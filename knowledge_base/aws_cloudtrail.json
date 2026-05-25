@@ -1,0 +1,22 @@
+{
+  "platform": "aws",
+  "display_name": "AWS CloudTrail & IAM",
+  "keywords": ["aws", "cloudtrail", "iam", "sts", "s3", "ec2", "lambda", "guardduty"],
+  "actionNames": [
+    "AssumeRole",
+    "CreateUser",
+    "AttachUserPolicy",
+    "PutUserPolicy",
+    "CreateAccessKey",
+    "DeleteTrail",
+    "StopLogging",
+    "UpdateTrail",
+    "PutBucketPolicy",
+    "GetSecretValue",
+    "ConsoleLogin",
+    "CreateRole",
+    "PassRole",
+    "RunInstances",
+    "InvokeFunction"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "platform": "active_directory",
+  "display_name": "Active Directory / LDAP",
+  "keywords": ["active directory", "kerberos", "ldap", "samr", "domain controller", "ad cs"],
+  "actionNames": [
+    "LDAP Bind",
+    "LDAP Search",
+    "Kerberos TGT Request",
+    "Kerberos Service Ticket",
+    "SAMR CreateUserInDomain",
+    "SAMR SetPassword",
+    "DCSync",
+    "Certificate Request",
+    "Group Policy Change",
+    "AdminSDHolder Modified",
+    "NTLM Authentication",
+    "Replication Event"
+  ]
+}

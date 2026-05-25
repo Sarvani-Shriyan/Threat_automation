@@ -1,0 +1,20 @@
+{
+  "filtered_at": "test",
+  "article_count": 2,
+  "articles": [
+    {
+      "source": "Hacking Articles",
+      "title": "AWS CloudGoat EC2 SSRF Exploitation",
+      "url": "https://www.hackingarticles.in/aws-cloudgoat-ec2-ssrf-exploitation/",
+      "content": "Cloud environments are increasingly targeted due to misconfigurations. Server-Side Request Forgery (SSRF) on AWS EC2 instances allows attackers to reach the metadata service, steal IAM credentials via AssumeRole, and disable CloudTrail logging.",
+      "gemma_verdict": {"relevant": true, "justification": "Active AWS misconfiguration exploitation", "mitre_tactic_hint": "Initial Access"}
+    },
+    {
+      "source": "Test",
+      "title": "GCP Compute Metadata SSRF via IAM permission abuse",
+      "url": "https://example.com/gcp-metadata-ssrf",
+      "content": "Researchers demonstrated SSRF against Google Cloud compute.instances.setMetadata allowing privilege escalation when service accounts hold iam.serviceAccounts.actAs and compute instances are misconfigured.",
+      "gemma_verdict": {"relevant": true, "justification": "GCP IAM misconfiguration", "mitre_tactic_hint": "Privilege Escalation"}
+    }
+  ]
+}

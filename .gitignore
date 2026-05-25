@@ -1,0 +1,18 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+.env
+.env.*
+
+# Large upstream raw IAM dumps (rebuilt via scripts/sync_knowledge_base.py)
+knowledge_base/catalogs/*.raw.json
+
+# Optional: uncomment to keep pipeline outputs local only
+# data/threat_queue.json
+# data/filtered_threat_queue.json
+# data/generated_rules_staging.json
+# data/ingestion_dedup_state.json

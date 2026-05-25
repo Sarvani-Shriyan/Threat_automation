@@ -1,0 +1,218 @@
+{
+  "generated_at": "2026-05-22T05:36:30.564222+00:00",
+  "last_updated_at": "2026-05-22T05:38:58.028726+00:00",
+  "threat_count": 2,
+  "total_rule_variants": 10,
+  "successful_threats": 2,
+  "failed_threats": 0,
+  "entries": [
+    {
+      "threat_id": "14113b5d923b09b5",
+      "threat_title": "AWS CloudGoat EC2 SSRF Exploitation",
+      "threat_url": "https://www.hackingarticles.in/aws-cloudgoat-ec2-ssrf-exploitation/",
+      "source": "Hacking Articles",
+      "gemma_verdict": {
+        "relevant": true,
+        "justification": "Active AWS misconfiguration exploitation",
+        "mitre_tactic_hint": "Initial Access"
+      },
+      "variants": [
+        {
+          "name": "AWS: Unusual Metadata Service Access",
+          "description": "Detects abnormal access patterns to the AWS metadata service from EC2 instances, indicating potential SSRF exploitation.",
+          "actionNames": [
+            "CloudTrail.DescribeTrails"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Initial Access",
+          "recommend": "Ensure strict IAM policies and network configurations that limit access to the metadata service. Regularly audit permissions and use VPC endpoints for internal AWS services.",
+          "remediate": "Immediately isolate affected EC2 instances, review IAM roles and credentials, and re-enable CloudTrail logging."
+        },
+        {
+          "name": "AWS: Unauthorized AssumeRole Activity",
+          "description": "Monitors unexpected AssumeRole API calls that could indicate stolen IAM credentials being used by an attacker.",
+          "actionNames": [
+            "CloudTrail.AddTags"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Initial Access",
+          "recommend": "Implement least privilege access policies and use AWS CloudTrail to monitor for unusual AssumeRole activity.",
+          "remediate": "Revoke compromised credentials, rotate IAM keys, and investigate the source of the unauthorized access."
+        },
+        {
+          "name": "AWS: Sudden Disabling of CloudTrail Logging",
+          "description": "Tracks unexpected deletions or disabling of CloudTrail logs, which could be an attacker's attempt to cover their tracks.",
+          "actionNames": [
+            "CloudTrail.DeleteTrail"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Defense Evasion",
+          "recommend": "Ensure continuous logging by setting up multiple trails and using AWS Config rules to detect changes in CloudTrail configurations.",
+          "remediate": "Re-enable CloudTrail, investigate the source of the deletion, and review logs for suspicious activity."
+        },
+        {
+          "name": "AWS: Creation of Unusual Resources",
+          "description": "Identifies unexpected creation of resources such as channels or dashboards which may be used to facilitate SSRF attacks.",
+          "actionNames": [
+            "CloudTrail.CreateChannel",
+            "CloudTrail.CreateDashboard"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Execution",
+          "recommend": "Regularly audit resource creation and enforce strict IAM policies that limit who can create resources.",
+          "remediate": "Review the purpose of newly created resources, revoke unnecessary permissions, and delete suspicious resources."
+        },
+        {
+          "name": "AWS: Unusual Tagging Patterns on Resources",
+          "description": "Detects abnormal tagging patterns which could indicate an attacker is marking resources for later exploitation.",
+          "actionNames": [
+            "CloudTrail.AddTags"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Persistence",
+          "recommend": "Monitor and audit resource tagging activities, ensuring that tags are used consistently with organizational policies.",
+          "remediate": "Investigate unusual tagging patterns, remove unauthorized tags, and review access controls."
+        }
+      ],
+      "variant_count": 5,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-05-22T05:37:48Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "CloudTrail.AddTags",
+          "CloudTrail.CancelQuery",
+          "CloudTrail.CreateChannel",
+          "CloudTrail.CreateDashboard",
+          "CloudTrail.CreateEventDataStore",
+          "CloudTrail.CreateTrail",
+          "CloudTrail.DeleteChannel",
+          "CloudTrail.DeleteDashboard",
+          "CloudTrail.DeleteEventDataStore",
+          "CloudTrail.DeleteResourcePolicy",
+          "CloudTrail.DeleteTrail",
+          "CloudTrail.DeregisterOrganizationDelegatedAdmin",
+          "CloudTrail.DescribeQuery",
+          "CloudTrail.DescribeTrails",
+          "CloudTrail.DisableFederation"
+        ],
+        "source_files": [
+          "catalogs/aws_iam_actions.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "8c80d3e6a331fcf0",
+      "threat_title": "GCP Compute Metadata SSRF via IAM permission abuse",
+      "threat_url": "https://example.com/gcp-metadata-ssrf",
+      "source": "Test",
+      "gemma_verdict": {
+        "relevant": true,
+        "justification": "GCP IAM misconfiguration",
+        "mitre_tactic_hint": "Privilege Escalation"
+      },
+      "variants": [
+        {
+          "name": "GCP: Unusual Metadata Set Activity",
+          "description": "Detects abnormal usage patterns of the compute.instances.setMetadata API, which could indicate an SSRF attempt to escalate privileges via metadata manipulation.",
+          "actionNames": [
+            "compute.instances.setMetadata"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Ensure strict IAM policies are in place for service accounts with compute.instances.setMetadata permissions. Regularly audit and review service account roles to prevent privilege escalation.",
+          "remediate": "Immediately revoke unnecessary iam.serviceAccounts.actAs permissions from the implicated service accounts, and investigate any recent metadata changes."
+        },
+        {
+          "name": "GCP: Unauthorized Service Account Impersonation",
+          "description": "Monitors for unauthorized attempts by a service account to act as another service account using iam.serviceAccounts.actAs, which could be part of an SSRF attack vector.",
+          "actionNames": [
+            "iam.serviceAccounts.actAs"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Privilege Escalation",
+          "recommend": "Implement least privilege principles for service accounts and regularly audit their permissions. Use Cloud Audit Logs to monitor for unexpected actAs activities.",
+          "remediate": "Revoke the actAs permission from the compromised service account, review recent activity logs, and investigate any unauthorized access."
+        },
+        {
+          "name": "GCP: Anomalous Instance Usage",
+          "description": "Tracks unusual patterns in compute.instances.use that may suggest an SSRF attack leveraging misconfigured instances to escalate privileges.",
+          "actionNames": [
+            "compute.instances.use"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Privilege Escalation",
+          "recommend": "Regularly review and update instance configurations. Ensure that only authorized entities can use compute resources.",
+          "remediate": "Isolate the affected instances, review their configuration for misconfigurations, and apply necessary security patches."
+        },
+        {
+          "name": "GCP: Metadata Access from Unusual Sources",
+          "description": "Identifies access to instance metadata from unexpected or unauthorized sources, indicating potential SSRF activity.",
+          "actionNames": [
+            "compute.instances.use"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Configure VPC Service Controls and firewall rules to restrict metadata service access. Monitor for unusual source IP addresses accessing instance metadata.",
+          "remediate": "Block the unauthorized sources from accessing metadata services, review security group configurations, and ensure proper network segmentation."
+        },
+        {
+          "name": "GCP: Misconfigured Backend Services",
+          "description": "Detects misconfigurations in compute.backendServices that could be exploited for SSRF attacks to escalate privileges.",
+          "actionNames": [
+            "compute.backendServices.use"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Privilege Escalation",
+          "recommend": "Regularly audit backend service configurations and ensure they adhere to security best practices. Limit access based on necessity.",
+          "remediate": "Correct any misconfigurations found in backend services, review access controls, and monitor for further suspicious activities."
+        }
+      ],
+      "variant_count": 5,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-05-22T05:38:58Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "gcp"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "compute.instances.setMetadata",
+          "iam.serviceAccounts.actAs",
+          "compute.instances.use",
+          "compute.addresses.use",
+          "compute.backendBuckets.use",
+          "compute.backendServices.use",
+          "compute.disks.use",
+          "compute.externalVpnGateways.use",
+          "compute.firewallPolicies.use",
+          "compute.forwardingRules.use",
+          "compute.globalAddresses.use",
+          "compute.globalNetworkEndpointGroups.use",
+          "compute.globalPublicDelegatedPrefixes.use",
+          "compute.healthChecks.use",
+          "compute.httpHealthChecks.use"
+        ],
+        "source_files": [
+          "catalogs/gcp_iam_permissions.json"
+        ]
+      }
+    }
+  ],
+  "run_stats": {
+    "knowledge_base_dir": "/Users/sarvani/Threat_automation/knowledge_base",
+    "knowledge_base_catalogs": 2,
+    "input_threats": 2,
+    "processed_this_run": 2,
+    "skipped_resume": 0,
+    "successful_generations": 2,
+    "failed_generations": 0,
+    "total_rule_variants_this_run": 10,
+    "elapsed_seconds": 147.4
+  }
+}
