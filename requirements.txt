@@ -1,5 +1,5 @@
 openai>=1.30
-# Step 3 uses same openai client for Phi-4 via Ollama
+# Step 3 uses same openai client for phi4-mini-reasoning via Ollama
 pydantic>=2.6
 pydantic-settings>=2.2
 aiohttp>=3.9
@@ -12,3 +12,5 @@ litellm>=1.40
 structlog>=24.1
 simhash>=2.1
 pytest>=8.0
+streamlit>=1.33
+streamlit-autorefresh>=1.0

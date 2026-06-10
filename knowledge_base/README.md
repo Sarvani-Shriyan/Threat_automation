@@ -36,11 +36,13 @@ AWS/GCP continue to use `catalogs/*` IAM datasets unchanged.
 | `azure_admin` | `azure_admin_events.json` | DR disruption, replication deletion, RBAC, resource group changes |
 | `azure_auth` | `azure_auth_events.json` | Entra ID directory, service principals, tokens, conditional access |
 
-Rebuild from iann0036 provider operations:
+Rebuild from iann0036 **azure/map.json** (ARM RBAC format: `Provider.Namespace/resource/operation`):
 
 ```bash
 python scripts/build_azure_catalogs.py
 ```
+
+Example operations: `Microsoft.RecoveryServices/vaults/replicationFabrics/delete`, `Microsoft.AzureActiveDirectory/entraTenants/read`, `ArizeAi.ObservabilityEval/register/action`.
 
 ## Okta routing
 

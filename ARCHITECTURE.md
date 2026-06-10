@@ -257,7 +257,7 @@ flowchart LR
 | `FEED_URLS` | — | Comma-separated RSS URLs |
 | `KEYWORDS` | AWS,CloudTrail,Okta | Filter list |
 | `SLM_MODEL` | gemma-2-9b-it | Binary relevance |
-| `REASONING_MODEL` | phi-4 | Rule generation |
+| `REASONING_MODEL` | ollama/phi4-mini-reasoning | Rule generation |
 | `LLM_MOCK` | false | Test without API keys |
 | `MAX_FEEDBACK_RETRIES` | 3 | Feedback cap |
 

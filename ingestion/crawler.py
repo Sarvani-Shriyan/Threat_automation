@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import re
+from datetime import datetime
 from html import unescape
 from urllib.parse import urlparse
 
@@ -12,9 +13,11 @@ from pydantic import BaseModel, Field
 
 from ingestion.config import (
     INGESTION_FEED_TIMEOUT_SECONDS,
+    INGESTION_MAX_AGE_DAYS,
     INGESTION_MAX_CONCURRENT_FEEDS,
     RSS_FEED_LINKS,
 )
+from ingestion.dates import ingestion_cutoff, parse_feed_entry_published
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +37,10 @@ class NormalizedArticle(BaseModel):
     title: str
     url: str | None = None
     raw_content: str = Field(description="Plain-text body with HTML stripped")
+    published_at: datetime | None = Field(
+        default=None,
+        description="RSS publication time (UTC); required for ingestion window filter",
+    )
 
 
 class FeedCrawler:
@@ -44,11 +51,14 @@ class FeedCrawler:
         feed_urls: list[str] | None = None,
         timeout_seconds: float = REQUEST_TIMEOUT_SECONDS,
         max_concurrent_feeds: int = INGESTION_MAX_CONCURRENT_FEEDS,
+        max_age_days: int = INGESTION_MAX_AGE_DAYS,
     ) -> None:
         self._feed_urls = feed_urls if feed_urls is not None else RSS_FEED_LINKS
         self._timeout = aiohttp.ClientTimeout(total=timeout_seconds)
         self._headers = {"User-Agent": USER_AGENT}
         self._max_concurrent = max(1, max_concurrent_feeds)
+        self._max_age_days = max_age_days
+        self._cutoff = ingestion_cutoff(max_age_days=max_age_days)
         self._feed_errors: dict[str, int] = {
             "timeout": 0,
             "http_error": 0,
@@ -56,11 +66,17 @@ class FeedCrawler:
             "connection": 0,
             "other": 0,
             "empty": 0,
+            "stale_dropped": 0,
+            "undated_dropped": 0,
         }
 
     @property
     def feed_errors(self) -> dict[str, int]:
         return dict(self._feed_errors)
+
+    @property
+    def ingestion_cutoff(self) -> datetime:
+        return self._cutoff
 
     async def crawl_all(self) -> list[NormalizedArticle]:
         self._feed_errors = {k: 0 for k in self._feed_errors}
@@ -127,6 +143,14 @@ class FeedCrawler:
         articles: list[NormalizedArticle] = []
 
         for entry in parsed.entries:
+            published_at = parse_feed_entry_published(entry)
+            if published_at is None:
+                self._feed_errors["undated_dropped"] += 1
+                continue
+            if published_at < self._cutoff:
+                self._feed_errors["stale_dropped"] += 1
+                continue
+
             title = (entry.get("title") or "Untitled").strip()
             link = entry.get("link") or entry.get("id")
             body = (
@@ -143,6 +167,7 @@ class FeedCrawler:
                     title=title,
                     url=link,
                     raw_content=self._strip_html(body),
+                    published_at=published_at,
                 )
             )
         return articles

@@ -91,6 +91,8 @@ TECH_STACK_KEYWORDS = PLATFORM_KEYWORDS
 # Step 1 — RSS ingestion (64 feeds; 5s timeout + full parallelism caused mass timeouts)
 INGESTION_FEED_TIMEOUT_SECONDS = 20
 INGESTION_MAX_CONCURRENT_FEEDS = 12
+# Only ingest feed items published within this many days (rolling window from UTC now)
+INGESTION_MAX_AGE_DAYS = 7
 
 # Local LLM — Ollama OpenAI-compatible API
 OLLAMA_BASE_URL = "http://localhost:11434/v1"
@@ -100,8 +102,9 @@ OLLAMA_MODEL = "gemma4:e4b"
 OLLAMA_TIMEOUT_SECONDS = 120
 OLLAMA_MAX_WORKERS = 4
 
-# Step 3 — Phi-4 rule generation
-OLLAMA_PHI4_MODEL = "phi4"
+# Step 3 — phi4-mini-reasoning rule generation (local Ollama + LiteLLM alias)
+OLLAMA_PHI4_MODEL = "phi4-mini-reasoning"
+LITELLM_REASONING_MODEL = "ollama/phi4-mini-reasoning"
 OLLAMA_PHI4_TIMEOUT_SECONDS = 300
 OLLAMA_PHI4_MAX_WORKERS = 2
 RULE_VARIANTS_MIN = 5

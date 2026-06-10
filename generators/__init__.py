@@ -1,4 +1,4 @@
-"""Step 3 — grounded Phi-4 detection rule generation."""
+"""Step 3 — grounded phi4-mini-reasoning detection rule generation."""
 
 from generators.io import StagingStore
 from generators.knowledge_base import GroundingResult, KnowledgeBase

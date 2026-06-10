@@ -106,7 +106,7 @@ def build_grounded_system_prompt(grounding: GroundingResult) -> str:
 
 
 class RuleEngine:
-    """Phi-4 rule generation with knowledge-base grounded actionNames."""
+    """phi4-mini-reasoning rule generation with knowledge-base grounded actionNames."""
 
     def __init__(
         self,
@@ -149,12 +149,12 @@ class RuleEngine:
             batch = self._parse_rules(raw)
             return batch.rules, None, grounding
         except (APIConnectionError, APITimeoutError, ConnectionError, TimeoutError) as exc:
-            msg = f"Phi-4 offline or timeout: {exc}"
-            logger.error("phi4_timeout threat=%s error=%s", threat.get("title"), exc)
+            msg = f"phi4-mini-reasoning offline or timeout: {exc}"
+            logger.error("reasoning_model_timeout threat=%s error=%s", threat.get("title"), exc)
             return [], msg, grounding
         except Exception as exc:
             msg = f"Generation failed: {exc}"
-            logger.error("phi4_generation_failed threat=%s error=%s", threat.get("title"), exc)
+            logger.error("reasoning_model_generation_failed threat=%s error=%s", threat.get("title"), exc)
             return [], msg, grounding
 
     def process_threat_stream(
@@ -197,6 +197,11 @@ class RuleEngine:
     @staticmethod
     def _build_user_prompt(threat: dict[str, Any], grounding: GroundingResult) -> str:
         verdict = threat.get("gemma_verdict") or {}
+        reasoning = (
+            verdict.get("reasoning_summary")
+            or verdict.get("justification")
+            or "N/A"
+        )
         allowed_preview = ", ".join(grounding.allowed_actions[:8])
         if len(grounding.allowed_actions) > 8:
             allowed_preview += ", ..."
@@ -204,8 +209,10 @@ class RuleEngine:
             f"Threat Title: {threat.get('title', '')}\n"
             f"Source: {threat.get('source', '')}\n"
             f"URL: {threat.get('url', 'N/A')}\n"
-            f"Gemma Justification: {verdict.get('justification', 'N/A')}\n"
-            f"MITRE Hint: {verdict.get('mitre_tactic_hint', '')}\n"
+            f"Semantic Domain: {verdict.get('primary_domain', 'Unknown')}\n"
+            f"Semantic Platform: {verdict.get('primary_platform', 'Unknown')}\n"
+            f"Confidence Score: {verdict.get('confidence_score', 'N/A')}/10\n"
+            f"Semantic Summary: {reasoning}\n"
             f"Grounded Platforms: {', '.join(grounding.matched_platforms) or 'none'}\n"
             f"Routed Profiles: {', '.join(grounding.routed_profiles) or 'none'}\n"
             f"Verified actionNames sample: {allowed_preview or 'none'}\n\n"
@@ -213,12 +220,46 @@ class RuleEngine:
         )
 
     @staticmethod
-    def _parse_rules(raw: str) -> ThreatRuleBatch:
+    def _strip_model_artifacts(raw: str) -> str:
+        """Remove markdown fences and phi4-mini-reasoning <thinking> blocks before JSON parse."""
         text = raw.strip()
         if text.startswith("```"):
-            text = re.sub(r"^```(?:json)?\s*", "", text)
-            text = re.sub(r"\s*```$", "", text)
-        data = json.loads(text)
+            text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.IGNORECASE)
+            text = re.sub(r"\s*```$", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"<thinking>.*?</thinking>", "", text, flags=re.DOTALL | re.IGNORECASE)
+        return text.strip()
+
+    @staticmethod
+    def _extract_rules_json(text: str) -> dict[str, Any]:
+        """Isolate the rules JSON object when thinking prose precedes or wraps the payload."""
+        try:
+            payload = json.loads(text)
+            if isinstance(payload, dict):
+                return payload
+        except json.JSONDecodeError:
+            pass
+
+        for match in re.finditer(r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", text, re.DOTALL):
+            try:
+                payload = json.loads(match.group())
+            except json.JSONDecodeError:
+                continue
+            if isinstance(payload, dict) and (
+                "rules" in payload or "variants" in payload or isinstance(payload.get("rules"), list)
+            ):
+                return payload
+
+        brace_match = re.search(r"\{.*\}", text, re.DOTALL)
+        if brace_match:
+            payload = json.loads(brace_match.group())
+            if isinstance(payload, dict):
+                return payload
+        raise ValueError("No valid rules JSON object found in model response")
+
+    @staticmethod
+    def _parse_rules(raw: str) -> ThreatRuleBatch:
+        text = RuleEngine._strip_model_artifacts(raw)
+        data = RuleEngine._extract_rules_json(text)
         if isinstance(data, list):
             return ThreatRuleBatch(rules=data)
         if "rules" in data:

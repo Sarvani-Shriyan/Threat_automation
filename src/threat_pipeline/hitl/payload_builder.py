@@ -12,6 +12,36 @@ class HITLPayloadBuilder:
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
 
+    def build_from_rules(
+        self,
+        item: QueueItem,
+        rules: list[ThreatRule],
+    ) -> HITLPayload:
+        """Build HITL payload directly from generated rules (validation stage removed)."""
+        validated_sample = rules[:3]
+        if len(validated_sample) < 2 and len(rules) >= 2:
+            validated_sample = rules[:2]
+
+        context = ThreatContext(
+            threat_id=item.id,
+            title=item.article.title,
+            source=item.article.source,
+            url=item.article.url,
+            published_at=item.article.published_at,
+            excerpt=item.article.content_plain[:500],
+        )
+
+        return HITLPayload(
+            threat_id=item.id,
+            threat_context=context,
+            validated_rules=validated_sample,
+            invalid_rules=[],
+            metadata={
+                "pipeline_version": self._settings.pipeline_version,
+                "generated_at": datetime.utcnow().isoformat(),
+            },
+        )
+
     def build(
         self,
         item: QueueItem,

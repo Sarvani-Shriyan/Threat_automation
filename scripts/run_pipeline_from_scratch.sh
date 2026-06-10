@@ -4,7 +4,7 @@
 # Prerequisites:
 #   source .venv/bin/activate
 #   pip install -r requirements.txt
-#   ollama serve   # separate terminal, models: gemma + phi4 per ingestion/config.py
+#   ollama serve   # separate terminal, models: gemma4:e4b + phi4-mini-reasoning per ingestion/config.py
 #
 # Usage:
 #   ./scripts/run_pipeline_from_scratch.sh              # full run (slow filter/generate)
@@ -57,7 +57,7 @@ FILTER_ARGS=()
 python main_filter.py ${FILTER_ARGS[@]} $FILTER_LIMIT
 
 echo ""
-echo "========== STEP 3: RULE GENERATION (requires Ollama + Phi-4) =========="
+echo "========== STEP 3: RULE GENERATION (requires Ollama + phi4-mini-reasoning) =========="
 echo "Ensure: ollama serve  (and models pulled per ingestion/config.py)"
 # shellcheck disable=SC2086
 python main_generator.py $GEN_LIMIT $GEN_FORCE

@@ -1,0 +1,55 @@
+# Single image, multi-service pipeline. Ollama runs on the HOST — not in Docker.
+# Run the dashboard:  docker compose up -d threat-dashboard
+# Run a step:         docker compose run --rm step1-ingestion
+
+x-app-image: &app-image
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: threat-automation:latest
+  working_dir: /app
+
+x-pipeline-rw: &pipeline-rw
+  <<: *app-image
+  profiles: [pipeline]
+  volumes:
+    - ./data:/app/data:rw
+
+x-ollama-pipeline: &ollama-pipeline
+  <<: *app-image
+  profiles: [pipeline]
+  volumes:
+    - ./data:/app/data:rw
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  environment:
+    OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+
+services:
+  threat-dashboard:
+    <<: *app-image
+    container_name: threat-dashboard
+    command:
+      - streamlit
+      - run
+      - app.py
+      - --server.address=0.0.0.0
+      - --server.port=8501
+      - --server.headless=true
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data:ro
+    restart: always
+
+  step1-ingestion:
+    <<: *pipeline-rw
+    command: ["python", "main_ingestion.py"]
+
+  step2-filter:
+    <<: *ollama-pipeline
+    command: ["python", "main_filter.py"]
+
+  step3-generator:
+    <<: *ollama-pipeline
+    command: ["python", "main_generator.py"]

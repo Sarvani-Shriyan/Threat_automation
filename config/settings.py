@@ -23,7 +23,10 @@ class Settings(BaseSettings):
         alias="KEYWORDS",
     )
     slm_model: str = Field(default="gemma-2-9b-it", alias="SLM_MODEL")
-    reasoning_model: str = Field(default="phi-4", alias="REASONING_MODEL")
+    reasoning_model: str = Field(
+        default="ollama/phi4-mini-reasoning",
+        alias="REASONING_MODEL",
+    )
     llm_mock: bool = Field(default=False, alias="LLM_MOCK")
     max_feedback_retries: int = Field(default=3, alias="MAX_FEEDBACK_RETRIES")
     fetch_timeout_seconds: float = Field(default=30.0, alias="FETCH_TIMEOUT_SECONDS")

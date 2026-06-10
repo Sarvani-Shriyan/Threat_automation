@@ -44,7 +44,7 @@ def _print_kb_banner(kb: KnowledgeBase) -> None:
 
 def _print_queue_banner(total: int, output_path: Path, already_staged: int) -> None:
     print("=" * 60)
-    print("PHI-4 RULE GENERATION — STREAMING + GROUNDED")
+    print("PHI4-MINI-REASONING RULE GENERATION — STREAMING + GROUNDED")
     print("=" * 60)
     print(f"Threats queued this run     : {total}")
     print(f"Already in staging file     : {already_staged}")

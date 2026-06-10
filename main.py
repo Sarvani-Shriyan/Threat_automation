@@ -30,7 +30,7 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Threat Research Automation Pipeline")
     parser.add_argument(
         "--stage",
-        choices=["ingest", "filter", "generate", "validate", "hitl", "full"],
+        choices=["ingest", "filter", "generate", "hitl", "full"],
         default="full",
         help="Pipeline stage to run",
     )

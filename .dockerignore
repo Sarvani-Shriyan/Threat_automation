@@ -1,0 +1,19 @@
+.git
+.gitignore
+.venv
+venv
+__pycache__
+*.py[cod]
+*$py.class
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.DS_Store
+.env
+.env.*
+*.md
+!README.md
+
+# Local pipeline outputs — mounted at runtime, not baked into the image
+data/*
+!data/.gitkeep

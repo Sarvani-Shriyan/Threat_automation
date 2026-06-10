@@ -1,218 +1,234 @@
 {
-  "generated_at": "2026-05-22T05:36:30.564222+00:00",
-  "last_updated_at": "2026-05-22T05:38:58.028726+00:00",
+  "generated_at": "2026-06-04T09:05:51.760094+00:00",
+  "last_updated_at": "2026-06-04T09:08:30.899965+00:00",
   "threat_count": 2,
   "total_rule_variants": 10,
   "successful_threats": 2,
   "failed_threats": 0,
   "entries": [
     {
-      "threat_id": "14113b5d923b09b5",
-      "threat_title": "AWS CloudGoat EC2 SSRF Exploitation",
-      "threat_url": "https://www.hackingarticles.in/aws-cloudgoat-ec2-ssrf-exploitation/",
-      "source": "Hacking Articles",
+      "threat_id": "d103ac42ef28e6cf",
+      "threat_title": "Breaking Confinement: How a Corrections Vendor Exposed Inmate Communications  | UpGuard",
+      "threat_url": "https://www.upguard.com/breaches/breaking-containment-how-a-corrections-vendor-exposed-inmate-communications",
+      "source": "UpGuard Data Breach Research",
       "gemma_verdict": {
-        "relevant": true,
-        "justification": "Active AWS misconfiguration exploitation",
-        "mitre_tactic_hint": "Initial Access"
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions an exposed Azure storage bucket containing millions of documents, including driver's licenses used for identity verification."
       },
       "variants": [
         {
-          "name": "AWS: Unusual Metadata Service Access",
-          "description": "Detects abnormal access patterns to the AWS metadata service from EC2 instances, indicating potential SSRF exploitation.",
+          "name": "Azure: Unauthorized Filesystem Read Activity",
+          "description": "Detects unauthorized read operations on the filesystem within an Azure environment, indicative of potential data exposure or exfiltration attempts.",
           "actionNames": [
-            "CloudTrail.DescribeTrails"
+            "Dell.Storage/filesystems/read",
+            "Qumulo.Storage/fileSystems/read"
           ],
           "defaultSeverity": "High",
-          "threatType": "Initial Access",
-          "recommend": "Ensure strict IAM policies and network configurations that limit access to the metadata service. Regularly audit permissions and use VPC endpoints for internal AWS services.",
-          "remediate": "Immediately isolate affected EC2 instances, review IAM roles and credentials, and re-enable CloudTrail logging."
+          "threatType": "Exfiltration",
+          "recommend": "Implement strict access controls and regularly audit permissions to ensure only authorized entities can read sensitive data.",
+          "remediate": "Immediately revoke unauthorized access, review recent filesystem reads for suspicious activity, and validate the integrity of exposed data."
         },
         {
-          "name": "AWS: Unauthorized AssumeRole Activity",
-          "description": "Monitors unexpected AssumeRole API calls that could indicate stolen IAM credentials being used by an attacker.",
+          "name": "Azure: Unusual Filesystem Write Operations",
+          "description": "Monitors for unexpected write operations to the filesystem that could indicate an attempt to modify or corrupt sensitive data.",
           "actionNames": [
-            "CloudTrail.AddTags"
-          ],
-          "defaultSeverity": "Critical",
-          "threatType": "Initial Access",
-          "recommend": "Implement least privilege access policies and use AWS CloudTrail to monitor for unusual AssumeRole activity.",
-          "remediate": "Revoke compromised credentials, rotate IAM keys, and investigate the source of the unauthorized access."
-        },
-        {
-          "name": "AWS: Sudden Disabling of CloudTrail Logging",
-          "description": "Tracks unexpected deletions or disabling of CloudTrail logs, which could be an attacker's attempt to cover their tracks.",
-          "actionNames": [
-            "CloudTrail.DeleteTrail"
-          ],
-          "defaultSeverity": "Critical",
-          "threatType": "Defense Evasion",
-          "recommend": "Ensure continuous logging by setting up multiple trails and using AWS Config rules to detect changes in CloudTrail configurations.",
-          "remediate": "Re-enable CloudTrail, investigate the source of the deletion, and review logs for suspicious activity."
-        },
-        {
-          "name": "AWS: Creation of Unusual Resources",
-          "description": "Identifies unexpected creation of resources such as channels or dashboards which may be used to facilitate SSRF attacks.",
-          "actionNames": [
-            "CloudTrail.CreateChannel",
-            "CloudTrail.CreateDashboard"
+            "Dell.Storage/filesystems/write",
+            "Qumulo.Storage/fileSystems/write"
           ],
           "defaultSeverity": "Medium",
-          "threatType": "Execution",
-          "recommend": "Regularly audit resource creation and enforce strict IAM policies that limit who can create resources.",
-          "remediate": "Review the purpose of newly created resources, revoke unnecessary permissions, and delete suspicious resources."
+          "threatType": "Impact",
+          "recommend": "Enforce least privilege access and monitor for deviations from normal write patterns as a proactive measure against unauthorized modifications.",
+          "remediate": "Investigate the source of unusual writes, assess potential data integrity issues, and apply necessary patches or configuration changes."
         },
         {
-          "name": "AWS: Unusual Tagging Patterns on Resources",
-          "description": "Detects abnormal tagging patterns which could indicate an attacker is marking resources for later exploitation.",
+          "name": "Azure: Filesystem Deletion Anomalies",
+          "description": "Triggers on unexpected deletion activities within filesystems that could signify attempts to remove evidence or sensitive information.",
           "actionNames": [
-            "CloudTrail.AddTags"
+            "Dell.Storage/filesystems/delete",
+            "Qumulo.Storage/fileSystems/delete"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Impact",
+          "recommend": "Set up alerts for unauthorized deletions and maintain regular backups of critical data to mitigate potential loss or tampering.",
+          "remediate": "Conduct a thorough investigation into the deletion events, restore any lost data from backups if necessary, and review access controls."
+        },
+        {
+          "name": "Azure: Unregistered Storage Operations",
+          "description": "Detects attempts to unregister storage operations which could be an indicator of trying to bypass security measures or hide malicious activities.",
+          "actionNames": [
+            "Dell.Storage/unregister/action",
+            "Qumulo.Storage/unregister/action"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Defense Evasion",
+          "recommend": "Monitor for and restrict unauthorized attempts to unregister storage operations, ensuring all actions are logged and auditable.",
+          "remediate": "Review recent unregistration activities for anomalies, reinforce security policies around storage operation management, and validate system integrity."
+        },
+        {
+          "name": "Azure: Unauthorized Storage Registration",
+          "description": "Identifies unauthorized attempts to register new storage operations, potentially indicating an effort to establish footholds or exfiltrate data.",
+          "actionNames": [
+            "Dell.Storage/register/action",
+            "Qumulo.Storage/register/action"
           ],
           "defaultSeverity": "Medium",
           "threatType": "Persistence",
-          "recommend": "Monitor and audit resource tagging activities, ensuring that tags are used consistently with organizational policies.",
-          "remediate": "Investigate unusual tagging patterns, remove unauthorized tags, and review access controls."
+          "recommend": "Implement stringent controls and monitoring on the registration of new storage operations to prevent unauthorized access or data leaks.",
+          "remediate": "Investigate the source of unauthorized registrations, revoke any illegitimate permissions, and ensure compliance with security policies."
         }
       ],
       "variant_count": 5,
       "generation_status": "success",
       "error": null,
-      "generated_at": "2026-05-22T05:37:48Z",
+      "generated_at": "2026-06-04T09:07:26Z",
       "grounding_context": {
         "matched_platforms": [
-          "aws"
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_admin"
         ],
         "injected_action_count": 15,
         "allowed_actions": [
-          "CloudTrail.AddTags",
-          "CloudTrail.CancelQuery",
-          "CloudTrail.CreateChannel",
-          "CloudTrail.CreateDashboard",
-          "CloudTrail.CreateEventDataStore",
-          "CloudTrail.CreateTrail",
-          "CloudTrail.DeleteChannel",
-          "CloudTrail.DeleteDashboard",
-          "CloudTrail.DeleteEventDataStore",
-          "CloudTrail.DeleteResourcePolicy",
-          "CloudTrail.DeleteTrail",
-          "CloudTrail.DeregisterOrganizationDelegatedAdmin",
-          "CloudTrail.DescribeQuery",
-          "CloudTrail.DescribeTrails",
-          "CloudTrail.DisableFederation"
+          "Dell.Storage/filesystems/delete",
+          "Dell.Storage/filesystems/read",
+          "Dell.Storage/filesystems/write",
+          "Dell.Storage/operations/read",
+          "Dell.Storage/register/action",
+          "Dell.Storage/unregister/action",
+          "Qumulo.Storage/fileSystems/delete",
+          "Qumulo.Storage/fileSystems/read",
+          "Qumulo.Storage/fileSystems/write",
+          "Qumulo.Storage/operations/read",
+          "Qumulo.Storage/register/action",
+          "Qumulo.Storage/unregister/action",
+          "microsoft.app/builders/delete",
+          "microsoft.app/builders/read",
+          "microsoft.app/builders/write"
         ],
         "source_files": [
-          "catalogs/aws_iam_actions.json"
+          "azure_admin_events.json"
         ]
       }
     },
     {
-      "threat_id": "8c80d3e6a331fcf0",
-      "threat_title": "GCP Compute Metadata SSRF via IAM permission abuse",
-      "threat_url": "https://example.com/gcp-metadata-ssrf",
-      "source": "Test",
+      "threat_id": "7195249d009cc8b4",
+      "threat_title": "Inside the GREYVIBE Threat Actor Group: A Hybrid Espionage Menace",
+      "threat_url": "https://securityonline.info/greyvibe-threat-actor-group-russia-nexus/",
+      "source": "Daily CyberSecurity",
       "gemma_verdict": {
-        "relevant": true,
-        "justification": "GCP IAM misconfiguration",
-        "mitre_tactic_hint": "Privilege Escalation"
+        "is_relevant": true,
+        "confidence_score": 7,
+        "primary_domain": "Identity",
+        "primary_platform": "AWS",
+        "reasoning_summary": "The text mentions a phishing alert involving credential theft and the use of AWS S3, indicating an identity-focused attack vector."
       },
       "variants": [
         {
-          "name": "GCP: Unusual Metadata Set Activity",
-          "description": "Detects abnormal usage patterns of the compute.instances.setMetadata API, which could indicate an SSRF attempt to escalate privileges via metadata manipulation.",
+          "name": "AWS: Unusual IAM User Creation",
+          "description": "Detects the creation of new IAM users which may indicate credential theft and unauthorized access attempts. Focuses on unexpected spikes in user creation activities.",
           "actionNames": [
-            "compute.instances.setMetadata"
+            "Transfer.CreateUser"
           ],
           "defaultSeverity": "High",
-          "threatType": "Privilege Escalation",
-          "recommend": "Ensure strict IAM policies are in place for service accounts with compute.instances.setMetadata permissions. Regularly audit and review service account roles to prevent privilege escalation.",
-          "remediate": "Immediately revoke unnecessary iam.serviceAccounts.actAs permissions from the implicated service accounts, and investigate any recent metadata changes."
+          "threatType": "Credential Access",
+          "recommend": "Implement stricter IAM policies and review user creation logs regularly to ensure compliance with organizational standards.",
+          "remediate": "Revoke access for suspicious users, investigate the source of the request, and enforce multi-factor authentication."
         },
         {
-          "name": "GCP: Unauthorized Service Account Impersonation",
-          "description": "Monitors for unauthorized attempts by a service account to act as another service account using iam.serviceAccounts.actAs, which could be part of an SSRF attack vector.",
+          "name": "AWS: Anomalous Access Configuration",
+          "description": "Monitors for unexpected changes in access configurations that could signal attempts to bypass security controls or escalate privileges.",
           "actionNames": [
-            "iam.serviceAccounts.actAs"
-          ],
-          "defaultSeverity": "Critical",
-          "threatType": "Privilege Escalation",
-          "recommend": "Implement least privilege principles for service accounts and regularly audit their permissions. Use Cloud Audit Logs to monitor for unexpected actAs activities.",
-          "remediate": "Revoke the actAs permission from the compromised service account, review recent activity logs, and investigate any unauthorized access."
-        },
-        {
-          "name": "GCP: Anomalous Instance Usage",
-          "description": "Tracks unusual patterns in compute.instances.use that may suggest an SSRF attack leveraging misconfigured instances to escalate privileges.",
-          "actionNames": [
-            "compute.instances.use"
+            "Transfer.CreateAccess"
           ],
           "defaultSeverity": "Medium",
           "threatType": "Privilege Escalation",
-          "recommend": "Regularly review and update instance configurations. Ensure that only authorized entities can use compute resources.",
-          "remediate": "Isolate the affected instances, review their configuration for misconfigurations, and apply necessary security patches."
+          "recommend": "Regularly audit and review IAM policies and permissions, ensuring least privilege principles are applied.",
+          "remediate": "Revert unauthorized changes, investigate the origin of the configuration change, and update security policies as needed."
         },
         {
-          "name": "GCP: Metadata Access from Unusual Sources",
-          "description": "Identifies access to instance metadata from unexpected or unauthorized sources, indicating potential SSRF activity.",
+          "name": "AWS: Unexpected Connector Setup",
+          "description": "Tracks the creation of new connectors which may be used to establish unauthorized data exfiltration channels.",
           "actionNames": [
-            "compute.instances.use"
+            "Transfer.CreateConnector"
           ],
           "defaultSeverity": "High",
-          "threatType": "Privilege Escalation",
-          "recommend": "Configure VPC Service Controls and firewall rules to restrict metadata service access. Monitor for unusual source IP addresses accessing instance metadata.",
-          "remediate": "Block the unauthorized sources from accessing metadata services, review security group configurations, and ensure proper network segmentation."
+          "threatType": "Data Exfiltration",
+          "recommend": "Monitor and restrict connector setup activities, ensuring they align with business needs and security policies.",
+          "remediate": "Disable unauthorized connectors, review logs for suspicious activity, and enhance monitoring on data transfer endpoints."
         },
         {
-          "name": "GCP: Misconfigured Backend Services",
-          "description": "Detects misconfigurations in compute.backendServices that could be exploited for SSRF attacks to escalate privileges.",
+          "name": "AWS: Unusual Server Configuration Changes",
+          "description": "Detects unexpected server configuration changes that could indicate attempts to compromise or alter system behavior.",
           "actionNames": [
-            "compute.backendServices.use"
+            "Transfer.CreateServer"
           ],
           "defaultSeverity": "Medium",
-          "threatType": "Privilege Escalation",
-          "recommend": "Regularly audit backend service configurations and ensure they adhere to security best practices. Limit access based on necessity.",
-          "remediate": "Correct any misconfigurations found in backend services, review access controls, and monitor for further suspicious activities."
+          "threatType": "Defense Evasion",
+          "recommend": "Implement change management processes and regularly review server configurations for unauthorized modifications.",
+          "remediate": "Revert changes, investigate the source of the modification, and strengthen configuration management practices."
+        },
+        {
+          "name": "AWS: Unauthorized Profile Creation",
+          "description": "Identifies the creation of new profiles that may be used to impersonate legitimate users or services within the AWS environment.",
+          "actionNames": [
+            "Transfer.CreateProfile"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Identity Spoofing",
+          "recommend": "Enforce strict profile creation policies and regularly audit existing profiles for compliance with security standards.",
+          "remediate": "Delete unauthorized profiles, investigate the origin of the request, and enhance identity verification processes."
         }
       ],
       "variant_count": 5,
       "generation_status": "success",
       "error": null,
-      "generated_at": "2026-05-22T05:38:58Z",
+      "generated_at": "2026-06-04T09:08:30Z",
       "grounding_context": {
         "matched_platforms": [
-          "gcp"
+          "aws"
+        ],
+        "primary_platform": "aws",
+        "routed_profiles": [
+          "aws:iam"
         ],
         "injected_action_count": 15,
         "allowed_actions": [
-          "compute.instances.setMetadata",
-          "iam.serviceAccounts.actAs",
-          "compute.instances.use",
-          "compute.addresses.use",
-          "compute.backendBuckets.use",
-          "compute.backendServices.use",
-          "compute.disks.use",
-          "compute.externalVpnGateways.use",
-          "compute.firewallPolicies.use",
-          "compute.forwardingRules.use",
-          "compute.globalAddresses.use",
-          "compute.globalNetworkEndpointGroups.use",
-          "compute.globalPublicDelegatedPrefixes.use",
-          "compute.healthChecks.use",
-          "compute.httpHealthChecks.use"
+          "MPA.DeleteInactiveApprovalTeamVersion",
+          "MPA.StartActiveApprovalTeamDeletion",
+          "Transfer.CreateAccess",
+          "Transfer.CreateAgreement",
+          "Transfer.CreateConnector",
+          "Transfer.CreateProfile",
+          "Transfer.CreateServer",
+          "Transfer.CreateUser",
+          "Transfer.CreateWebApp",
+          "Transfer.CreateWorkflow",
+          "Transfer.DeleteAccess",
+          "Transfer.DeleteAgreement",
+          "Transfer.DeleteCertificate",
+          "Transfer.DeleteConnector",
+          "Transfer.DeleteHostKey"
         ],
         "source_files": [
-          "catalogs/gcp_iam_permissions.json"
+          "catalogs/aws_iam_actions.json"
         ]
       }
     }
   ],
   "run_stats": {
     "knowledge_base_dir": "/Users/sarvani/Threat_automation/knowledge_base",
-    "knowledge_base_catalogs": 2,
+    "knowledge_base_catalogs": 10,
     "input_threats": 2,
     "processed_this_run": 2,
     "skipped_resume": 0,
     "successful_generations": 2,
     "failed_generations": 0,
     "total_rule_variants_this_run": 10,
-    "elapsed_seconds": 147.4
+    "elapsed_seconds": 159.1
   }
 }

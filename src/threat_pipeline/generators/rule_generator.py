@@ -16,7 +16,7 @@ logger = structlog.get_logger(__name__)
 
 
 class RuleGeneratorStage:
-    """Phi-4 (configurable) generates 5-6 JSON rule variants."""
+    """phi4-mini-reasoning (configurable) generates 5-6 JSON rule variants."""
 
     def __init__(
         self,

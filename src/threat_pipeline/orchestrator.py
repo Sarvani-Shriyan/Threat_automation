@@ -12,7 +12,6 @@ from threat_pipeline.ingestion.threat_queue import ThreatQueue
 from threat_pipeline.llm.client_factory import LLMClientFactory
 from threat_pipeline.models.ingestion import QueueStatus
 from threat_pipeline.models.pipeline import FeedbackBundle, HITLPayload
-from threat_pipeline.validators.rule_validator import RuleValidator
 
 logger = structlog.get_logger(__name__)
 
@@ -31,10 +30,9 @@ class PipelineOrchestrator:
         )
         self.keyword_filter = KeywordFilterStage(self.queue, self.llm, self.settings)
         self.rule_generator = RuleGeneratorStage(self.queue, self.llm, self.settings)
-        self.validator = RuleValidator(self.settings)
         self.hitl_builder = HITLPayloadBuilder(self.settings)
         self.feedback_loop = FeedbackCorrectionLoop(
-            self.queue, self.rule_generator, self.validator, self.settings
+            self.queue, self.rule_generator, self.settings
         )
 
     def run_ingestion(
@@ -78,23 +76,13 @@ class PipelineOrchestrator:
     def run_generation_stage(self, feedback: FeedbackBundle | None = None) -> dict:
         return self.rule_generator.run(feedback=feedback)
 
-    def run_validation_stage(self, rules_by_threat: dict) -> dict[str, list]:
-        from threat_pipeline.models.rules import ValidationResult
-
-        results: dict[str, list[ValidationResult]] = {}
-        for threat_id, variants in rules_by_threat.items():
-            validation = self.validator.validate_all(variants)
-            results[threat_id] = validation
-            self.queue.update_status(threat_id, QueueStatus.VALIDATED)
-        return results
-
-    def build_hitl_payloads(self, validation_by_threat: dict) -> list[HITLPayload]:
+    def build_hitl_payloads(self, rules_by_threat: dict) -> list[HITLPayload]:
         payloads: list[HITLPayload] = []
-        for threat_id, validation_results in validation_by_threat.items():
+        for threat_id, variants in rules_by_threat.items():
             item = self.queue.get_by_id(threat_id)
             if not item:
                 continue
-            payload = self.hitl_builder.build(item, validation_results)
+            payload = self.hitl_builder.build_from_rules(item, variants)
             payloads.append(payload)
             self.queue.update_status(threat_id, QueueStatus.HITL_READY)
         return payloads
@@ -117,14 +105,13 @@ class PipelineOrchestrator:
                     for item in confirmed
                 }
 
-        validation = self.run_validation_stage(rules)
-        return self.build_hitl_payloads(validation)
+        return self.build_hitl_payloads(rules)
 
     def apply_feedback(self, bundle: FeedbackBundle) -> list[HITLPayload]:
-        results, _ = self.feedback_loop.process_feedback(bundle)
+        variants, _ = self.feedback_loop.process_feedback(bundle)
         item = self.queue.get_by_id(bundle.threat_id)
         if not item:
             return []
-        payload = self.hitl_builder.build(item, results)
+        payload = self.hitl_builder.build_from_rules(item, variants)
         self.queue.update_status(bundle.threat_id, QueueStatus.HITL_READY)
         return [payload]

