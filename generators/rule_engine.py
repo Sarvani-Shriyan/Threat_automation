@@ -22,27 +22,49 @@ from ingestion.config import (
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT_BASE = f"""You are an expert detection engineer building production SIEM/detection rules.
+SYSTEM_PROMPT_BASE = """\
+You are an expert detection engineer building production SIEM/detection rules.
 
-Given a verified security threat article, generate exactly {RULE_VARIANTS_MIN} to {RULE_VARIANTS_MAX} DISTINCT detection rule variants that catch different behavioral variations of the same attack.
+Given a verified security threat article, generate EXACTLY 3 detection rule variants.
+The array must contain EXACTLY 3 objects — no more, no fewer.
 
-Output ONLY a valid JSON object with this exact structure (no markdown):
-{{"rules": [ ...array of {RULE_VARIANTS_MIN}-{RULE_VARIANTS_MAX} rule objects... ]}}
+Output ONLY a valid JSON object with this exact structure (no markdown, no commentary):
+{"rules": [ <rule_1>, <rule_2>, <rule_3> ]}
 
-Each rule object MUST conform exactly to this schema:
-{{
-  "name": "String — format: '[Platform]: [Actionable, Precise Indicator Title]'",
-  "description": "String — detailed operational triggers, condition boundaries, and focus context",
-  "actionNames": ["String — exact infrastructure/API actions to monitor from the threat text"],
-  "defaultSeverity": "String — one of: Low, Medium, High, Critical",
-  "threatType": "String — MITRE ATT&CK Tactic name classification",
-  "recommend": "String — strategic structural hardening and configuration recommendations",
-  "remediate": "String — tactical response, host containment, validation steps"
-}}
+━━━ MANDATORY STRATEGY DIVERSITY ━━━
+Each of the 3 rules MUST target a FUNDAMENTALLY different telemetry layer.
+Do NOT produce slight syntax variations of the same detection idea.
 
-Requirements:
-- Each variant must target a different detection angle (e.g., auth anomaly, API abuse, config drift, lateral movement signal).
-- Names must include the primary platform (AWS, Azure, Okta, etc.) from the article context."""
+  Rule 1 — PROCESS CREATION / COMMAND-LINE ARGUMENTS
+    Focus: spawned processes, executable paths, command-line flags, script invocations,
+           shell child-process chains, or interpreter abuse tied to the threat.
+
+  Rule 2 — FILE / REGISTRY MODIFICATIONS OR BEHAVIORAL INDICATORS
+    Focus: file writes, file reads on sensitive paths, registry key changes,
+           configuration drift, credential file access, persistence artifacts,
+           or storage-layer behavioral anomalies tied to the threat.
+
+  Rule 3 — NETWORK CONNECTIONS / API / SYSTEM CALLS
+    Focus: outbound/inbound connection patterns, DNS lookups, API calls,
+           data-plane syscalls, cloud-plane operations, or protocol-level
+           indicators tied to the threat.
+
+━━━ SCHEMA (every rule object must have all 7 keys) ━━━
+{
+  "name":            "String — format: '[Platform]: [Actionable Indicator Title]'",
+  "description":     "String — operational trigger, condition boundaries, layer focus",
+  "actionNames":     ["String — exact infrastructure/API action name to monitor"],
+  "defaultSeverity": "String — exactly one of: Low, Medium, High, Critical",
+  "threatType":      "String — MITRE ATT&CK Tactic name",
+  "recommend":       "String — structural hardening and configuration recommendations",
+  "remediate":       "String — tactical response, containment, and validation steps"
+}
+
+━━━ HARD RULES ━━━
+- Names must include the primary platform (AWS, Azure, Okta, GitHub, etc.).
+- Do NOT invent actionNames — use ONLY strings from the LOOKUP_ARRAY provided.
+- Do NOT emit markdown fences, prose, or any text outside the JSON object.\
+"""
 
 
 def build_grounded_system_prompt(grounding: GroundingResult) -> str:
@@ -106,7 +128,14 @@ def build_grounded_system_prompt(grounding: GroundingResult) -> str:
 
 
 class RuleEngine:
-    """phi4-mini-reasoning rule generation with knowledge-base grounded actionNames."""
+    """
+    phi4-mini-reasoning rule generation with knowledge-base grounded actionNames.
+
+    Generates exactly 3 structurally diverse detection rule variants per threat:
+      Rule 1 — Process Creation / Command-Line Arguments
+      Rule 2 — File / Registry Modifications or Behavioral Indicators
+      Rule 3 — Network Connections / API / System Calls
+    """
 
     def __init__(
         self,
@@ -216,6 +245,10 @@ class RuleEngine:
             f"Grounded Platforms: {', '.join(grounding.matched_platforms) or 'none'}\n"
             f"Routed Profiles: {', '.join(grounding.routed_profiles) or 'none'}\n"
             f"Verified actionNames sample: {allowed_preview or 'none'}\n\n"
+            f"REMINDER — output exactly 3 rules using the 3 mandatory strategy layers:\n"
+            f"  [1] Process Creation / Command-Line Arguments\n"
+            f"  [2] File / Registry Modifications or Behavioral Indicators\n"
+            f"  [3] Network Connections / API / System Calls\n\n"
             f"Threat Content:\n{(threat.get('content') or '')[:5000]}"
         )
 
@@ -260,13 +293,30 @@ class RuleEngine:
     def _parse_rules(raw: str) -> ThreatRuleBatch:
         text = RuleEngine._strip_model_artifacts(raw)
         data = RuleEngine._extract_rules_json(text)
+
         if isinstance(data, list):
-            return ThreatRuleBatch(rules=data)
-        if "rules" in data:
-            return ThreatRuleBatch(rules=data["rules"])
-        if "variants" in data:
-            return ThreatRuleBatch(rules=data["variants"])
-        raise ValueError("Response missing 'rules' array")
+            rules_list = data
+        elif "rules" in data:
+            rules_list = data["rules"]
+        elif "variants" in data:
+            rules_list = data["variants"]
+        else:
+            raise ValueError("Response missing 'rules' array")
+
+        if not isinstance(rules_list, list):
+            raise ValueError(f"Expected a list of rules, got {type(rules_list).__name__}")
+
+        # If the model over-generates, keep the first 3 (one per strategy layer).
+        # Under-generation is a hard failure — Pydantic enforces min_length=3.
+        if len(rules_list) > RULE_VARIANTS_MAX:
+            logger.warning(
+                "model_over_generated count=%d — truncating to %d strategy variants",
+                len(rules_list),
+                RULE_VARIANTS_MAX,
+            )
+            rules_list = rules_list[:RULE_VARIANTS_MAX]
+
+        return ThreatRuleBatch(rules=rules_list)
 
 
 def threat_id(threat: dict[str, Any]) -> str:

@@ -1,25 +1,265 @@
 {
-  "filtered_at": "2026-06-04T08:00:15.257123+00:00",
+  "filtered_at": "2026-06-15T08:48:00.007894+00:00",
   "stats": {
-    "total_in_file": 45,
-    "total_inputs": 45,
-    "keyword_dropped": 41,
-    "passed_keywords": 4,
-    "cve_patch_dropped": 0,
-    "survived_cve_patch_filter": 4,
-    "gemma_rejected": 2,
-    "confirmed_gemma": 2,
+    "total_in_file": 664,
+    "total_inputs": 664,
+    "keyword_dropped": 597,
+    "passed_keywords": 67,
+    "cve_patch_dropped": 6,
+    "survived_cve_patch_filter": 61,
+    "gemma_rejected": 23,
+    "confirmed_gemma": 38,
     "min_confidence_score": 6,
-    "existing_loaded": 0,
-    "new_confirmed_this_run": 2,
-    "merged_before_cap": 2,
+    "existing_loaded": 2,
+    "new_confirmed_this_run": 38,
+    "merged_before_cap": 40,
     "trimmed_count": 0,
     "max_queue_size": 50,
-    "confirmed_gemma_this_run": 2,
-    "final_queue_size": 2
+    "confirmed_gemma_this_run": 38,
+    "final_queue_size": 40
   },
-  "article_count": 2,
+  "article_count": 40,
   "articles": [
+    {
+      "source": "Cyble",
+      "title": "Borrowed Trust – Systematic Exploitation of Abandoned Cloud DNS Delegations to serve Thai Gambling SEO Content",
+      "url": "https://cyble.com/blog/borrowed-trust-cloud-dns-takeover-thai-gambling-seo-poisoning/",
+      "content": "Executive Summary Cyble Research & Intelligence Labs (CRIL) has identified an active SEO poisoning campaign exploiting abandoned cloud DNS zone delegations to serve Thai-language gambling content under the domain authority of reputed enterprise organizations. The campaign has compromised 163 organizations across 30+ countries, spanning federal government agencies, national healthcare systems, financial institutions, critical infrastructure operators, and major universities. The primary mechanism is the Azure DNS zone takeover. When enterprises decommission cloud infrastructure, NS delegations to Azure DNS zones are routinely left in place. The actor systematically identifies these abandoned delegations, claims the orphaned zones under a fresh Azure subscription, and deploys a Next.js gambling kit behind a valid Let's Encrypt wildcard TLS certificate, all resolving cleanly under the victim's own domain. A browser, a search engine, and a Thai user following a search result all see a page identical to a legitimate enterprise property. This report documents the full campaign architecture: the pivot chain from initial discovery through infrastructure attribution, the DNS compromise mechanisms observed, the structured affiliate monetization layer with server-side geographic filtering and dual-tier commission tracking, and a dedicated 103-node application backend in Hong Kong tied to a single Chinese operator by twelve independent technical evidence points. At the time of publication, 161 organizations remain actively compromised. Initial Discovery During an ongoing vulnerability assessment, CRIL identified an anomalous DNS resolution on the cardsforheroes.verizon.com subdomain environment. What initially appeared to be a single misconfigured endpoint turned out to be 1000+ individually named subdomains , each serving Thai-language online gambling content under Verizon's trusted domain authority . Every subdomain followed a gambling brand keyword pattern with URL-encoded Thai characters confirming the intended audience. All endpoints resolved to a single IP at OVH SAS (AS16276). Loading a representative endpoint revealed a fully rendered Next.js gambling application with outbound affiliate redirect links. It matched the structural similarity of 97 other enterprise subdomains across completely unrelated organizations. The affiliate referral parameter on every redirect established the monetization intent immediately: this was not defacement or malware delivery, but a structured operation funneling Thai search traffic to gambling registrations for commission. The Verizon endpoint was not the campaign's origin. Following it, 162 other compromised organizations were exposed. Figure 1: Screenshot of the compromised endpoint cod9[.]cardsforheroes[.]Verizon[.]com Background: The Vulnerability Class Cloud infrastructure provisioning introduces a category of DNS misconfiguration that is structurally different from the record-level errors security teams routinely audit. When an enterprise provisions Azure resources for a project environment, a standard step is to delegate a subdomain to an Azure DNS zone by adding NS records in the parent DNS zone that point to Microsoft's nameservers for that environment. The zone lives inside the Azure subscription, the team manages its records there, and the project operates normally. What consistently fails is the decommissioning step. When the project ends, and the Azure resources are deleted, the NS delegation in the parent DNS zone is not usually removed. It persists silently, pointing any DNS query for that subdomain to Azure nameservers that no longer serve authoritative records for it. In several cases identified during this investigation, these delegations had been left in place for over six years. The exploitability of this configuration depends on another condition: whether the Azure DNS zone for that subdomain is claimable by a new subscriber. Microsoft's zone-creation model has historically allowed any subscriber to register a zone by name under their own subscription. A zone abandoned with a canceled subscription can be recreated by a third party, who then inherits the delegated DNS authority that the enterprise's parent zone never revoked. Our analysis of this campaign demonstrates that awareness has not translated into hygiene at an enterprise scale. DNS Compromise Mechanisms Four distinct mechanisms account for the 163 confirmed victims. Each exploits the same underlying failure: a DNS delegation that outlived the infrastructure it was created to serve. Mechanism 1 — Azure DNS Zone Takeover (150+ Organizations) The actor identifies subdomains whose NS records still point to Azure DNS nameservers, even though the underlying subscription has been canceled or abandoned. A new Azure subscription is created, the orphaned zone is claimed by name, a wildcard A record is added that points all subdomains to a delivery IP, and ACME HTTP-01 validation is performed through the now-controlled DNS to obtain a Let's Encrypt wildcard certificate. One DNS record exposes every possible subdomain of the environment. Direct authoritative DNS evidence confirms the mechanism. Querying Microsoft's own nameserver infrastructure returns the actor's wildcard A record. Zone SOA serials of 1 on confirmed victims establish that the zones were created from scratch by the actor, not modified from an existing state. Certificate Transparency logs confirm the dormancy periods: A major pharmaceutical company's pilot subdomain: last legitimate certificate October 2019, actor certificate April 11, 2026 — a 6.5-year gap A global electronics company's IoT platform: last legitimate certificate February 2023, actor certificate April 10, 2026 The bulk of actor-obtained certificates cluster in April 2026, indicating a concentrated automated exploitation window applied across targets abandoned over multiple years. Mechanism 2 — DigitalOcean DNS Zone Takeover (2 Organizations) Two organizations, a US luxury furniture retailer and an Indian university, have their compromised subdomains delegated to DigitalOcean nameservers rather than Azure. Both carry wildcard records resolving to 38.127.8.49. DigitalOcean's zone-claiming model carries the same structural vulnerability: abandoned DNS zones in canceled accounts become available for re-registration. The actor's tooling targets multiple cloud DNS providers. Mechanism 3 — Direct Wildcard Misconfiguration (2 Organizations) A US energy company's development subdomain and a mobile payments platform's development subdomain both resolve via wildcard to 139.99.82.106, even though there is no cloud DNS zone delegation. Both use their own organizational nameservers, making cloud zone takeover mechanically impossible. The wildcard records resolve from within the parent zone, indicating either an orphaned wildcard A record left in the organization's own DNS console when a project was decommissioned, or a direct DNS management access path the actor exploited. \"A wildcard A record in the DNS console of a payments platform is a more direct access path than a cloud zone takeover. Mechanism 3 — Direct Wildcard Misconfiguration (2 Organizations) A US energy company's development subdomain and a mobile payments platform's development subdomain both resolve via wildcard to 139.99.82.106, even though there is no cloud DNS zone delegation. Both use their own organizational nameservers, making cloud zone takeover mechanically impossible. The wildcard records resolve from within the parent zone, indicating either an orphaned wildcard A record left in the organization's own DNS console when a project was decommissioned, or a direct DNS management access path the actor exploited. \"A wildcard A record in the DNS console of a payments platform is a more direct access path than a cloud zone takeover. Mechanism 4 — Per-Subdomain A Records (1 Organization) The Verizon environment represents a distinct approach: 1000+ individually named A records rather than a single wildcard. Each gambling-keyword subdomain is a separately created DNS entry pointing to 51.79.199.51. This implies either an automated DNS API script with zone-write access or a compromised DNS management credential that enabled bulk record creation. Technical Analysis Pivoting: From One Endpoint to 163 Organizations Pivot 1: 51.79.199.51 — Primary Delivery Node and First Scope Expansion The first pivot came from the primary delivery IP itself. Cross-referencing 51.79.199.51 against passive DNS resolution data and page fingerprint matching returned over 90 enterprise subdomains serving identical content, confirmed by: Identical Next.js build ID : QQOrXCFjoI6C9oF-4YVhl Identical favicon path: /img/ib99-hq.ico Outbound affiliate redirects to the same three destination domains across every result Every result was a subdomain of a legitimately owned enterprise domain with a clean reputation. Standard threat intelligence feeds returned no signal on any of them. The shared page fingerprint expanded the confirmed victim set from 1 organization to over 90 in a single query. Figure 2: Thai-language gambling page served from a compromised enterprise subdomain, advertising free credits with no deposit required. Pivot 2: 139.99.82.106 and 38.127.8.49 — Secondary and Tertiary Delivery Nodes Passive DNS resolution data against AS16276 (OVH) surfaced two additional delivery IPs operating in parallel. Both served the identical gambling kit with the same build fingerprint across a partially overlapping but distinct victim set. Government agencies, healthcare organizations, and several non-Azure takeover victims routed through these two nodes rather than the primary. Together, the three OVH nodes account for the full 163-organization victim estate. All three presented clean IP reputations, no prior association with threat actors, and standard deployment signatures at the surface level. Figure 3: Compromised endpoint pointing to “38[.]127[.]8[.]49” Pivot 3: 38.173.56.218 — The JARM Anomaly That Exposed the Backend JARM TLS fingerprinting against the primary delivery node returned thousands of global matches, nearly all of them generic shared hosting providers. One result stood apart by every observable metric: 38.173.56.218 in Hong Kong, AS398478 (PEG TECH INC), presenting: A ThinkPHP application framework error on port 443 A Chinese server management panel certificate identity on port 21 MySQL 5.7.44-log on port 3306 Where every other JARM match represented commodity hosting, this node showed a purpose-built application stack managed from mainland China. This was the single point of entry from the OVH delivery layer into the backend infrastructure. Figures 2 and 3 showcase these using findings from ODIN by Cyble . Affiliate Architecture: How the Campaign Monetizes Every destination redirect carries a ?rc= affiliate code — ibiza99vip1, bigwinv1, link99, or seven77vip1 — that attributes completed registrations to the actor and triggers a commission payout from the destination platform. This is standard affiliate marketing infrastructure; legal and illegal gambling operations use it. A server-side layer beneath the visible code separates this campaign from simple redirect farms. A POST request intercepted at a live endpoint returned this before any redirect was issued: \" status \": \"ok\", \" msg \": \"TH - Referrer verified\", \" data \": { \"referrer\": \"link99\" }, \" x-token\": \"\" The backend validates geographic origin server-side. Requests from outside Thailand are not redirected, keeping traffic focused and limiting scanner exposure. The link99 identifier is a sub-affiliate publisher ID that sits above the ?rc= codes in the platform's tracking hierarchy. The actor earns at both tiers: publisher-level credit under link99 for delivering Thai traffic, and a per-registration payout under the ?rc= code for each conversion. The two layers are independent — campaign codes can rotate while link99 persists as the actor's permanent platform identity. Figure 4: 5,547 results matching the JARM hash on ODIN (source: ODIN by Cyble) Pivoting on the Let's Encrypt certificate presented by this node, issued to broker-xm.com, returned 103 IPs across seven contiguous /24 subnets in 38.173.0.0/16, all within AS398478. A single certificate deployed across 103 servers in a wholesale-allocated IP block produced the complete backend fleet inventory from one certificate query. Figure 5: Results for Cert CN->broker-xm.com showcasing 200 hits from Hong Kong with the IP range 38.173.0.0/16 (source: ODIN by Cyble) Affiliate Architecture: How the Campaign Monetizes Every destination redirect carries a ?rc= affiliate code — ibiza99vip1, bigwinv1, link99, or seven77vip1 — that attributes completed registrations to the actor and triggers a commission payout from the destination platform. This is standard affiliate marketing infrastructure; legal and illegal gambling operations use it. A server-side layer beneath the visible code separates this campaign from simple redirect farms. A POST request intercepted at a live endpoint returned this before any redirect was issued: \" status \": \"ok\", \" msg \": \"TH - Referrer verified\", \" data \": { \"referrer\": \"link99\" }, \" x-token\": \"\" The backend validates geographic origin server-side. Requests from outside Thailand are not redirected, keeping traffic focused and limiting scanner exposure. The link99 identifier is a sub-affiliate publisher ID that sits above the ?rc= codes in the platform's tracking hierarchy. The actor earns at both tiers: publisher-level credit under link99 for delivering Thai traffic, and a per-registration payout under the ?rc= code for each conversion. The two layers are independent — campaign codes can rotate while link99 persists as the actor's permanent platform identity. Figure 6 : Phishing page Redirected to hxxps://link99.nova555.rest/register/ with link99 as a referral code Four destination platforms have been confirmed — ibiza99.autos, big888.store, seven77.click, and stillsunday.pl. These domains are white-label deployments on a shared codebase, as confirmed by identical CSS hashes and JavaScript resilience logic across all three, except big888.store, which carries active Google Search Console verification, indicating the platform operator runs its own independent SEO operation beyond this campaign. Each platform maintains its own appbox.* CDN subdomains , a fourth infrastructure layer entirely separate from the delivery nodes, backend fleet, and victim domains. Figure 7: Asking for banking information post login via Thailand phone number The Gambling Kit: What the Endpoint Delivers An HTTP request to any compromised enterprise subdomain with Thai locale headers returns a fully rendered Next.js page that returns a legitimate enterprise web property. The page presents lang=\"th\" with Thai-language gambling platform branding A valid Let's Encrypt wildcard TLS certificate matching the victim subdomain, clean browser padlock, no warnings Schema.org FAQ structured data with Thai-language answers about minimum deposits, withdrawal timelines, and mobile compatibility, directly targeting the queries Thai users make when researching gambling platforms AMP alternate links for Google mobile indexing coverage Static assets served from paths under the compromised domain itself, using the victim's domain authority as a CDN The minimum deposit advertised across all kit variants is 1 Thai Baht, approximately $0.03 USD. The 1-baht minimum ($0.03 USD) removes the deposit threshold that causes most users to abandon the registration flow before converting. The kit fingerprint is consistent across the entire victim estate, regardless of which victim domain or OVH node serves the content, confirming centralized build and deployment by a single operator. Figure 8 - Three-tier referral commission structure (10%/3%/1%) plus 0.3% turnover rebate, embedded in the gambling kit served across all 163 compromised subdomains Figure 9: Multi-level recruitment diagram promoting unlimited monthly commissions across three affiliate downline tiers. Backend Infrastructure: The Hong Kong Fleet The three OVH delivery nodes handle content distribution, but the application layer sits entirely within a separate dedicated infrastructure in Hong Kong. The 103-node backend fleet is distributed across seven /24 subnets within 38.173.0.0/16, all under AS398478 (PEG TECH INC). Seven independent evidence points converge on single-operator control; the MD5 match across all 103 nodes on port 80 alone eliminates coincidence. Evidence Point Detail Weight HTTP body MD5 match 7df3d7cf3358af3f470ac7229387ef94 (615 bytes) identical across all 103 nodes on port 80 Critical Single shared certificate broker-xm.com Let's Encrypt cert deployed across all 103 servers High Envoy proxy fingerprint Identical 503 error string on port 443 across all 103 nodes High MySQL version 5.7.44-log with binary replication logging enabled uniformly High BT-Panel provisioning admin@bt.cn, Dongguan, Guangdong, on FTP certificates across all nodes High JARM fingerprint 07d14d16d21d21d07c42d43d000000270a013a3e21e28897e76e8fe13e2f7d uniform across fleet High Zero PTR records No reverse DNS on any of the 103 IPs, deliberate suppression Medium Detection and Hunting The campaign produces no signal in standard security controls. Valid TLS certificates, clean IP reputation, trusted domain names, and no exploit delivery mean conventional tooling produces no signal. Detection requires operating at the DNS layer. Certificate Transparency monitoring is the most reliable early indicator. An unexpected Let's Encrypt wildcard certificate on a corporate-owned subdomain, particularly following a period of no issuance, is an anomaly no legitimate provisioning scenario produces. Monitoring CT logs for wildcard certificates whose expected issuer is a corporate or premium CA would have detected every Azure takeover victim at the time of certificate issuance. Azure DNS zone delegation auditing is a structural prevention control. Organizations should enumerate all NS delegation records in their parent DNS zones and verify that corresponding Azure DNS zones exist in subscriptions they own and actively manage. 163 organizations across 30 countries had gambling content served under their domain authority without any alert firing. One class of DNS misconfiguration enabled it. Wildcard DNS testing confirms active exploitation. A randomized nonsense hostname query against any Azure-delegated subdomain that returns a resolution should be treated as a compromised zone until proven otherwise. Network and endpoint detection rules: DNS answers resolving to 51.79.199.51, 139.99.82.106, or 38.127.8.49 URL query parameters containing rc=ibiza99vip1, rc=bigwinv1, or rc=seven77vip1 or rc=link99 HTTP requests to /img/ib99-hq.ico Outbound connections to 38.173.30.0/24, 38.173.37.0/24, 38.173.56.0/24, 38.173.57.0/24, 38.173.235.0/24, 38.173.236.0/24, or 38.173.239.0/24 Internet scanning queries: HTTP body MD5: 7df3d7cf3358af3f470ac7229387ef94 TLS certificate CN: broker-xm.com ASN sweep: AS398478 Remediation For Azure DNS zone takeover victims: Remove the NS delegation from your parent DNS zone immediately. This severs the attack chain regardless of what the actor maintains inside the Azure zone, which is under their control and cannot be directly modified by the victim organization. Report the abandoned zone to Microsoft MSRC at msrc@microsoft.com with the zone name and evidence. Microsoft can force-remove zones from subscriptions holding abandoned delegations. Request revocation of any Let's Encrypt certificates issued against the compromised subdomain using the certificate serial numbers from crt.sh. Audit all remaining subdomains for additional environment-style entries (dev, uat, staging, preprod, pilot, lab, test, sandbox) carrying NS delegations to cloud providers, and verify each delegation is intentional, current, and managed. For DigitalOcean zone takeover victims : Remove the NS delegation from the parent zone and verify whether the DigitalOcean zone exists in an account you own. For direct wildcard misconfiguration victims: Remove the wildcard A record from your DNS management console. If the origin of the record cannot be identified, treat the DNS management credential as compromised and rotate it immediately. Conclusion This campaign demonstrates that enterprise reputational trust can be systematically harvested through a single class of DNS misconfiguration that most organizations have no visibility into. The actor did not breach any perimeter or exploit any application vulnerability. They claimed what had been left unclaimed and built a commercial affiliate operation on top of it. The scale, 163 organizations across 30+ countries, is not the result of 163 separate attacks. It is an automated scanning process applied to a single vulnerability class. A single wildcard record beneath an abandoned Azure delegation exposes an unlimited subdomain namespace, each entry inheriting the full TLS-verified authority of the victim's brand. The campaign lives entirely within legitimate infrastructure, OVH delivery nodes, Let's Encrypt certificates, victim-owned domains, and organic search rankings, which is precisely why conventional controls produce no signal. Audit your DNS estate. Every abandoned NS delegation pointing to a cloud provider is a candidate for the next version of this list. Every abandoned NS delegation pointing to a cloud provider is a potential entry in the next version of this list. The remediation is simple. The detection methodology is documented here. The gap between a decommissioned project and an actively exploited subdomain closed silently on 163 organizations. In several cases, it stayed closed for over six years. MITRE ATT&CK® Techniques Technique ID Description Resource Development — Acquire Infrastructure T1583.003 OVH VPS for delivery; PEG TECH INC ASN for backend fleet Resource Development — Compromise Infrastructure T1584 Azure DNS zone takeover of legitimate enterprise subdomains Initial Access — Drive-by Compromise T1189 Thai users directed to compromised enterprise subdomains via organic search Persistence — Valid Accounts T1078 DNS management credentials implied by per-subdomain record creation (Verizon) Defense Evasion — Impersonation T1656 Gambling kit served under legitimate enterprise TLS certificates Defense Evasion — Valid Accounts: Cloud Accounts T1078.004 Azure account used to claim abandoned DNS zones Collection — Adversary-in-the-Middle T1557 Server-side affiliate referrer verification intercepts the user session Exfiltration — Web Service T1567 User registration data and financial transactions were exfiltrated to gambling platforms Indicators of Compromise (IOCs) Delivery Infrastructure Indicator Type Description 51.79.199.51 IP Primary OVH delivery node, AS16276 139.99.82.106 IP Secondary OVH delivery node, AS16276 38.127.8.49 IP Tertiary OVH delivery node, AS16276 38.173.30.0/24 CIDR Backend fleet, AS398478 PEG TECH INC 38.173.37.0/24 CIDR Backend fleet, AS398478 PEG TECH INC 38.173.56.0/24 CIDR Backend fleet, AS398478 PEG TECH INC 38.173.57.0/24 CIDR Backend fleet, AS398478 PEG TECH INC 38.173.235.0/24 CIDR Backend fleet, AS398478 PEG TECH INC 38.173.236.0/24 CIDR Backend fleet, AS398478 PEG TECH INC 38.173.239.0/24 CIDR Backend fleet, AS398478 PEG TECH INC Certificates and Fingerprints Indicator Type Description d9799ca2f08af6992dc80c49f9889fef40ed27c7 SHA1 bt.default.com custom CA on primary delivery node broker-xm.com Domain Let's Encrypt cert across all 103 backend nodes 07d14d16d21d21d07c42d43d000000270a013a3e21e28897e76e8fe13e2f7d JARM TLS fingerprint across delivery and backend infrastructure 7df3d7cf3358af3f470ac7229387ef94 MD5 HTTP body hash, 615 bytes, port 80, all 103 backend nodes Campaign Kit Fingerprints Indicator Type Description QQOrXCFjoI6C9oF-4YVhl String Next.js build ID across all delivery endpoints /img/ib99-hq.ico URI Kit-specific favicon path main.af42a497.css Hash Shared CSS fingerprint across all three destination platforms pub-a4952b46ff9c4f6b8d5529cd21f9a1e3.r2.dev Domain Cloudflare R2 CDN bucket Affiliate Domains and Tracking Indicator Type Description ibiza99.autos Domain Destination platform, affiliate code ibiza99vip1 big888.store Domain Destination platform, affiliate code bigwinv1 seven77.click Domain Destination platform, affiliate code seven77vip1 link99.nova555.rest Domain Destination platform, affiliate code link99 appbox.7y6texmeyy.com Domain ibiza99.autos image CDN appbox.devh5api27.xyz Domain big888.store image CDN appbox.55u4g5g4k2.com Domain seven77.click image CDN 322242757545449 Pixel ID Facebook Pixel, ibiza99.autos 1607473696511298 Pixel ID Facebook Pixel, ibiza99.autos 721331896825411 Pixel ID Facebook Pixel, big888.store GTM-NP59MP3T GTM ID Google Tag Manager, big888.store Parallel Operations (AS398478) Indicator Type Description 99997778.com Domain Active Chinese gambling platform, AS398478 bevictor.com Domain Chinese offshore sports betting (伟德国际), AS398478 The post Borrowed Trust – Systematic Exploitation of Abandoned Cloud DNS Delegations to serve Thai Gambling SEO Content appeared first on Cyble .",
+      "published_at": "2026-06-12T00:06:51+00:00",
+      "timestamp": "2026-06-12T00:06:51+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 10,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly details the exploitation of abandoned Azure DNS zone delegations, a core identity/infrastructure misconfiguration, allowing unauthorized content serving under trusted domain authority."
+      }
+    },
+    {
+      "source": "Daily CyberSecurity",
+      "title": "The Payroll Pirate Campaign Leverages AiTM Session Hijacking to Target HR Departments",
+      "url": "https://securityonline.info/payroll-pirate-campaign-aitm-hijacking/",
+      "content": "SecurityRisk Advisors (SRA) recently identified an active cyber threat targeting corporate finance departments. Known as the Payroll Pirate The post The Payroll Pirate Campaign Leverages AiTM Session Hijacking to Target HR Departments appeared first on Daily CyberSecurity . Related posts: New AI-Driven Phishing Campaign Subverts Microsoft’s Device Code Flow Phishing Alert: Fake WeTransfer & HunCERT Pages Hosted on AWS S3 & Cloudflare Turnstile Stealing Credentials Old WinRAR Flaw Still Fuels Attacks on Ukraine in 2026",
+      "published_at": "2026-06-14T22:52:39+00:00",
+      "timestamp": "2026-06-14T22:52:39+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly mentions 'AiTM Session Hijacking' and targeting corporate departments, which are core identity security vectors."
+      }
+    },
+    {
+      "source": "Daily CyberSecurity",
+      "title": "SimpleHelp Authentication Bypass Exploited to Hijack Remote Endpoints",
+      "url": "https://securityonline.info/simplehelp-authentication-bypass/",
+      "content": "Recently, a maximum-severity flaw emerged in the remote management software landscape. Cybersecurity researchers found a critical SimpleHelp authentication The post SimpleHelp Authentication Bypass Exploited to Hijack Remote Endpoints appeared first on Daily CyberSecurity . Related posts: SolarWinds Web Help Desk Hit with Multiple RCE and Auth Bypass Vulnerabilities LiteLLM Under Fire: Triple Threat Vulnerabilities Expose AI Gateways to Total Takeover Critical 9.1 Bypass in OAuth2 Proxy Exposes Upstream Resources",
+      "published_at": "2026-06-12T22:25:21+00:00",
+      "timestamp": "2026-06-12T22:25:21+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly mentions 'authentication bypass' and 'OAuth2 Proxy,' which are core identity security vectors, even though the specific platform is not named."
+      }
+    },
+    {
+      "source": "Rapid7 Cybersecurity Blog",
+      "title": "Weekly Metasploit Update: New Kerberos/Certificate tracing options, and multiple new modules",
+      "url": "https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-13-06-2026",
+      "content": "New Tracing Options As hard as we try to ensure that Metasploit is bug free, issues inevitably come up. Whether you’re running a module on an op or writing a new one, what we can do is make the debugging experience easier. To that end one of our two Google Summer of Code (GSoC) projects is here to deliver. Building on the previous pattern of HttpTrace comes two new options KerberosTicketTrace and CertificateTrace . These options, when enabled, will enable debugging output of Kerberos tickets and Certificates that are both sent and received by applicable modules. Now when things aren’t going quite right, users have new levers to reach for to inspect what’s happening under the hood. For example, to inspect exactly what’s happening when using the auxiliary/admin/kerberos/get_ticket module: msf auxiliary(admin/kerberos/get_ticket) > set KerberosTicketTrace true KerberosTicketTrace => true msf auxiliary(admin/kerberos/get_ticket) > run [*] Running module against 192.168.159.10 [*] 192.168.159.10:88 - Getting TGT for smcintyre@msflab.local #################### # Kerberos Request: AS-REQ #################### Protocol Version: 5 Message Type: 10 (AS-REQ) Pre-Authentication Data: Entry[0]: Type: 128 (PA_PAC_REQUEST) Value: [binary 7 bytes: 3005a0030101ff] Request Body: KDC Options: Value: 1082195984 Flags: - FORWARDABLE - RENEWABLE - CANONICALIZE - RENEWABLE_OK Client Name: Name Type: 1 (NT_PRINCIPAL) Name String: - smcintyre Realm: MSFLAB.LOCAL Server Name: Name Type: 1 (NT_PRINCIPAL) Name String: - krbtgt - MSFLAB.LOCAL Till: 2026-06-12T18:21:36Z Rtime: 2026-06-12T18:21:36Z Nonce: 6831592 Encryption Type: - 18 (AES256) - 17 (AES128) - 23 (RC4_HMAC) - 3 (DES_CBC_MD5) - 16 (DES3_CBC_SHA1) #################### # Kerberos Response: KRB-ERROR #################### Protocol Version: 5 Message Type: 30 (KRB-ERROR) Server Time: 2026-06-11T18:21:36Z Server Microseconds: 862696 Error Code: Name: KDC_ERR_PREAUTH_REQUIRED Value: 25 Description: Additional pre-authentication required Realm: MSFLAB.LOCAL Server Name: Name Type: 1 (NT_PRINCIPAL) Name String: - krbtgt - MSFLAB.LOCAL Error Data: [binary 87 bytes: 30553032a103020113a22b04293027301ea003020112a1171b154d53464c41422e4c4f43414c736d63696e747972653005a0030201173009a103020102a20204003009a103020110a20204003009a10302010fa2020400] #################### # Kerberos Request: AS-REQ #################### Protocol Version: 5 Message Type: 10 (AS-REQ) Pre-Authentication Data: Entry[0]: Type: 2 (PA_ENC_TIMESTAMP) Value: [binary 67 bytes: 3041a003020112a23a0438724f4965bd3deb1f061e807b616a09b613f59d9a6749eaee895e2ec3ed3045403cb28874acaa371681e3957a3ec23879141411ba788886f3] Entry[1]: Type: 128 (PA_PAC_REQUEST) Value: [binary 7 bytes: 3005a0030101ff] Request Body: KDC Options: 1350565888 Client Name: Name Type: 1 (NT_PRINCIPAL) Name String: - smcintyre Realm: MSFLAB.LOCAL Server Name: Name Type: 1 (NT_PRINCIPAL) Name String: - krbtgt - MSFLAB.LOCAL Till: 2026-06-12T18:21:36Z Rtime: 2026-06-12T18:21:36Z Nonce: 7068778 Encryption Type: - 18 (AES256) - 23 (RC4_HMAC) #################### # Kerberos Response: AS-REP #################### Protocol Version: 5 Message Type: 11 (AS-REP) Pre-Authentication Data: Entry[0]: Type: 19 (PA_ETYPE_INFO2) Value: [binary 34 bytes: 3020301ea003020112a1171b154d53464c41422e4c4f43414c736d63696e74797265] Client Realm: MSFLAB.LOCAL Client Name: Name Type: 1 (NT_PRINCIPAL) Name String: - smcintyre Ticket: Ticket Version Number: 5 Realm: MSFLAB.LOCAL Server Name: Name Type: 1 (NT_PRINCIPAL) Name String: - krbtgt - MSFLAB.LOCAL Encrypted Part: Encryption Type: 18 (AES256) Key Version Number: 2 Cipher: [binary 1098 bytes: a3b825bd279344fd0bc454654f7906e31c8f4918c7c69319515e6a722515b55da36e2ae26f107d9f6278b029ba4c1b937a8a4e9df04f4a54da43794b2216fd5d7762582e94e3aa72fd14bfa0cfb9ff5c9a138acecd57351ff7ca98a9d7d890445316b04359e9210f93ba72c578a1605fb5502ba00fe67d9b55417e356e6400ef3bd07b9e1a8e4aedeb62249bef9f56f0cda3a30969d33fe6999a4855ae8f666b82fdff29047b14d4bcd77b31a6b9ce1ee3a4425cd197250af0cc878995afbeb4de42fb7e55d6095ab27ab3fa7f0afb0010b8e8f5e721a3d0417c7342df77619f6520e726652dc4417d2dbc044529236557441f87a50a7188242fb177e5f1bd45d31902c877d51cd05af7215e520c410e9b7036bc78c1ddad458b0ad99832c4fdd6f8f523ca4241aee8ebce4a0000202ebfb870761833feffc2c248683751a11d556bba4c59b20c7a1627b187d4d4679e19b1928f3ab7edeef3f01b459324178a9e49976519b58d6d7164b29c77e20625c4e710e3bbb0bb32452d4bdb9ed0c3e9873b9511cadf36fb0b372af5f67310319f160c0242d2fff1095bc467c4eb6da0382ab0587d519e5390e56eacb6db4f98c2c25b7ac22edf40db2e0e0eca03dfeba48327916a8caa85c382d04dcea16116c76132dcbfc168b7e3435a37f812f479f1e8309b124a9dcbac1e2ae83063a5e49c1ea584f13f64832c713577f07b3229e83c0fe73c3dc350640a69ea643ef24b66ed17114c262d3e5cdddb8182d8da49173e597b23d94f8ef652433713bf1d5e91c7f984945940d27755584137b00baa9696cdd121c641870830ffc86c8f9989254b6b804912c4989014b3f849cd02e6b06d3cc6401fd3f830cfcd36a0ecf31309d5b6dc82a65b427818694002bcf5fac9c936e1d64205a397126f39f684903803a5405baff041881339c4c8d325a2f446178b66383c209f3dba61bdda626f6e6d63c473638191e447d58aebfcb5a98104c2f96afa3283ac3aca675937afd7c497f1bd41a3dd1b52a6a16db791421a4ab9189d9fa0d610713d9c1eeb2f9c46d6ea197f48e2e643fe773ece0855c63b44b6020044fb7cc1396b26b4747941484b73108b7c1c90e2670cf723033274cc24ceb66a7054b35a9653cd7391a4f81b2c977ee251c9295e47be46b14c66b4031c6758415e543153bde190af0f1abe0f207d84145e3521850f89765997ab72cccaaeb4c5ce8b8be9b33712090d59424c2517e4cd539740750f5792f171fec2b4e4b4bc00cb77bc308abe1b70c75684734aa9ef03c4b419d2e10b4ea6229faf5a4b2af9483156ea32bc4b298f158067ac45afd5c812c407bda57880434cb93a60ac19799004a9adc72d845401ebb8e2a31ed0edf539233d293b1141bb49b36b6475d87c0fd114d97a946e82e39ed58e6c2e0d72826059600d412bd05aaf0af5602ade2f1ff6db363ec33e25756c4bc417b248344ba19ecd8d80d2cd2c2ff32aa355c22ee96166fc7043204dcc48b5595416c4312855c7d6e31d422c93c1d6f3df1a5890b45fc55f1b757b8e] Encrypted Part: Encryption Type: 18 (AES256) Key Version Number: 3 Cipher: [binary 271 bytes: 357637faf370a69ec4780f1fc4308e3d639e59ebbdb5d208cf6df75470bcefdd5210a098aa716055f758d9ec58674abc4b56cec2923329309e2be192db3ee1a63c6f0133a96c440707a0f29f2e075f90c54e2ab7626132f8e898112f81cbde6905d992d9ec6a4c26087043ea8f97c1a876354c47b4a6a76e3321f42edc483530d5248f8daa01db15ab019ac4179dfdb5f6d6c1f2666b9983cd02989612acdad2b2efe352fb9708a080fd304d17a87ff1e152dc8ca981de6cff418f38c5c28612766bfc13fbac51bad1a01fcd7aae544c7d839124e1bce745d20d06c8aca5c7125afe069e8d5299a10cd27b392bd8ae3893181f132f3d49dd746c6c70c6d2b651df998c59be84f2d5b83e5b3c0a71b2] [+] 192.168.159.10:88 - Received a valid TGT-Response [*] 192.168.159.10:88 - TGT MIT Credential Cache ticket saved to /home/smcintyre/.msf4/loot/20260611142136_default_192.168.159.10_mit.kerberos.cca_918073.bin #################### # Kerberos Credential: TGT #################### Creds: 1 Credential[0]: Server: krbtgt/MSFLAB.LOCAL@MSFLAB.LOCAL Client: smcintyre@MSFLAB.LOCAL Ticket etype: 18 (AES256) Key: 58b969939485b53dee75e4399253524d132cc2ca145f4da4e4951c04a843e544 Subkey: false Ticket Length: 1188 Ticket Flags: 0x50e10000 (FORWARDABLE, PROXIABLE, RENEWABLE, INITIAL, PRE_AUTHENT, CANONICALIZE) Addresses: 0 Authdatas: 0 Times: Auth time: 2026-06-11 14:21:36 -0400 Start time: 2026-06-11 14:21:36 -0400 End time: 2026-06-12 00:21:36 -0400 Renew Till: 2026-06-12 14:21:36 -0400 Ticket: Ticket Version Number: 5 Realm: MSFLAB.LOCAL Server Name: krbtgt/MSFLAB.LOCAL Encrypted Ticket Part: Ticket etype: 18 (AES256) Key Version Number: 2 Cipher: o7glvSeTRP0LxFRlT3kG4xyPSRjHxpMZUV5qciUVtV2jbiribxB9n2J4sCm6TBuTeopOnfBPSlTaQ3lLIhb9XXdiWC6U46py/RS/oM+5/1yaE4rOzVc1H/fKmKnX2JBEUxawQ1npIQ+TunLFeKFgX7VQK6AP5n2bVUF+NW5kAO870HueGo5K7etiJJvvn1bwzaOjCWnTP+aZmkhVro9ma4L9/ykEexTUvNd7Maa5zh7jpEJc0ZclCvDMh4mVr7603kL7flXWCVqyerP6fwr7ABC46PXnIaPQQXxzQt93YZ9lIOcmZS3EQX0tvARFKSNlV0Qfh6UKcYgkL7F35fG9RdMZAsh31RzQWvchXlIMQQ6bcDa8eMHdrUWLCtmYMsT91vj1I8pCQa7o685KAAAgLr+4cHYYM/7/wsJIaDdRoR1Va7pMWbIMehYnsYfU1GeeGbGSjzq37e7z8BtFkyQXip5Jl2UZtY1tcWSynHfiBiXE5xDju7C7MkUtS9ue0MPphzuVEcrfNvsLNyr19nMQMZ8WDAJC0v/xCVvEZ8TrbaA4KrBYfVGeU5Dlbqy220+YwsJbesIu30DbLg4OygPf66SDJ5FqjKqFw4LQTc6hYRbHYTLcv8Fot+NDWjf4EvR58egwmxJKncusHiroMGOl5JwepYTxP2SDLHE1d/B7MinoPA/nPD3DUGQKaepkPvJLZu0XEUwmLT5c3duBgtjaSRc+WXsj2U+O9lJDNxO/HV6Rx/mElFlA0ndVWEE3sAuqlpbN0SHGQYcIMP/IbI+ZiSVLa4BJEsSYkBSz+EnNAuawbTzGQB/T+DDPzTag7PMTCdW23IKmW0J4GGlAArz1+snJNuHWQgWjlxJvOfaEkDgDpUBbr/BBiBM5xMjTJaL0RheLZjg8IJ89umG92mJvbm1jxHNjgZHkR9WK6/y1qYEEwvlq+jKDrDrKZ1k3r9fEl/G9QaPdG1KmoW23kUIaSrkYnZ+g1hBxPZwe6y+cRtbqGX9I4uZD/nc+zghVxjtEtgIARPt8wTlrJrR0eUFIS3MQi3wckOJnDPcjAzJ0zCTOtmpwVLNallPNc5Gk+Bssl37iUckpXke+RrFMZrQDHGdYQV5UMVO94ZCvDxq+DyB9hBReNSGFD4l2WZercszKrrTFzouL6bM3EgkNWUJMJRfkzVOXQHUPV5Lxcf7CtOS0vADLd7wwir4bcMdWhHNKqe8DxLQZ0uELTqYin69aSyr5SDFW6jK8SymPFYBnrEWv1cgSxAe9pXiAQ0y5OmCsGXmQBKmtxy2EVAHruOKjHtDt9TkjPSk7EUG7SbNrZHXYfA/RFNl6lG6C457VjmwuDXKCYFlgDUEr0FqvCvVgKt4vH/bbNj7DPiV1bEvEF7JINEuhns2NgNLNLC/zKqNVwi7pYWb8cEMgTcxItVlUFsQxKFXH1uMdQiyTwdbz3xpYkLRfxV8bdXuO [*] Auxiliary module execution completed msf auxiliary(admin/kerberos/get_ticket) > Stay tuned for future enhancements like KerberosTicketTraceLevel which should have verbosity toggles such as meta, ticket, and full. We’d like to thank our GSoC contributors eve0805 and Pushpenderrathore for their hard work on this project. Upcoming Evasion Module Changes Metasploit is currently reconsidering the UX of evasion modules whereby users are currently required to use the module, set the payload, run it, then return to their exploit and copy the generated output from the evasion module into the exploit. This is a cumbersome process and we think we can do better but before we commit to a direction, we are soliciting feedback from the community on what they think would be the best path forward. To that end, we’ve published a writeup of the options we’re considering and a form through which we’re hoping to receive feedback. The form contains 3 questions and will be open until July 1st, 2026. New module content (1) ClickFix Server Authors: boredchilada and h00die Type: Exploit Pull request: #21212 contributed by h00die Path: multi/misc/clickfix_server Description: Adds a new Metasploit exploit module exploit/multi/misc/clickfix_server that runs an HTTP server to deliver a \"ClickFix\"-style social-engineering page which copies a generated command payload to the victim’s clipboard that they are prompted execute. Enhancements and features (9) #21008 from EclipseAditya - Adds kernel_rex_version to Msf::Post::Linux::Kernel, a new helper that extracts the upstream kernel version from uname -r and returns a Rex::Version . This eliminates an ArgumentError crash that occurred when 15+ Linux local exploit modules encountered distro-specific kernel version suffixes. #21198 from Pushpenderrathore - This adds a CertificateTracePresenter , implementing certificate tracing using the presenter pattern aligned with existing Metasploit conventions. This can be enabled by setting the CertificateTrace datastore option when using modules like icpr_cert and get_ticket to see the X.509 certificates being sent and received. #21222 from g0tmi1k - Standardizes the log output across many Metasploit modules to improve the host and port log details when IPv6 addresses are present. #21266 from zeroSteiner - This improves how we log SMB services. If the service is detected but authentication fails, the client still logs what dialect was negotiated so we log the service even if we couldn't authenticate to it. #21383 from zeroSteiner - This bumps Ruby SMB to version 3.1.21 and closes a feature gap between Ruby SMB and the Rex SMB client. With the feature gap closed, modules/auxiliary/admin/smb/samba_symlink_traversal.rb can now be switched from Rex to the RubySMB client. One less module in the way of dropping the ancient Rex client. #21466 from eve0805 - This adds introduces KerberosTicketTrace support as a datastore option for Metasploit's Kerberos authentication flows. Enabling KerberosTicketTrace allows users to see the following requests and responses as they are sent and received: AS-REQ, AS-REP, TGS-REQ, TGS-REP, KRB-ERROR. Inbound messages are colored blue and outgoing messages are colored red to match the existing HttpTrace functionality. The coloring can be turned off and on with the KerberosTicketTraceColors datastore option. #21528 from h00die - This PR updates Metasploit module metadata by adding Exploit-DB (EDB) reference IDs to existing modules that already have CVE references, improving cross-referencing for higher-fidelity vulnerability tracking. #21535 from adfoster-r7 - Updates multiple HTTP login scanners to validate the remote target as a pre-requisite to running the login attempts. #21554 from sjanusz-r7 - Make WebDAV upload PHP exploit checks less strict. Bugs fixed (4) #20618 from Aaditya1273 - Updates the MSSQL modules to no longer crash when running stored procedures like EXEC sp_linkedservers; against a remote host. #21543 from sjanusz-r7 - Addresses a recent issue stemming from the recently-made changes to the webdav upload php module, where a false positive was being reported based on only the response code. #21549 from 4ravind-b - Adds the missing https://github.com/advisories/GHSA-hxj9-549w-4pcq reference to modules/auxiliary/scanner/smtp/smtp_relay.rb . #21557 from adfoster-r7 - Fixes a db_import crash when importing zip files. Documentation You can find the latest Metasploit documentation on our docsite at docs.metasploit.com . Get it As always, you can update to the latest Metasploit Framework with msfupdate and you can get more details on the changes since the last blog post from GitHub: Pull Requests 6.4.136...6.4.137 Full diff 6.4.136...6.4.137 If you are a git user, you can clone the Metasploit Framework repo (master branch) for the latest. To install fresh without using git, you can use the open-source-only Nightly Installers or the commercial edition Metasploit Pro",
+      "published_at": "2026-06-12T18:52:18+00:00",
+      "timestamp": "2026-06-12T18:52:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text details the use of KerberosTicketTrace and CertificateTrace options within Metasploit, directly referencing core identity protocols and ticket handling."
+      }
+    },
+    {
+      "source": "BleepingComputer",
+      "title": "Early Warning Signs of Supply-Chain Attacks Live in the Dark Web",
+      "url": "https://www.bleepingcomputer.com/news/security/early-warning-signs-of-supply-chain-attacks-live-in-the-dark-web/",
+      "content": "GitHub access sales, leaked repositories, and stolen API keys can all become supply-chain attack footholds. Flare explores how underground forums expose early signals tied to software supply-chain risk. [...]",
+      "published_at": "2026-06-12T08:31:11+00:00",
+      "timestamp": "2026-06-12T08:31:11+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly mentions GitHub access sales, leaked repositories, and stolen API keys, which are direct indicators of SaaS supply-chain attack vectors."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict AWS access to specific IPs using Conditional Access",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-aws-access-to-specific-ips-using-conditional-access",
+      "content": "How to use Microsoft Entra ID Named Locations and Conditional Access to block AWS IAM Identity Center sign-ins from any IP address outside your approved range.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Okta",
+        "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Conditional Access to restrict AWS IAM Identity Center sign-ins, linking Identity and Cloud domains."
+      }
+    },
+    {
+      "source": "ThreatCluster - Threat Intelligence Feed",
+      "title": "Critical CVE-2026-48611 Vulnerability Allows OAuth Account Hijacking",
+      "url": "https://threatcluster.io/cluster/critical-cve-2026-48611-vulnerability-allows-oauth-account-h-80c1d62a",
+      "content": "CVE-2026-48611 has been identified as a critical vulnerability due to improper authentication checks in OAuth implementations, allowing account hijacking even when OAuth is disabled. This flaw affects default installations of phpBB versions below 3.3.16, enabling unauthenticated attackers to gain unauthorized access to user accounts. The vulnerability has been assigned a CVSS score of 9.8, indicating its critical nature. Currently, there is no evidence of public proof-of-concept or active exploitation. Security experts recommend applying the patch available via GitHub Advisory immediately or disabling OAuth functionality if not needed. Organizations should also audit account access logs for any signs of unauthorized activity. The vulnerability was published on June 12, 2026. Key Points: • CVE-2026-48611 is a critical vulnerability with a CVSS score of 9.8. • It allows account hijacking through improper OAuth authentication checks. • Immediate patching is recommended to mitigate risks associated with this flaw.",
+      "published_at": "2026-06-12T03:21:50+00:00",
+      "timestamp": "2026-06-12T03:21:50+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly details a critical vulnerability (CVE-2026-48611) allowing account hijacking through improper OAuth authentication checks, which is a core Identity Security concern."
+      }
+    },
+    {
+      "source": "The Cyber Express",
+      "title": "163 Organizations Hit by Thai Gambling SEO Poisoning Campaign",
+      "url": "https://thecyberexpress.com/thai-gambling-seo-poisoning/",
+      "content": "A large-scale Thai gambling SEO poisoning operation has compromised 163 organizations across more than 30 countries by exploiting abandoned cloud DNS delegations, according to research from Cyble Research & Intelligence Labs (CRIL). The ongoing SEO poisoning campaign has affected government agencies, healthcare organizations, financial institutions, universities, and critical infrastructure operators, allowing attackers to host Thai-language gambling content on trusted enterprise domains. How the SEO Poisoning Campaign Works Researchers found that the campaign primarily abuses abandoned Azure DNS zone delegations . When organizations retire cloud projects, DNS records that delegate subdomains to Azure are often left behind. Threat actors identify these orphaned delegations, recreate the abandoned DNS zones under new Azure subscriptions, and gain authority over the affected subdomains. Using this method, the attackers deploy a Next.js-based Thai-language gambling kit protected by valid Let's Encrypt wildcard certificates. As a result, users, browsers, and search engines see what appears to be legitimate content hosted under trusted corporate domains. At the time of publication, 161 of the 163 affected organizations remained actively compromised. Discovery Leads to Global Exposure The investigation began when CRIL identified unusual DNS activity on a Verizon subdomain environment. Researchers discovered more than 1,000 individually named subdomains serving Thai-language gambling content. Each page contains affiliate links designed to drive user registrations and generate commissions. Further analysis revealed the same infrastructure and content fingerprints across 162 additional organizations. More than 90 compromised enterprise subdomains shared the same Next.js build ID (QQOrXCFjoI6C9oF-4YVhl), favicon path (/img/ib99-hq.ico), and affiliate redirect destinations. Four DNS Abuse Methods Identified The Thai gambling SEO poisoning operation relied on four compromise mechanisms: Azure DNS zone takeover: More than 150 organizations were affected through abandoned Azure DNS delegations. DigitalOcean DNS zone takeover: Two organizations were compromised using a similar technique. Direct wildcard DNS misconfigurations: Two organizations had wildcard records pointing to attacker-controlled infrastructure. Mass A-record creation: Verizon's environment contained over 1,000 individual DNS records directing traffic to gambling content. Certificate Transparency records showed some abandoned zones had remained dormant for years. One pharmaceutical company's subdomain had not seen a legitimate certificate since October 2019 before attackers obtained a new certificate on April 11, 2026. Another electronics firm's platform showed a gap between February 2023 and April 10, 2026. Monetization and Backend Infrastructure The SEO poisoning campaign generated revenue through affiliate tracking codes such as \"ibiza99vip1,\" \"bigwinv1,\" \"seven77vip1,\" and \"link99.\" Researchers observed server-side filtering that verified visitors originated from Thailand before redirecting them to gambling platforms. The campaign ultimately linked to four gambling destinations: ibiza99.autos, big888.store, seven77.click, and link99.nova555.rest. The gambling pages promoted deposits as low as 1 Thai Baht (approximately $0.03 USD) and included structured SEO content, FAQ schema, and mobile optimization features. Behind the delivery infrastructure, researchers uncovered a dedicated backend fleet of 103 servers located in Hong Kong under AS398478 (PEG TECH INC). Evidence linking the servers included identical TLS fingerprints, shared certificates, matching HTTP hashes, uniform MySQL configurations, and common administration tools. Detection and Mitigation CRIL noted that traditional security tools are unlikely to detect this Thai gambling SEO poisoning activity because the attackers use valid certificates, reputable domains, and clean infrastructure. The researchers recommend continuous monitoring of Certificate Transparency logs, auditing all DNS delegations, and immediately removing abandoned NS records pointing to cloud providers. According to the report, the campaign demonstrates how a single DNS hygiene failure can be systematically exploited at scale. Rather than breaching networks or applications, the attackers capitalized on forgotten cloud configurations , turning trusted domains into vehicles for a sophisticated SEO poisoning campaign targeting Thai search traffic.",
+      "published_at": "2026-06-12T01:58:39+00:00",
+      "timestamp": "2026-06-12T01:58:39+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text details the exploitation of abandoned Azure DNS zone delegations and DNS zone takeovers to compromise trusted enterprise subdomains."
+      }
+    },
+    {
+      "source": "The Hacker News",
+      "title": "GitHub to Disable npm Install Scripts by Default to Stop Supply Chain Attacks",
+      "url": "https://thehackernews.com/2026/06/github-to-disable-npm-install-scripts.html",
+      "content": "GitHub has announced what it said are \"breaking changes\" coming to npm version 12, one of which turns off install scripts by default to combat software supply chain threats. The changes aim to combat attack techniques that abuse the \"npm install\" command to trigger the execution of malicious code using npm lifecycle hooks. \"Npm install\" is used to download and install all the necessary",
+      "published_at": "2026-06-11T00:53:03+00:00",
+      "timestamp": "2026-06-11T00:53:03+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly discusses GitHub making changes to npm install scripts to combat software supply chain threats, which falls directly under SaaS security boundaries."
+      }
+    },
+    {
+      "source": "www.theregister.com - Articles",
+      "title": "GitHub pulls pin on npm's auto-run scripts",
+      "url": "https://www.theregister.com/devops/2026/06/10/github-pulls-pin-on-npms-auto-run-scripts/5253453",
+      "content": "Shai-Hulud worm exploited exactly this. Better late than never, says everyone except the malware authors",
+      "published_at": "2026-06-10T07:41:14+00:00",
+      "timestamp": "2026-06-10T07:41:14+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The content explicitly discusses GitHub pulling a pin on npm's auto-run scripts, which is a direct security measure within the SaaS development ecosystem."
+      }
+    },
+    {
+      "source": "Cybersecurity Blog",
+      "title": "The Megalodon Supply Chain Attack Campaign Explained",
+      "url": "https://www.cm-alliance.com/cybersecurity-blog/the-megalodon-supply-chain-attack-campaign-explained",
+      "content": "In May 2026, cybersecurity researchers uncovered one of the largest software supply chain attacks ever observed on GitHub. Known as the Megalodon campaign, the attack saw threat actors inject malicious GitHub Actions workflows into more than 5,500 repositories through over 5,700 malicious commits in just a few hours.",
+      "published_at": "2026-06-10T04:45:29+00:00",
+      "timestamp": "2026-06-10T04:45:29+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly details the injection of malicious GitHub Actions workflows into repositories, directly matching the SaaS security domain."
+      }
+    },
+    {
+      "source": "darkreading",
+      "title": "Miasma Supply Chain Worm Burrows Into 73 Microsoft Repositories",
+      "url": "https://www.darkreading.com/application-security/miasma-supply-chain-worm-73-microsoft-repositories",
+      "content": "The attacks stemmed from a GitHub account that was also compromised in a previous Miasma attack on Microsoft last month.",
+      "published_at": "2026-06-09T14:03:45+00:00",
+      "timestamp": "2026-06-09T14:03:45+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly mentions a compromised GitHub account used in a supply chain attack targeting repositories."
+      }
+    },
+    {
+      "source": "www.theregister.com - Articles",
+      "title": "Miasma worms its way onto GitHub as attack kit goes open source",
+      "url": "https://www.theregister.com/cyber-crime/2026/06/09/miasma-supply-chain-attack-toolkit-goes-public-on-github/5253074",
+      "content": "As if there weren't enough package poisonings to worry about",
+      "published_at": "2026-06-09T12:35:50+00:00",
+      "timestamp": "2026-06-09T12:35:50+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly mentions 'GitHub' and 'package poisonings,' indicating a supply chain attack vector within a source code management platform."
+      }
+    },
+    {
+      "source": "The Hacker News",
+      "title": "Microsoft Restores Some GitHub Repos, Keeps Others Offline as Miasma Probe Continues",
+      "url": "https://thehackernews.com/2026/06/microsoft-restores-some-github-repos.html",
+      "content": "Microsoft on Monday confirmed that it temporarily removed some GitHub repositories in response to a recent security incident that led to 73 of its open-source projects being compromised to inject an information stealer into the code. \"Our priority is to protect customers and the broader ecosystem,\" a Microsoft spokesperson told The Hacker News via email. \"We temporarily removed some",
+      "published_at": "2026-06-09T11:04:52+00:00",
+      "timestamp": "2026-06-09T11:04:52+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly mentions the compromise of GitHub repositories and the injection of an information stealer into open-source code."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "Miasma worm targets Microsoft, compromises 73 GitHub repositories",
+      "url": "https://www.threatlocker.com/blog/miasma-worm-targets-microsoft-compromises-73-github-repositories",
+      "content": "Miasma worm hits 73 Microsoft GitHub repositories and directly targets StepSecurity’s Harden-Runner to evade security controls.",
+      "published_at": "2026-06-09T10:07:44+00:00",
+      "timestamp": "2026-06-09T10:07:44+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly mentions the worm targeting GitHub repositories and compromising a specific runner environment (Harden-Runner)."
+      }
+    },
+    {
+      "source": "Blog – Silverfort",
+      "title": "Device code attacks in Azure: From exploitation to detection",
+      "url": "https://www.silverfort.com/blog/device-code-attacks-in-azure-from-exploitation-to-detection/",
+      "content": "How attackers weaponize Microsoft's OAuth device code flow to steal tokens, bypass MFA, and maintain persistent access. The post Device code attacks in Azure: From exploitation to detection appeared first on Silverfort .",
+      "published_at": "2026-06-09T07:30:00+00:00",
+      "timestamp": "2026-06-09T07:30:00+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly discusses weaponizing the OAuth device code flow to steal tokens and bypass MFA within the Azure environment."
+      }
+    },
     {
       "source": "UpGuard Data Breach Research",
       "title": "Breaking Confinement: How a Corrections Vendor Exposed Inmate Communications  | UpGuard",
@@ -33,6 +273,336 @@
         "primary_domain": "Identity",
         "primary_platform": "Azure",
         "reasoning_summary": "The text explicitly mentions an exposed Azure storage bucket containing millions of documents, including driver's licenses used for identity verification."
+      }
+    },
+    {
+      "source": "Generative AI - Medium",
+      "title": "Prompt Engineering Was the Demo. Context-as-Code Is the Product!",
+      "url": "https://generativeai.pub/prompt-engineering-was-the-demo-context-as-code-is-the-product-f687b25e761f?source=rss----440100e76000---4",
+      "content": "The prompt that won the room lost the customer. Prompt engineering is a single input to the system. Context engineering is the whole system — versioned retrieval, tool schemas, policies, memory, and the eval suite that catches silent regressions before a customer does. Source: LangChain (Chase, 2025), RULER benchmark (2024), Braintrust Series B (Feb 2026). You can’t git blame a sentence. You can't roll back a vibe. A clever paragraph of instructions nails the demo, the model answers like it has a soul, you ship. Then at 2 a.m. a paying customer gets a confidently wrong answer, you go to debug, and there's nothing to debug: no diff, no version, no failing test, just a string that used to behave. It was never a product. It was a magic trick, and the audience was you. This is where a smart person interrupts me with two good moves. Isn’t this just prompt engineering with a fresh coat of paint? You’re rebranding. No. A prompt is a string. Context-as-code is that string plus the retrieval that fills it, the tool schemas the model can call, the policies that constrain it, the memory it carries between turns, and the eval suite that tells you when any of those silently broke. You can diff a tool schema in a pull request and pin it to a commit hash. LangSmith does exactly this: “pull from repo loads latest version,” so for production you pin the hash and a prompt edit can’t ship itself behind your back. Try that with a clever sentence in a Notion doc. The second objection is the one I respect. Frontier models have million-token windows now, so stop building scaffolding and hand the model everything. A real argument, and the window did explode. GPT-4 shipped in March 2023 with an 8K default; Claude hit 100K two months later and proved it by loading The Great Gatsby and finding one altered line in 22 seconds. Gemini 1.5 Pro hit 1M by 2024, and Llama 4 claimed 10M in 2025. So if the window is the ocean, why lay pipe? Because the window is a lie about how much the model actually uses. The RULER benchmark caught it in 2024: GPT-4 slides from 96.6 to 81.2 accuracy between 4K and 128K. Llama 3.1–70B drops to 66.6. Mixtral-8x22B goes basically random at 128K while still advertising 64K support, and that one always makes me laugh, the spec sheet and the behavior living in different universes. Stanford’s “Lost in the Middle” found accuracy falling more than 30% when the relevant document sat in the middle of the pile. Then Chroma’s July 2025 “context rot” study ran 18 models (Claude 4, GPT-4.1, Gemini 2.5, Qwen3) and every one degraded as input grew. The punchline I can’t shake: effective context on multi-step tasks can drop under 1% of the nominal window, even on a model that brags about a million. RULER benchmark, 2024. Bigger windows do not guarantee the model uses them well. Gemini 1.5 Pro is the outlier that holds near-flat; every other tested model degrades measurably. The benchmark is the point: you need a measurement, not a faith in the spec sheet. Now the honest counterpoint. Gemini 1.5 Pro held 94.4% on RULER at 128K, a 2.3-point dip, basically flat. On simple factoid Q&A the “lost in the middle” effect mostly evaporates for that model, and a full-context approach is simpler. The long-context camp has points on the board. the exact moment it quietly stops using the right part, and that way is an eval, and an eval is code. So what do you build instead? Not a tidy six-item list. The pillars aren’t equal anyway, and two of them carry the load: retrieval and evals. Start with the failure that converts skeptics. October 2024: OpenAI silently swapped the default GPT-4o snapshot, no advance notice, fully within its own ToS, and developers woke up to broken JSON formatting, shifted tone, instruction-following that just stopped following. Azure did its own version mid-2024: upgrading gpt-35-turbo to gpt-4o-mini quietly flipped on a new input safety layer that killed a reliable prompt. Nobody touched the prompt. The ground moved under it. If your \"product\" is a string and the vendor can rewrite the interpreter beneath it overnight, you have a dependency you can't even see. That’s why evals have to gate deploys the way tests gate any merge. The pattern is boring, and boring is the point: a PR touches a prompt, model version, or retrieval config, an eval run kicks off, and the build fails if quality regresses past a threshold. Ragas alone scores a pipeline on faithfulness and context precision — the metrics that tell you the model is grounded in what you fed it. Braintrust raised $80M in February 2026 at an $800M valuation, customers including Notion, Vercel, and Cloudflare; a month later OpenAI bought Promptfoo, already used by a quarter of the Fortune 500. When OpenAI buys the tool that grades model outputs, “we’ll eyeball it” has stopped being a strategy. Retrieval is the other pillar, where context-as-code separates a feature from a liability. First: RAG does not cure hallucination: LexisNexis and Westlaw’s legal AI, both built on retrieval, still hallucinate 17–33% in a 2025 Stanford-led study, which retires the fantasy that “just add retrieval” is a finish line. Second, retrieved content is an attack surface, and this one spooked me. PoisonedRAG (USENIX Security 2025) showed five malicious documents in a corpus of millions hit a 90% attack success rate; poison 0.04% of the corpus and you’re at 98.2%. Prompt injection through retrieved content is now OWASP’s number-one GenAI risk, LLM01:2025. A prompt has no concept of provenance; a versioned retrieval layer (source allow-lists, freshness checks, sanitization, all in the diff) does. That’s the wall between your model and a poisoned document. The tools pillar got standardized while everyone argued about prompts. Anthropic shipped the Model Context Protocol (MCP) in November 2024, built by David Soria Parra and Justin Spahr-Summers, to kill the N×M mess where every data source needed its own connector. A server’s tool schema becomes a contract you can read, diff, review in a PR, and pin to a version, the same as any other dependency. The tool-calling behind all of this went from 0.5% of LangSmith traces in 2023 to 21.9% in 2024, a 43x jump — roughly the rate at which “let the model reach into the world” became table stakes. Block, Replit, and Sourcegraph were on MCP at launch; by late 2025 Cursor, ChatGPT, and Microsoft Copilot all spoke it, and Anthropic handed governance to a Linux Foundation body co-founded with OpenAI. That last move is the tell. You don’t form a neutral standards body around a string in a Notion doc. You form one around code. Here’s the org consequence nobody wants on the roadmap. Context is software. It needs an owner, a repo, a CI gate, and a reviewer whose sign-off hinges on the eval suite staying green — not a Slack channel where the founder pastes a sharper prompt on Fridays. The stakes are real money now. Enterprises spent $8.4 billion on model APIs in 2025, with 37% over $250K a year on LLM infrastructure; the vector-database market that feeds that retrieval hit $3.2 billion the same year, up from $2.2 billion in 2024. Set that spend against MIT’s finding that 95% of GenAI pilots never reach meaningful revenue. The gap between outlay and failure is almost never the model, because everyone rents the same model. It’s whether your context layer is an engineered, tested, owned artifact or a pile of clever strings nobody can roll back. The model is the commodity. Everyone rents the same brains by the million tokens, and inference fell roughly 10x a year: a GPT-4-class call went from $20 per million tokens in late 2022 to about $0.40 now. You will not out-prompt a competitor holding the identical model. What you can own is the layer underneath: the retrieval they can’t replicate, an eval suite that catches the regression before the customer does, an audit trail no window size hands you for free. So keep polishing prompts if it scratches the itch. Just know which way the advantage runs now: the next team that beats you won’t have a better sentence. It’ll have a context layer it can diff, test, and roll back at 2 a.m. — while yours is still a string nobody can blame. Originally published at https://suchitmajumdar.substack.com . This story is published on Generative AI . Connect with us on LinkedIn and follow Zeniteq to stay in the loop with the latest AI stories. Subscribe to our newsletter and YouTube channel to stay updated with the latest news and updates on generative AI. Let’s shape the future of AI together! Prompt Engineering Was the Demo. Context-as-Code Is the Product! was originally published in Generative AI on Medium, where people are continuing the conversation by highlighting and responding to this story.",
+      "published_at": "2026-06-12T21:46:42+00:00",
+      "timestamp": "2026-06-12T21:46:42+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text discusses model degradation and silent changes in behavior, citing specific platform updates like OpenAI's GPT-4o snapshot swap and Azure's gpt-35-turbo to gpt-4o-mini upgrade, which represent unauthorized changes to system functionality."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict Slack access to a specific IP address using Conditional Access",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-slack-access-to-a-specific-ip-address-using-conditional-access",
+      "content": "How to use Microsoft Entra ID Named Locations and Conditional Access to block Slack sign ins from any IP address outside your approved range.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Named Locations and Conditional Access to restrict sign-ins, which falls under Identity Security controls."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict Salesforce access to specific IP addresses using Conditional Access",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-salesforce-access-to-specific-ip-addresses-using-conditional-access",
+      "content": "How to use Microsoft Entra ID Named Locations and Conditional Access to block Salesforce sign-ins from any IP address outside your approved range.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Okta",
+        "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Named Locations and Conditional Access to restrict sign-ins, which falls under Identity Security controls."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict Snowflake access to a specific IP address using Conditional Access",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-snowflake-access-to-a-specific-ip-address-using-conditional-access",
+      "content": "How to use Microsoft Entra ID Named Locations and Conditional Access to block Snowflake sign-ins from any IP address outside your approved range.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Okta",
+        "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Named Locations and Conditional Access to restrict sign-ins, which falls under Identity Security controls."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict Workday access to a specific IP address using Conditional Access",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-workday-access-to-a-specific-ip-address-using-conditional-access",
+      "content": "How to use Microsoft Entra ID Named Locations and Conditional Access to block Workday sign-ins from any IP address outside your approved range.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID and Conditional Access to restrict access to a specific application (Workday), which falls under Identity Security controls."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict Syncro access to specific IP addresses using Condition Access",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-syncro-access-to-specific-ip-addresses-using-condition-access",
+      "content": "How to use Microsoft Entra ID Named Locations and Conditional Access to block Syncro sign ins from any IP address outside your approved range.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Named Locations and Conditional Access to restrict sign-ins, which falls under Identity Security controls."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict Okta access to a specific IP address using Conditional Access",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-okta-access-to-a-specific-ip-address-using-conditional-access",
+      "content": "How to restrict Okta and Okta-managed application access by IP address, and when Microsoft Entra ID Conditional Access applies.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Okta",
+        "reasoning_summary": "The text explicitly discusses restricting Okta access using Conditional Access, which directly relates to Identity Security controls."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict Microsoft Azure access to specific IP addresses using Conditional Access",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-microsoft-azure-access-to-specific-ip-addresses-using-conditional-access",
+      "content": "How to use Microsoft Entra ID Named Locations and Conditional Access to block Azure portal, CLI, and API access from any IP address outside your approved range.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly discusses using Microsoft Entra ID Named Locations and Conditional Access to restrict Azure portal and API access."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict Jira (Atlassian Cloud) access to specific IP addresses",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-jira-atlassian-cloud-access-to-specific-ip-addresses",
+      "content": "How to use Microsoft Entra ID Named Locations and Conditional Access to block Atlassian Cloud sign-ins from any IP address outside your approved range.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Named Locations and Conditional Access to restrict Atlassian Cloud sign-ins, which falls under Identity Security controls."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict DocuSign access to specific IP addresses using Conditional Access",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-docusign-access-to-specific-ip-addresses-using-conditional-access",
+      "content": "How to use Microsoft Entra ID Named Locations and Conditional Access to block DocuSign sign-ins from any IP address outside your approved range.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Named Locations and Conditional Access to restrict sign-ins, which falls under Identity Security controls."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict Hudu access to specific IP addresses using Conditional Access",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-hudu-access-to-specific-ip-addresses-using-conditional-access",
+      "content": "How to restrict Hudu access by IP address using Microsoft Entra ID Conditional Access and Hudu's native IP Access Control.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Conditional Access to restrict access, which falls under Identity Security controls."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict HubSpot access to specific IP addresses using Conditional Access",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-hubspot-access-to-specific-ip-addresses-using-conditional-access",
+      "content": "How to use Microsoft Entra ID Named Locations and Conditional Access to block HubSpot sign-ins from any IP address outside your approved range.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Okta",
+        "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Named Locations and Conditional Access to restrict access to HubSpot, which falls under Identity Security controls."
+      }
+    },
+    {
+      "source": "ThreatLocker Blog",
+      "title": "How to restrict GitHub Enterprise Cloud access to a specific IP address using Conditional Access",
+      "url": "https://www.threatlocker.com/blog/how-to-restrict-github-enterprise-cloud-access-to-a-specific-ip-address-using-conditional-access",
+      "content": "Guide on how to restrict GitHub Enterprise Cloud access to specific IP addresses using Conditional Access. Protect source code, control access locations, and prevent unauthorized access.",
+      "published_at": "2026-06-12T07:15:18+00:00",
+      "timestamp": "2026-06-12T07:15:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The content explicitly discusses restricting access to GitHub Enterprise Cloud using Conditional Access, which falls under SaaS security controls."
+      }
+    },
+    {
+      "source": "InfoSec Write-ups - Medium",
+      "title": "How I Built a SOAR Automation in Microsoft Sentinel That Responds to Attacks Without a Single Click",
+      "url": "https://infosecwriteups.com/how-i-built-a-soar-automation-in-microsoft-sentinel-that-responds-to-attacks-without-a-single-click-e41226314564?source=rss----7b722bfd1b8d---4",
+      "content": "A Logic App playbook, an automation rule, a real permissions error — and what it taught me about how automated incident response actually works. An SSH brute force incident fires in Sentinel. High severity. 260 failed attempts in 28 minutes. Without automation, an analyst gets paged, manually opens the incident, investigates, and responds. That process takes 15 to 30 minutes on a good day — longer if it’s 3am. With SOAR, the moment that incident is created, a playbook runs automatically. No analyst needed. No manual trigger. The response is documented, timestamped, and logged before anyone even opens their laptop. This is how I built that automation in Microsoft Sentinel from scratch — and what I ran into along the way. What SOAR actually is SOAR stands for Security Orchestration, Automation and Response. It’s the automation layer of the SOC — the thing that handles routine, well-understood incidents automatically so analysts can focus on threats that actually need human judgment. In real enterprise SOCs, SOAR playbooks handle IP blocking on firewalls, disabling compromised accounts in Active Directory, sending alerts to Teams or Slack, opening ServiceNow tickets, enriching incidents with threat intelligence, and isolating endpoints — all without human intervention. The two pieces — and how they connect In Microsoft Sentinel, SOAR has two components that work together: The Logic App playbook — the actual workflow that runs when triggered. Built in Azure Logic App Designer without writing a single line of code. It defines what happens: add a comment, send an email, block an IP, disable an account. The automation rule — the connector between a Sentinel incident and the playbook. It listens for specific conditions and automatically calls the playbook when they’re met. The whole chain executes in seconds. Zero analyst involvement required. Step 1 — The automation rule The automation rule lives in Sentinel’s Automation section. I configured it with three settings: Trigger: When incident is created Condition: Analytics rule name contains “SSH Brute Force Attack Detected” Action: Run playbook → Sentinel-Block-IP-Playbook The condition scope matters — you don’t want every incident triggering the same playbook. By scoping it to the specific analytics rule name, only SSH Brute Force incidents trigger this automation. Every other incident type gets its own dedicated response logic. Automation rule ‘Auto-Respond to SSH Brute Force’ active in Sentinel — Status: Active, Workspace: sc200-lab, Action: Run Logic App. One rule, one condition, fully automated. Step 2 — The Logic App playbook The playbook is built in Azure Logic App Designer. Two steps, no code: Trigger — Microsoft Sentinel Incident: The playbook wakes up when called by the automation rule. It receives the full incident context — ID, title, severity, attacker entities, and the ARM resource ID needed to write back to the incident. Action — Add Comment to Incident (V3): The playbook adds this automated response comment to the incident: Automated comment added to incident: AUTOMATED RESPONSE: High severity SSH Brute Force incident detected. Attacker IP has been flagged. SOC analyst notified to block IP via UFW on Ubuntu endpoint immediately. Every automated action gets logged in the incident timeline. This creates a timestamped audit trail essential for compliance, post-incident review, and SOC reporting. Even if no analyst touches the incident for an hour, there’s a record of exactly what the automation did and when. Sentinel-Block-IP-Playbook in Logic App Designer — Microsoft Sentinel incident trigger connected to Add comment to incident (V3). The automated response message is visible in the right panel. Two steps, zero code. Step 3 — Testing it and what actually happened After building the playbook I manually triggered it against the SSH Brute Force incident to verify the end-to-end flow. Here’s what the run history showed: Trigger — Microsoft Sentinel Incident: Succeeded (green checkmark, 0s) Action — Add comment to incident: BadRequest error The trigger succeeded — the playbook correctly received the Sentinel incident and started executing. The action step hit a BadRequest error because manually triggering a playbook outside of a live incident doesn’t automatically pass the Incident ARM ID that the Add Comment action requires. This is a known limitation of manual testing. When the automation rule triggers the playbook automatically on a real incident, the ARM ID is passed correctly as part of the incident context and the action completes successfully. I’m documenting this because it’s a realistic troubleshooting scenario. In a real enterprise environment, this exact error shows up when permissions or context aren’t configured correctly and knowing why it happens is more valuable than a perfectly clean lab screenshot. Logic App run history — trigger succeeded (green checkmark, 0s), action hit BadRequest on manual test due to missing ARM ID context. In production triggered by automation rule, the full incident context is passed and the action completes. The permissions challenge — what no tutorial mentions Before any of this worked, the automation rule failed with a permissions error. This is worth documenting because it’s one of the most common SOAR configuration issues in real environments and almost no beginner tutorial covers it. The root cause: Microsoft Sentinel uses a dedicated service account to run playbooks. That service account needs the Microsoft Sentinel Automation Contributor role on the resource group containing the playbook. Without it, the automation rule fires but the playbook silently fails. The fix — navigate to the incident in Sentinel, click Run Playbook, and click “Grant permissions.” Sentinel automatically assigns the correct role to the resource group. Two clicks, but you need to know it exists. Understanding this permission model is what separates someone who has configured SOAR in a real environment from someone who has only read about it. What this looks like at scale The playbook I built adds a comment. Real enterprise playbooks do far more with the same architecture: Push block rules to Palo Alto or Cisco firewalls via API Disable compromised accounts in Azure Active Directory Send high-priority alerts to a Teams SOC channel Open a P1 ticket in ServiceNow automatically Enrich incidents with VirusTotal intelligence on attacker IPs Isolate compromised endpoints via Microsoft Defender The architecture is identical — Logic App trigger, automated actions, audit trail. The only difference is the action steps and the API integrations. Once you understand the trigger-condition-action chain, you can build any of these. The one thing that makes SOAR actually work SOAR only works for attacks you’ve already understood well enough to automate. You can’t automate a response you haven’t manually investigated first. The SSH brute force playbook works because I spent Day 3 manually investigating the attack — building the timeline, identifying the attacker IP, confirming no successful logins, running the containment command. Only after doing that manually did I have enough understanding to say “this is repeatable and automatable.” That sequence — manual investigation first, automation second — is how real SOC teams build their playbook library. Every automated response started as a manual one. This is Day 6 of a 7-day Microsoft Sentinel enterprise lab I built from scratch. The full lab covers SSH and RDP brute force detection, KQL threat hunting, SOAR automation, and a live SOC dashboard — all documented on GitHub at microsoft-sentinel-enterprise-siem-lab . Previous post in this series covered the KQL detection rule that generates the incident this playbook responds to. If you’re building Sentinel SOAR automation for SC-200 prep or your own lab — feel free to connect on LinkedIn. How I Built a SOAR Automation in Microsoft Sentinel That Responds to Attacks Without a Single Click was originally published in InfoSec Write-ups on Medium, where people are continuing the conversation by highlighting and responding to this story.",
+      "published_at": "2026-06-12T01:40:39+00:00",
+      "timestamp": "2026-06-12T01:40:39+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text details automated response logic using Azure Logic Apps and Microsoft Sentinel to handle incident response, specifically mentioning disabling compromised accounts in Active Directory and managing identity-related alerts."
+      }
+    },
+    {
+      "source": "defend.network – Daily Threat Briefings",
+      "title": "Microsoft 200-patch record, Veeam RCE critical, GitHub supply-chain worm ongoing",
+      "url": "https://defend.network/briefings/microsoft-veeam-github-patch-rce-miasma-2026-06-10.html",
+      "content": "Microsoft released record 200 Patch Tuesday fixes including critical flaws; Veeam Backup & Replication RCE (CVE-2026-44963, CVSS 9.4) requires immediate patching; 73 GitHub repos remain compromised as Miasma supply-chain attack investigation continues.",
+      "published_at": "2026-06-10T01:00:00+00:00",
+      "timestamp": "2026-06-10T01:00:00+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly mentions a 'GitHub supply-chain worm' and compromised GitHub repositories, fitting the SaaS security domain."
+      }
+    },
+    {
+      "source": "Red Canary",
+      "title": "Investigating suspicious AI workflows in Microsoft Entra Agent ID: Assistive agents",
+      "url": "https://redcanary.com/blog/threat-detection/entra-id-ai-workflows-assistive-agents/",
+      "content": "Assistive AI agents aren't always helpful—it all depends on who they're working on behalf of.",
+      "published_at": "2026-06-08T10:07:01+00:00",
+      "timestamp": "2026-06-08T10:07:01+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions 'Microsoft Entra ID,' which is a core identity provider, indicating a high probability behavioral match within the Identity Security domain."
+      }
+    },
+    {
+      "source": "The Hacker News",
+      "title": "⚡ Weekly Recap: Instagram Account Hacks, Android Zero-Day, GitHub Worm and More",
+      "url": "https://thehackernews.com/2026/06/weekly-recap-instagram-account-hacks.html",
+      "content": "Monday again. The weekend was meant to be quiet. It wasn't. Last week had poisoned packages, a broken AI helper, and a worm tearing through repos. The ugly part: basic tricks still worked. A chatbot got fooled. A bot token got leaked inside the malware. The same old mistakes showed up again. And while everyone chased the loud stuff, quieter attackers sat in inboxes for months, reading mail and",
+      "published_at": "2026-06-08T07:48:57+00:00",
+      "timestamp": "2026-06-08T07:48:57+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text mentions 'chatbot got fooled' and 'bot token got leaked', indicating identity or credential compromise, while also referencing 'poisoned packages' and 'worm tearing through repos' which suggests SaaS/Cloud vectors."
+      }
+    },
+    {
+      "source": "Security | CIO",
+      "title": "IA con impacto social: el proyecto de Cruz Roja que transforma la orientación laboral",
+      "url": "https://www.cio.com/article/4184471/ia-con-impacto-social-el-proyecto-de-cruz-roja-que-transforma-la-orientacion-laboral.html",
+      "content": "La transformación digital se ha convertido en uno de los grandes ejes estratégicos de las organizaciones que trabajan en el ámbito social. En un contexto marcado por la aceleración tecnológica, la inteligencia artificial y la digitalización de los servicios, entidades como Cruz Roja Española afrontan un doble reto: innovar tecnológicamente sin perder el componente humano y garantizar que la tecnología sirva para reducir desigualdades y no para ampliarlas. En los últimos diez años, Cruz Roja ha desarrollado una importante evolución en materia de digitalización e innovación social, incorporando progresivamente herramientas tecnológicas orientadas a mejorar la atención, el acompañamiento y la capacidad de respuesta a las personas. Gracias a ello, la tecnología ocupa hoy un papel estratégico dentro de la organización como herramienta para ampliar el impacto social, mejorar la atención y contribuir a reducir desigualdades. “Las TI permiten desarrollar soluciones escalables, accesibles y seguras, especialmente en ámbitos sensibles como la empleabilidad o la intervención social”, señala Javier Cressi, responsable de Servicios Digitales de Empleo de Cruz Roja. En este sentido, “el liderazgo tecnológico resulta clave para impulsar una innovación alineada con los valores de la organización y orientada siempre al impacto social”. Esta estrategia se apoya además en infraestructuras cloud como Azure y AWS y en criterios estrictos de seguridad y protección de datos. “La privacidad, la ética y la protección de la información son elementos fundamentales en cualquier desarrollo tecnológico dentro de Cruz Roja”, subraya Cressi. En los últimos diez años, Cruz Roja ha desarrollado una importante evolución en materia de digitalización e innovación social, incorporando progresivamente herramientas tecnológicas orientadas a mejorar la atención, el acompañamiento y la capacidad de respuesta a las personas IA para mejorar la empleabilidad Dentro de esta evolución tecnológica, la inteligencia artificial generativa ocupa un papel cada vez más relevante. “Es una de las tecnologías más disruptivas que estamos incorporando, especialmente aplicada a orientación laboral y acompañamiento digital”, explica Cressi. En el ámbito del empleo, este proceso de transformación ha permitido construir “un ecosistema multicanal que combina intervención presencial con recursos digitales accesibles y personalizados”. Un entorno que integra recursos de orientación laboral, contenidos formativos, servicios de acompañamiento y soluciones digitales diseñadas para facilitar la inserción laboral de las personas participantes. Es precisamente en este contexto donde nace “Simula tu entrevista”, una solución digital desarrollada junto a Deloitte que utiliza inteligencia artificial generativa para ayudar a personas con mayores dificultades de acceso al empleo a prepararse para entrevistas laborales reales. La iniciativa recibió el Premio al mejor proyecto de IA y automatización inteligente en los CIO Awards 2025 . La herramienta permite que la persona usuaria suba su currículum y una oferta de empleo concreta. A partir de ese análisis, la IA genera una entrevista personalizada —oral o escrita— que simula un entorno profesional realista. Al finalizar, ofrece “un feedback detallado con recomendaciones sobre las respuestas dadas, puntos fuertes, áreas de mejora y nivel de adecuación al puesto”. La solución forma parte del ecosistema digital de orientación laboral del Plan de Empleo de Cruz Roja, junto con otras herramientas de creación de currículums, contenidos de orientación, webinars y recursos formativos. “El simulador representa un paso más dentro de ese itinerario digital de empleabilidad”, afirma Cressi. La iniciativa, cuyo objetivo, según Cressi, es “mejorar la empleabilidad de personas en situación de vulnerabilidad, ayudándolas a afrontar procesos de selección con mayor preparación, seguridad y autoconocimiento”, nace directamente de la experiencia diaria de la organización en el acompañamiento a colectivos vulnerables. “En Cruz Roja trabajamos diariamente con personas que enfrentan brechas de acceso al empleo por edad, origen, género, baja cualificación o largos periodos de desempleo. Detectamos que muchas llegaban a la entrevista como una de las fases más difíciles del proceso”, explica. A ello se suma la propia evolución del mercado laboral, que “está incorporando cada vez más herramientas digitales e inteligencia artificial en los procesos de selección, por lo que era importante que las personas participantes pudieran también entrenarse y familiarizarse con estos nuevos contextos”, señala. Cruz Roja Española “El liderazgo tecnológico resulta clave para impulsar una innovación alineada con los valores de la organización y orientada siempre al impacto social”, dice Javier Cressi El proyecto se ha desarrollado utilizando tecnologías de IA generativa apoyadas en Azure AI y AWS y se integra además con el ecosistema tecnológico de Cruz Roja en Liferay y con diferentes servicios digitales internos relacionados con orientación laboral y gestión de participantes. Además, “ha sido importante contrastar el desarrollo con empresas y profesionales de recursos humanos para asegurar que las simulaciones y evaluaciones respondieran a situaciones reales”. La herramienta comenzó a funcionar el 4 de junio de 2025 y actualmente ya está siendo utilizada dentro de los proyectos de empleo de Cruz Roja. Desde su lanzamiento, 1.540 personas han utilizado la plataforma, se han realizado 2.629 entrevistas y se han generado 1.733 evaluaciones personalizadas. “El feedback está siendo muy positivo. Las personas usuarias destacan que les ayuda a ganar confianza, a enfrentarse a preguntas que no se habían planteado previamente y a comprender mejor cómo desenvolverse en una entrevista real”, explica Javier Cressi. La organización reconoce que uno de los principales retos del proyecto ha sido la alfabetización digital y la adaptación de algunas personas usuarias a estos nuevos entornos tecnológicos. Sin embargo, desde Cruz Roja insisten en que el debate no debe centrarse tanto en la resistencia a la tecnología como en el uso responsable de la misma. “Más que resistencia, hablaríamos de la necesidad de construir una inteligencia artificial ética, comprensible y alineada con los valores de Cruz Roja”, afirma Javier Cressi. La iniciativa forma parte de una estrategia más amplia de transformación digital y atención multicanal dentro del Plan de Empleo de Cruz Roja. “Actualmente estamos en una fase de consolidación y ampliación de servicios digitales de orientación laboral”, explica Javier Cressi. No obstante, desde la entidad recalcan que el objetivo no pasa por sustituir la atención presencial. “Nuestro objetivo no es sustituir la intervención presencial, sino complementarla y ampliar la capacidad de acompañamiento también en el entorno digital”, explica. Cruz Roja Española Innovar sin dejar a nadie atrás De cara a los próximos años, Cruz Roja continuará ampliando su ecosistema digital de orientación laboral mediante nuevos servicios basados en IA y herramientas de acompañamiento online. Entre sus principales objetivos figura seguir reduciendo brechas digitales y garantizar que las personas con menos competencias tecnológicas puedan beneficiarse igualmente de estas soluciones. El reto, subrayan desde la organización, es que la innovación siga siendo accesible para todas las personas, independientemente de su nivel de competencias digitales. “Afrontamos el futuro desde una visión muy clara: utilizar la tecnología para generar inclusión y no para aumentar desigualdades”, concluye Cressi. “La innovación tecnológica solo tiene sentido si mejora realmente la vida de las personas y amplía sus oportunidades”.",
+      "published_at": "2026-06-15T00:30:00+00:00",
+      "timestamp": "2026-06-15T00:30:00+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 7,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text mentions the use of cloud infrastructure like Azure and AWS, and discusses digital solutions for personal data handling and employability, which falls under Identity Security principles."
+      }
+    },
+    {
+      "source": "Technical Information Security Content & Discussion",
+      "title": "Free Compromise Detection for GitHub Repos - Tracebit Community Edition",
+      "url": "https://www.reddit.com/r/netsec/comments/1u3y1zo/free_compromise_detection_for_github_repos/",
+      "content": "submitted by /u/tracebit [link] [comments]",
+      "published_at": "2026-06-12T09:42:18+00:00",
+      "timestamp": "2026-06-12T09:42:18+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 7,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The content explicitly discusses compromise detection for GitHub repositories, placing it within the SaaS security domain."
+      }
+    },
+    {
+      "source": "tl;dr sec",
+      "title": "[tl;dr sec] #332 - I've Joined OpenAI, fwd:cloudsec, AWS Well Architected Supply Chain Security",
+      "url": "https://tldrsec.com/p/tldr-sec-332",
+      "content": "Why I joined OpenAI to lead Cyber efforts, playlist of the latest cloud security talks, AWS' supply chain best practices",
+      "published_at": "2026-06-11T09:00:00+00:00",
+      "timestamp": "2026-06-11T09:00:00+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 7,
+        "primary_domain": "Cloud",
+        "primary_platform": "AWS",
+        "reasoning_summary": "The content explicitly mentions 'AWS' and 'cloud security talks' and 'AWS' supply chain best practices', indicating a high probability of cloud infrastructure relevance."
+      }
+    },
+    {
+      "source": "Microsoft Security Blog",
+      "title": "Reconstructing AI activity in investigations",
+      "url": "https://www.microsoft.com/en-us/security/blog/2026/06/09/reconstructing-ai-activity-investigations/",
+      "content": "Learn how to investigate AI activity in Microsoft 365 Copilot and Azure AI services using a structured, telemetry-driven approach. This playbook helps security teams reconstruct events, assess data exposure, and detect potential threats faster. The post Reconstructing AI activity in investigations appeared first on Microsoft Security Blog .",
+      "published_at": "2026-06-09T12:05:06+00:00",
+      "timestamp": "2026-06-09T12:05:06+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 7,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The content discusses investigating AI activity within Microsoft 365 Copilot and Azure AI services, which falls under core identity and cloud telemetry analysis."
+      }
+    },
+    {
+      "source": "AWS Security Blog",
+      "title": "ICYMI: May 2026 @AWS Security",
+      "url": "https://aws.amazon.com/blogs/security/icymi-may-2026-aws-security/",
+      "content": "Read all about the latest AWS security features, compliance updates, and hands-on resources in our new, monthly digest posts. You’ll find expert blog posts, new service capabilities, code samples, and workshops. AWS Security Blog posts This month’s AWS Security Blog posts covered AI security, network protection, identity management, compliance frameworks, and supply chain security. Read […]",
+      "published_at": "2026-06-08T15:30:11+00:00",
+      "timestamp": "2026-06-08T15:30:11+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 7,
+        "primary_domain": "Identity",
+        "primary_platform": "AWS",
+        "reasoning_summary": "The text mentions 'identity management' and 'AWS security features,' indicating a high-level relevance to identity within the AWS ecosystem."
       }
     },
     {

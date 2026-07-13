@@ -33,9 +33,9 @@ class DetectionRule(BaseModel):
 
 
 class ThreatRuleBatch(BaseModel):
-    """5–6 rule variants for one threat."""
+    """Exactly 3 structurally diverse rule variants per threat."""
 
-    rules: list[DetectionRule] = Field(min_length=5, max_length=6)
+    rules: list[DetectionRule] = Field(min_length=3, max_length=3)
 
 
 class StagedThreatRules(BaseModel):

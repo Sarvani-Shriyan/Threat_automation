@@ -27,6 +27,26 @@ FIXED_CONTEXT_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+# Generic vendor patch bulletins — no CVE ID required.
+# These are "vendor released updates" announcements with no actionable attack
+# context for detection engineering (no TTPs, no IOCs, no active exploitation).
+PATCH_ADVISORY_TITLE_PATTERN = re.compile(
+    r"(?:"
+    r"\bmonthly\s+security\s+update\b|"
+    r"\bpatch\s+tuesday\b|"
+    r"\bsecurity\s+bulletin\b|"
+    r"\bsecurity\s+advisory\b|"
+    r"\bcumulative\s+update\b|"
+    r"\bsecurity\s+update\s+(?:for\s+)?"
+    r"(?:january|february|march|april|may|june|july|august|september|october|november|december)\b|"
+    r"\b(?:january|february|march|april|may|june|july|august|september|october|november|december)"
+    r"\s+\d{4}\s+security\s+updates?\b|"
+    r"\bapply\s+fixes\s+issued\s+by\s+the\s+vendor\b|"
+    r"\bvendor\s+security\s+release\b"
+    r")",
+    re.IGNORECASE,
+)
+
 # Historical / legacy vulnerability narrative
 HISTORICAL_CONTEXT_PATTERN = re.compile(
     r"(?:"
@@ -86,8 +106,14 @@ class KeywordMatcher:
 
 class CvePatchFilter:
     """
-    Drop articles that reference CVEs in a fixed/patched/historical context.
-    Articles with no CVE identifiers pass through unchanged.
+    Drop articles that are vendor patch bulletins or reference CVEs in a
+    fixed/patched/historical context.
+
+    Two independent drop paths:
+    1. Patch advisory title match — catches monthly bulletins with no CVE IDs
+       (e.g. "Microsoft Monthly Security Update (June 2026)").
+    2. CVE-in-fixed-context match — catches articles that cite a CVE identifier
+       alongside patched/remediated language.
     """
 
     def __init__(
@@ -95,15 +121,22 @@ class CvePatchFilter:
         cve_pattern: re.Pattern[str] = CVE_PATTERN,
         fixed_pattern: re.Pattern[str] = FIXED_CONTEXT_PATTERN,
         historical_pattern: re.Pattern[str] = HISTORICAL_CONTEXT_PATTERN,
+        advisory_title_pattern: re.Pattern[str] = PATCH_ADVISORY_TITLE_PATTERN,
         cve_window: int = 300,
     ) -> None:
         self._cve = cve_pattern
         self._fixed = fixed_pattern
         self._historical = historical_pattern
+        self._advisory_title = advisory_title_pattern
         self._window = cve_window
 
     def has_cve(self, text: str) -> bool:
         return self._cve.search(text) is not None
+
+    def is_patch_advisory(self, article: dict[str, Any]) -> bool:
+        """True when the title matches a generic vendor bulletin pattern."""
+        title = article.get("title") or ""
+        return bool(self._advisory_title.search(title))
 
     def is_fixed_or_historical_cve(self, article: dict[str, Any]) -> bool:
         text = f"{article.get('title', '')}\n{article.get('content', '')}"
@@ -130,12 +163,13 @@ class CvePatchFilter:
         passed: list[dict[str, Any]] = []
         dropped = 0
         for article in articles:
-            if self.is_fixed_or_historical_cve(article):
+            title = article.get("title", "")
+            if self.is_patch_advisory(article):
                 dropped += 1
-                logger.debug(
-                    "cve_patch_drop title=%s",
-                    article.get("title"),
-                )
+                logger.debug("patch_advisory_drop title=%s", title)
+            elif self.is_fixed_or_historical_cve(article):
+                dropped += 1
+                logger.debug("cve_patch_drop title=%s", title)
             else:
                 passed.append(article)
         logger.info("cve_patch_gate passed=%d dropped=%d", len(passed), dropped)

@@ -53,3 +53,7 @@ services:
   step3-generator:
     <<: *ollama-pipeline
     command: ["python", "main_generator.py"]
+
+  step4-validator:
+    <<: *ollama-pipeline
+    command: ["python", "main_validator.py"]
