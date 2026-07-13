@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -42,6 +43,65 @@ _STRATEGY_LABELS: list[tuple[str, str]] = [
     ("📁", "File & Registry"),
     ("🌐", "Network / API Calls"),
 ]
+
+# ---------------------------------------------------------------------------
+# Button colour injection
+# ---------------------------------------------------------------------------
+# st.button has no colour parameter.  We inject a tiny JavaScript snippet via
+# st.components.v1.html (which runs inside a srcdoc iframe that inherits the
+# parent document's origin) so window.parent.document is accessible.
+# A MutationObserver re-applies colours after every Streamlit re-render.
+
+_COLOUR_JS = """
+<script>
+(function () {
+    function paint() {
+        try {
+            var doc = window.parent.document;
+            doc.querySelectorAll("button").forEach(function (btn) {
+                var txt = (btn.innerText || btn.textContent || "").trim();
+                if (txt.indexOf("Approve") !== -1 || txt.indexOf("Move to Prod") !== -1) {
+                    btn.style.setProperty("background-color", "#27ae60", "important");
+                    btn.style.setProperty("border-color",     "#1e8449", "important");
+                    btn.style.setProperty("color",            "white",   "important");
+                    btn.style.setProperty("font-weight",      "600",     "important");
+                } else if (
+                    txt.indexOf("Reject") !== -1 ||
+                    txt.indexOf("Mark Invalid") !== -1 ||
+                    txt.indexOf("Submit Rejection") !== -1
+                ) {
+                    btn.style.setProperty("background-color", "#e74c3c", "important");
+                    btn.style.setProperty("border-color",     "#c0392b", "important");
+                    btn.style.setProperty("color",            "white",   "important");
+                    btn.style.setProperty("font-weight",      "600",     "important");
+                }
+            });
+        } catch (e) { /* cross-origin guard — silent */ }
+    }
+    paint();
+    try {
+        new MutationObserver(function () { paint(); })
+            .observe(window.parent.document.body, { childList: true, subtree: true });
+    } catch (e) {}
+})();
+</script>
+"""
+
+
+def _inject_button_colours() -> None:
+    """Render a zero-height component that colours approve/reject buttons."""
+    components.html(_COLOUR_JS, height=0, scrolling=False)
+
+
+def _green_button(label: str, key: str, **kwargs: Any) -> bool:
+    """Thin wrapper — colouring is handled by the JS observer."""
+    return st.button(label, key=key, **kwargs)
+
+
+def _red_button(label: str, key: str, **kwargs: Any) -> bool:
+    """Thin wrapper — colouring is handled by the JS observer."""
+    return st.button(label, key=key, **kwargs)
+
 
 # ---------------------------------------------------------------------------
 # Badge styling
@@ -371,17 +431,16 @@ def _variant_column(
                     st.markdown(rationale)
 
         # ── Decision buttons ─────────────────────────────────────
-        if st.button(
+        if _green_button(
             "✅ Approve / Move to Prod",
             key=f"approve__{tid}__{v_name}",
-            type="primary",
             use_container_width=True,
         ):
             action_approve(variant, all_variants, entry, already_rejected)
             st.toast(f"✅ **{v_name}** approved → production.", icon="✅")
             st.rerun()
 
-        if st.button(
+        if _red_button(
             "❌ Reject / Mark Invalid",
             key=f"reject_btn__{tid}__{v_name}",
             use_container_width=True,
@@ -398,10 +457,9 @@ def _variant_column(
             )
             c_sub, c_can = st.columns(2)
             with c_sub:
-                if st.button(
-                    "Submit",
+                if _red_button(
+                    "Submit Rejection",
                     key=f"submit_rej__{tid}__{v_name}",
-                    type="primary",
                     disabled=not (reason_text and reason_text.strip()),
                     use_container_width=True,
                 ):
@@ -502,6 +560,8 @@ def main() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
+    # Inject JS observer that colours approve/reject buttons
+    _inject_button_colours()
 
     # ── Sidebar ──────────────────────────────────────────────────
     with st.sidebar:

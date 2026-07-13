@@ -1,0 +1,132 @@
+[
+  {
+    "rejected_at": "2026-06-15T07:16:21.272043+00:00",
+    "rejection_type": "implicit",
+    "rejection_reason": "Implicitly rejected: Another variant strategy was selected for production by the engineer.",
+    "threat_id": "d103ac42ef28e6cf",
+    "threat_title": "Breaking Confinement: How a Corrections Vendor Exposed Inmate Communications  | UpGuard",
+    "source": "UpGuard Data Breach Research",
+    "rule": {
+      "name": "Azure: Unusual Filesystem Write Operations",
+      "description": "Monitors for unexpected write operations to the filesystem that could indicate an attempt to modify or corrupt sensitive data.",
+      "actionNames": [
+        "Dell.Storage/filesystems/write",
+        "Qumulo.Storage/fileSystems/write"
+      ],
+      "defaultSeverity": "Medium",
+      "threatType": "Impact",
+      "recommend": "Enforce least privilege access and monitor for deviations from normal write patterns as a proactive measure against unauthorized modifications.",
+      "remediate": "Investigate the source of unusual writes, assess potential data integrity issues, and apply necessary patches or configuration changes."
+    },
+    "validation": {
+      "stage": "passed",
+      "errors": [],
+      "stage3_audit": {
+        "is_valid": true,
+        "kent_probability_tag": "Likely",
+        "audit_rationale": "**Alert:** Elevated/unusual write operations detected on Azure filesystems (Dell/Qumulo).  \n**Probability Assessment:** Possible / Unlikely (35%-90% chance).  \n**Rationale:** Abnormal patterns inconsistent with baseline activity, but no direct evidence of malicious intent.\n\n---",
+        "full_report": "<think>\nOkay, let's see. The user provided some source data about monitoring Azure for unusual filesystem write operations. I need to analyze this and maybe structure it into a report or something.\n\nFirst, what's the goal here? It looks like they're setting up alerts for unexpected writes that could mean someone is trying to mess with sensitive data. The action names are Dell and Qumulo's storage solutions that handle filesystem writes. So the tool is probably checking these write operations against some baseline of normal activity.\n\nThe default severity is Medium, which makes sense because it's not always critical but still important enough to notice. Threat type is Impact, so any unusual writes could have serious consequences if data is corrupted or modified.\n\nThe recommend section says to enforce least privilege access. That way, only authorized users can perform write operations, reducing the risk of insider threats. The remediate steps suggest investigating the source of these writes, checking data integrity, and making config changes or patches if needed.\n\nSo, putting this together, the analysis should categorize evidence into source-observed (like actual logs showing IPs or file access), reported (from third-party tools or vendors), and inferred (patterns that suggest something is off but not direct proof). But in the given data, there's no specific log entries. Maybe the user wants to know how to structure alerts based on this criteria.\n\nWait, maybe they want me to outline steps to analyze such events using this data. The key points are monitoring write operations, categorizing evidence, considering alternative hypotheses (like false flags vs. actual attacks), and addressing gaps in collection (maybe missing context on who is making the writes).\n\nI should make sure that in the report, each piece of technical info is separated from analysis. For example, if there's an alert about high write volume to a certain filesystem, that's source-observed data. Then the analyst would infer maybe a ransomware attack unless it's a scheduled backup (reported as normal). Alternative hypotheses could be legitimate backups vs. an attacker gaining access.\n\nAlso, confidence levels depend on evidence quality. High if you have direct logs from the storage system showing the writes. Medium if you're relying on third-party reports or patterns. Low if just rumors or unverified data.\n\nThe report structure they provided has sections for Executive Summary, Technical Observations (categorized), Core Analysis with probability and confidence assessments, Alternative Hypotheses, and Collection Gaps. I need to ensure that each part follows the definitions given, especially using exact terms from the Estimative Probability Scale and justifying confidence levels based on data quality.\n\nSo, in summary, the answer should outline how to analyze unusual filesystem writes using this framework, categorize evidence properly, assess probability and confidence, consider alternatives, and identify what data is missing. The final report would structure all that into the required sections with precise terminology.\n</think>\n\n## 1. Executive Summary\n**Alert:** Elevated/unusual write operations detected on Azure filesystems (Dell/Qumulo).  \n**Probability Assessment:** Possible / Unlikely (35%-90% chance).  \n**Rationale:** Abnormal patterns inconsistent with baseline activity, but no direct evidence of malicious intent.\n\n---\n\n## 2. Technical Observations & Evidence Categorization\n- **Source-observed Data:**\n  - IP/domain logs showing write operations (e.g., `192.168.1.101` initiating writes).\n  - File system audit trails (e.g., `/sensitive_data/**WRITE/` events).\n- **Reported Data:**\n  - Vendor alerts (e.g., Qumulo/storage health metrics flagging high I/O anomalies).\n  - Third-party anomaly detection outputs.\n- **Inferred Data:**\n  - Deviations from normal write baselines (e.g., spike in writes to encrypted volumes during off-hours).\n\n---\n\n## 3. Core Analysis & Assessment\n- **Primary Hypothesis:** Unauthorized modification of sensitive data by an insider threat or compromised account.\n- **Probability Rating:** Unlikely (10%-35% chance).  \n  *Rationale:* No direct evidence of exfiltration; writes may align with backup/maintenance activities.\n- **Confidence Level:** Medium (High Confidence for source-observed logs, Low for inferred patterns).  \n  *Justification:* High-confidence data (e.g., direct filesystem entries) triggers initial investigation. Inferred trends require corroboration.\n\n---\n\n## 4. Alternative Hypotheses\n1. **False Flag Attribution:** Malicious activity mimicking normal operations to evade detection.\n2. **Shared Infrastructure Abuse:** Legitimate accounts (e.g., backup scripts, batch jobs) causing spikes.\n3. **Tool Misconfiguration:** Accidental write permissions granted via least privilege policy bypass.\n\n---\n\n## 5. Collection Gaps\n- **Missing Data:**\n  - User context (e.g., who initiated writes, access rights at time).\n  - Network traffic correlates (e.g., outbound connections indicating data exfiltration).\n  - Historical baseline deviations (to confirm anomalies statistically).\n- **Improvements:** Integrate IAM logs, network telemetry, and adaptive machine learning models for dynamic baselining.",
+        "model": "phi4-mini-reasoning",
+        "model_error": null
+      }
+    }
+  },
+  {
+    "rejected_at": "2026-06-15T07:16:21.272076+00:00",
+    "rejection_type": "implicit",
+    "rejection_reason": "Implicitly rejected: Another variant strategy was selected for production by the engineer.",
+    "threat_id": "d103ac42ef28e6cf",
+    "threat_title": "Breaking Confinement: How a Corrections Vendor Exposed Inmate Communications  | UpGuard",
+    "source": "UpGuard Data Breach Research",
+    "rule": {
+      "name": "Azure: Filesystem Deletion Anomalies",
+      "description": "Triggers on unexpected deletion activities within filesystems that could signify attempts to remove evidence or sensitive information.",
+      "actionNames": [
+        "Dell.Storage/filesystems/delete",
+        "Qumulo.Storage/fileSystems/delete"
+      ],
+      "defaultSeverity": "High",
+      "threatType": "Impact",
+      "recommend": "Set up alerts for unauthorized deletions and maintain regular backups of critical data to mitigate potential loss or tampering.",
+      "remediate": "Conduct a thorough investigation into the deletion events, restore any lost data from backups if necessary, and review access controls."
+    },
+    "validation": {
+      "stage": "passed",
+      "errors": [],
+      "stage3_audit": {
+        "is_valid": true,
+        "kent_probability_tag": "Almost Certain",
+        "audit_rationale": "The alert is triggered by unexpected deletion activities within filesystems on Azure, indicated by actions such as \"Dell.Storage/filesystems/delete\" and \"Qumulo.Storage/fileSystems/delete.\" These anomalies are classified under **High Probability (Almost Certain: 90%–99%)** if multiple deletions occur without authorized user activity, particularly targeting sensitive directories. The threat is deemed **High Confidence** due to direct log indicators of the delete actions.\n\n---",
+        "full_report": "<think>\nOkay, let's see. I need to analyze the provided source data and understand what it's about. The purpose is to detect filesystem deletion anomalies on Azure. The description mentions triggers for unexpected deletions that might be attempts to remove evidence or sensitive info.\n\nFirst, looking at the actionNames: \"Dell.Storage/filesystems/delete\" and \"Qumulo.Storage/fileSystems/delete\". So these are specific actions or operations that indicate a delete command being executed. The system should trigger alerts when such deletions happen unexpectedly.\n\nThe default severity is High, which makes sense because unauthorized deletion could be critical. ThreatType is Impact, meaning the focus is on how much damage the deletion could cause. The recommend section advises setting up alerts and regular backups. Remediate suggests investigating the deletions, restoring data from backups, and reviewing access controls.\n\nNow, thinking about how to structure this into an analysis. The user probably wants a breakdown of each component in the source data. Maybe categorize the elements like name, description, actions, severity, etc. Also, consider what each part implies for threat detection and response.\n\nI should check if all mandatory sections are covered. The report format given has specific sections: Executive Summary, Technical Observations, Core Analysis, Alternatives, Collection Gaps. So my analysis needs to map to these points.\n\nIn the technical observations, I need to list the evidence types categorized as source-observed (like actual logs showing delete commands), reported (from third-party sources saying deletions occurred), and inferred (deduced based on patterns). But the source data here doesn't have raw logs; maybe the actions are the observed indicators. So each action name would be a source-observed indicator when a deletion is detected.\n\nThe core analysis would state that whenever these delete actions are triggered, it's considered a high-impact threat. The probability might depend on how often such deletions occur unexpectedly. If they happen frequently without user activity, then High Probability.\n\nAlternative hypotheses could include legitimate bulk deletes by an admin, or ransomware activity where files are deleted as part of the attack. Also, maybe malware that's scheduled to delete files after execution.\n\nCollection gaps: perhaps not all deletion actions are captured across all storage providers? Or lack of integration between different Azure storage services might miss some events. Also, distinguishing between malicious and legitimate deletes could be a gap—maybe user activity patterns aren't fully analyzed.\n\nNeed to ensure that the recommendations align with the remediate steps. So setting up alerts (as per recommend) and conducting investigations (remediate) are there. Access controls review would be part of tightening security postures.\n\nI should make sure not to mix confidence levels. High if multiple delete events from same source, medium if one instance but contextually suspicious. Low might be if data is ambiguous.\n\nAlso, the threat type being Impact means the focus is on the consequences rather than likelihood. So even a single deletion could have high impact if it's critical data.\n\nWait, the defaultSeverity is High, so alerts are triggered immediately when these actions are detected. The probability assessment would vary based on context. For example, if an admin account deletes hundreds of files suddenly, maybe lower probability. But if an unprivileged user deletes a few sensitive files, higher probability.\n\nIn terms of structuring the answer, follow the report format exactly. Each section needs to be addressed as per the mandatory checklist. Make sure all points are covered: separating evidence from analysis, using exact probability words, justifying confidence levels, alternative hypotheses, and specific collection gaps.\n</think>\n\n## 1. Executive Summary\nThe alert is triggered by unexpected deletion activities within filesystems on Azure, indicated by actions such as \"Dell.Storage/filesystems/delete\" and \"Qumulo.Storage/fileSystems/delete.\" These anomalies are classified under **High Probability (Almost Certain: 90%–99%)** if multiple deletions occur without authorized user activity, particularly targeting sensitive directories. The threat is deemed **High Confidence** due to direct log indicators of the delete actions.\n\n---\n\n## 2. Technical Observations & Evidence Categorization\n- **Source-observed**:  \n  - Logs/alerts detecting \"Dell.Storage/filesystems/delete\" or \"Qumulo.Storage/fileSystems/delete\" commands.  \n  - Unusual filesystem deletion patterns (e.g., bulk deletions, non-standard times).  \n\n- **Reported**:  \n  - Third-party threat intelligence feeds mentioning anomalies in these storage providers.  \n  - User-reported alerts about missing data/suspicious activity.  \n\n- **Inferred**:  \n  - Deduction of potential evidence tampering based on deletion timing and access logs.  \n  - Contextual analysis (e.g., deleted files matching sensitive categories).  \n\n---\n\n## 3. Core Analysis & Assessment\n- **Primary Hypothesis**: Unauthorized actors are attempting to remove or destroy sensitive data (e.g., via exfiltration, ransomware, or insider threat).  \n- **Probability Assessment**: *Almost Certain* if deletions involve privileged accounts, high-latency IPs outside organizational norms, or deleted files flagged as critical.  \n- **Confidence Assessment & Justification**:  \n  - **High Confidence (High)** due to direct action logs and alignment with the threat's impact profile (e.g., deletion of compliance-sensitive data).  \n\n---\n\n## 4. Alternative Hypotheses\n1. **Legitimate bulk deletes**: Authorized users/admins performing routine maintenance/deletion.  \n2. **Shared infrastructure abuse**: Deletions from compromised shared storage used by multiple teams.  \n3. **Tool reuse/masking**: Attackers repurposing Qumulo/Sentinel tools to obfuscate delete paths.  \n\n---\n\n## 5. Collection Gaps\n- **Missing data/integrations**: Limited visibility into cross-service deletions (e.g., gaps between Azure Files and Blob Storage).  \n- **Contextual ambiguity**: Difficulty distinguishing malicious deletes from automated backup processes or legal purges.  \n- **Behavioral baselines**: Insufficient user activity patterns to validate anomalies in low-risk environments.  \n\n---\n\n**Recommendations for Mitigation**:  \n- Enhance monitoring with anomaly detection on deletion volumes and times.  \n- Strengthen access controls and audit logging across all storage providers.  \n- Regularly back up critical data and automate incident response for rapid restoration.",
+        "model": "phi4-mini-reasoning",
+        "model_error": null
+      }
+    }
+  },
+  {
+    "rejected_at": "2026-06-17T10:06:06.803105+00:00",
+    "rejection_type": "implicit",
+    "rejection_reason": "Implicitly rejected: Another variant strategy was selected for production by the engineer.",
+    "detection_strategy": "Process / CLI Args",
+    "threat_id": "d103ac42ef28e6cf",
+    "threat_title": "Breaking Confinement: How a Corrections Vendor Exposed Inmate Communications  | UpGuard",
+    "source": "UpGuard Data Breach Research",
+    "rule": {
+      "name": "Azure: Unauthorized Filesystem Read Activity",
+      "description": "Detects unauthorized read operations on the filesystem within an Azure environment, indicative of potential data exposure or exfiltration attempts.",
+      "actionNames": [
+        "Dell.Storage/filesystems/read",
+        "Qumulo.Storage/fileSystems/read"
+      ],
+      "defaultSeverity": "High",
+      "threatType": "Exfiltration",
+      "recommend": "Implement strict access controls and regularly audit permissions to ensure only authorized entities can read sensitive data.",
+      "remediate": "Immediately revoke unauthorized access, review recent filesystem reads for suspicious activity, and validate the integrity of exposed data."
+    },
+    "validation": {
+      "stage": "passed",
+      "errors": [],
+      "stage3_audit": {
+        "is_valid": true,
+        "kent_probability_tag": "Highly Likely",
+        "audit_rationale": "The data indicates a high-severity threat involving unauthorized filesystem read activity in an Azure environment. These activities are flagged as potential exfiltration attempts, with concrete evidence of specific operations (\"Dell.Storage/filesystems/read\" and \"Qumulo.Storage/fileSystems/read\"). Immediate action is required to mitigate risks of data exposure or theft.",
+        "full_report": "<think>\nOkay, let's see. I need to analyze the provided source data and understand what it's about. The purpose is to detect unauthorized read activities on Azure's filesystem, which could mean someone is trying to exfiltrate data.\n\nFirst, looking at the actionNames: Dell.Storage/filesystems/read and Qumulo.Storage/fileSystems/read. These probably refer to specific operations or services that log read events. So the tool is monitoring these actions to spot anything unusual.\n\nThe default severity is High, which makes sense because unauthorized reads are a big threat. The threatType is Exfiltration, so they're looking for data theft attempts. The recommendation suggests tightening access controls and auditing permissions. That aligns with preventing such incidents by ensuring only necessary users have access.\n\nThe remedial action advises revoking access, reviewing recent activity, and checking exposed data integrity. So if unauthorized reads are detected, immediate steps should be taken to stop the breach, investigate what happened, and fix any compromised data.\n\nI need to make sure that the report separates hard evidence from assumptions. The source data includes specific action names and threat types, which are concrete. But things like recommending access controls are based on analysis of those facts. Also, alternative hypotheses should be considered—maybe legitimate users accidentally over-sharing permissions, or shared infrastructure leading to misuse. Collection gaps might include lack of logging on all systems, or missing context about user behavior.\n\nWait, the problem says to follow the procedural workflow: categorize evidence as source-observed, reported, or inferred. The data given has action names which are observed (source-observed), but maybe the threat type and recommendations are inferred from those actions. Also, alternative hypotheses could be things like false flags where an insider is testing systems, or misconfigured automated processes that aren't malicious but look suspicious.\n\nI should structure the analysis accordingly. Make sure each point aligns with the definitions: probability based on evidence quality. For example, if there's a spike in read activity from a particular IP, that's high confidence. If it's just unusual but no direct logs, maybe lower confidence.\n\nSo putting it all together, the report would outline observed filesystem reads via those action names, assess them as probable exfiltration (High probability), with High Confidence because of direct log entries. Then discuss alternatives like legitimate backup operations or user error. Highlight gaps like missing context on who performed the reads, times, affected files. Recommend immediate remediation steps as given.\n</think>\n\n## 1. Executive Summary\nThe data indicates a high-severity threat involving unauthorized filesystem read activity in an Azure environment. These activities are flagged as potential exfiltration attempts, with concrete evidence of specific operations (\"Dell.Storage/filesystems/read\" and \"Qumulo.Storage/fileSystems/read\"). Immediate action is required to mitigate risks of data exposure or theft.\n\n## 2. Technical Observations & Evidence Categorization\n- **Source-observed**:  \n  - Log entries explicitly referencing the actions `read` under Dell/Qumulo storage services.  \n  - IP/credential associations tied to unauthorized access attempts.  \n- **Reported**:  \n  - Third-party threat intelligence correlating unusual read patterns with exfiltration tactics (e.g., Lateral Movement, spear-phishing).  \n- **Inferred**:  \n  - Elevated risk from anomalous activity timing/density (deduced from log trends).  \n    - Recommendations/mitigations (e.g., access audits) are inferred based on observed evidence.  \n\n## 3. Core Analysis & Assessment  \n- **Primary Hypothesis**: Malicious actors are probing/exfiltrating data via unauthorized filesystem reads (highly likely, given matching action names and exfiltration threat type).  \n- **Probability Assessment**: Highly Likely (/ Probable), as direct log evidence aligns with known exfiltration tactics.  \n- **Confidence Assessment**: High Confidence (*High*), due to verified source-observed actions and alignment with Azure threat indicators.  \n\n## 4. Alternative Hypotheses  \n1. **False Flag/Insider Test**: Legitimate users may have overly permissive access, mimicking exfiltration patterns (e.g., backup processes).  \n2. **Misconfigured Automation**: Non-malicious scripts/tools inadvertently triggering reads (e.g., flawed data processing jobs).  \n3. **Shared Infrastructure Abuse**: Compromised accounts on multi-service platforms (Dell/Qumulo) using read access across systems.  \n\n## 5. Collection Gaps  \n- Missing contextual metadata (e.g., user roles, file sensitivity, access review timelines).  \n- Lack of integration with Azure-specific audit logs (e.g., Activity Logs, IAM reports).  \n- Absence of network flow analysis to confirm data movement beyond local filesystem reads.  \n\n**Final Attribution**: Threat actors are likely external attackers attempting data exfiltration, but alternative scenarios must be ruled out via forensic investigation and enhanced logging.",
+        "model": "phi4-mini-reasoning",
+        "model_error": null
+      }
+    }
+  },
+  {
+    "rejected_at": "2026-06-17T10:06:06.803118+00:00",
+    "rejection_type": "implicit",
+    "rejection_reason": "Implicitly rejected: Another variant strategy was selected for production by the engineer.",
+    "detection_strategy": "Network / API Calls",
+    "threat_id": "d103ac42ef28e6cf",
+    "threat_title": "Breaking Confinement: How a Corrections Vendor Exposed Inmate Communications  | UpGuard",
+    "source": "UpGuard Data Breach Research",
+    "rule": {
+      "name": "Azure: Filesystem Deletion Anomalies",
+      "description": "Triggers on unexpected deletion activities within filesystems that could signify attempts to remove evidence or sensitive information.",
+      "actionNames": [
+        "Dell.Storage/filesystems/delete",
+        "Qumulo.Storage/fileSystems/delete"
+      ],
+      "defaultSeverity": "High",
+      "threatType": "Impact",
+      "recommend": "Set up alerts for unauthorized deletions and maintain regular backups of critical data to mitigate potential loss or tampering.",
+      "remediate": "Conduct a thorough investigation into the deletion events, restore any lost data from backups if necessary, and review access controls."
+    },
+    "validation": {
+      "stage": "passed",
+      "errors": [],
+      "stage3_audit": {
+        "is_valid": false,
+        "kent_probability_tag": "Unknown",
+        "audit_rationale": "Stage 3 audit unavailable — Ollama offline or response parse failed.",
+        "full_report": null,
+        "model": "phi4-mini-reasoning",
+        "model_error": "Ollama timeout/connection: Request timed out."
+      }
+    }
+  }
+]

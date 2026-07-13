@@ -213,7 +213,16 @@ python main_generator.py --force --no-resume
 **Input:** `data/filtered_threat_queue.json`  
 **Output:** `data/generated_rules_staging.json` (incremental; safe to interrupt)
 
-Requires Ollama with `phi4-mini-reasoning`. Model responses may include `<thinking>` blocks; `generators/rule_engine.py` strips them before parsing the rules JSON. If the model returns more than 3 rules, only the first 3 are kept. Fewer than 3 is logged as a generation failure.
+Requires Ollama with `phi4-mini-reasoning`. The parser in `generators/rule_engine.py` handles the following automatically before Pydantic validation:
+
+| Model output issue | Auto-recovery |
+|---|---|
+| `<thinking>…</thinking>` chain-of-thought blocks | Stripped before JSON parse |
+| Bare JSON array `[…]` without `{"rules": […]}` wrapper | Wrapped automatically |
+| `rules` value is a JSON string instead of an array | Double-parsed |
+| Missing `recommend` or `remediate` fields | Filled with context-aware defaults and logged as `rule_repair` warnings |
+| More than 3 rules returned | Truncated to first 3 (strategy order preserved) |
+| Fewer than 3 rules returned | Hard failure — logged as `generation_status: "failed"` |
 
 **Resume behaviour:** already-staged threats are skipped automatically. Use `--force --no-resume` to regenerate everything from scratch.
 
@@ -642,6 +651,8 @@ Filter cap (`50`) → `main_filter.py`. Min confidence (`6`) → `filters/gemma_
 | Filter confirms 0 | `--limit 20`; `--skip-gemma` to isolate keyword / CVE / patch gates. |
 | Scores all `1` / `MALFORMED_JSON_FALLBACK` | Verify `gemma4:e4b` is pulled; check Ollama container logs. |
 | Step 3 returns < 3 variants | `generation_status: "failed"` — re-run with `--force --no-resume`; phi4 non-deterministic. |
+| Step 3 logs `rule_repair` warnings | Normal — phi4 omitted `recommend`/`remediate`; parser auto-filled defaults. Rules still proceed to validation. |
+| Step 3 high failure rate (>50%) | Update to latest `generators/rule_engine.py` and re-run `--force --no-resume`. Parser now handles bare arrays and missing fields. |
 | Step 4 Stage 3 timeout | Set `STAGE3_TIMEOUT_SECONDS=600`; each variant takes 30–90s depending on hardware. |
 | Step 4 `stage3_audit.is_valid: false` | Ollama offline or empty response — check `model_error` field in `validated_rules.json`. |
 | Step 4 all variants `failed_stage_2` | `python scripts/sync_knowledge_base.py` to refresh KB catalogs. |

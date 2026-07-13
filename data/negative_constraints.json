@@ -1,0 +1,26 @@
+{
+  "updated_at": "2026-06-17T11:21:29.844731+00:00",
+  "total_failures_processed": 4,
+  "last_batch_size": 4,
+  "model": "phi4-mini-reasoning",
+  "strategy_counts": {
+    "File & Registry": 2,
+    "Process / CLI Args": 1,
+    "Network / API Calls": 1
+  },
+  "constraints": {
+    "File & Registry": [
+      "Do not implicitly reject rules whose action names include 'Dell.Storage' or 'Qumulo.Storage'.",
+      "Avoid implicit rejection of filesystem write/delete anomaly detection if specific storage strategies from these providers are already in use."
+    ],
+    "Process / CLI Args": [
+      "AVOID generating rules for this strategy — insufficient feedback data to derive reliable constraints.",
+      "PARSE_ERROR: Extra data: line 8 column 1 (char 217)"
+    ],
+    "Network / API Calls": [
+      "Do not generate rules targeting explicit API deletion actions if behavioral anomaly detection strategies exist within the same framework.",
+      "Avoid filesystem-specific deletions when generalized Network/Api Call analysis is already implemented for similar threats.",
+      "Never propose storage API action-based solutions under a comprehensive Network/Api Call strategy variant."
+    ]
+  }
+}

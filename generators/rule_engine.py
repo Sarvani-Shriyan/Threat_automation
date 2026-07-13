@@ -49,16 +49,30 @@ Do NOT produce slight syntax variations of the same detection idea.
            data-plane syscalls, cloud-plane operations, or protocol-level
            indicators tied to the threat.
 
-━━━ SCHEMA (every rule object must have all 7 keys) ━━━
+━━━ SCHEMA — every rule MUST include ALL 7 keys, NO EXCEPTIONS ━━━
+
 {
   "name":            "String — format: '[Platform]: [Actionable Indicator Title]'",
   "description":     "String — operational trigger, condition boundaries, layer focus",
   "actionNames":     ["String — exact infrastructure/API action name to monitor"],
   "defaultSeverity": "String — exactly one of: Low, Medium, High, Critical",
   "threatType":      "String — MITRE ATT&CK Tactic name",
-  "recommend":       "String — structural hardening and configuration recommendations",
-  "remediate":       "String — tactical response, containment, and validation steps"
+  "recommend":       "String — structural hardening and preventive configuration steps",
+  "remediate":       "String — tactical response, containment, and post-incident validation"
 }
+
+EXAMPLE of one correctly-formed rule object:
+{
+  "name": "[Azure]: Unusual Role Assignment to Service Principal",
+  "description": "Detects unexpected IAM role assignments to service principals outside approved change windows.",
+  "actionNames": ["Microsoft.Authorization/roleAssignments/write"],
+  "defaultSeverity": "High",
+  "threatType": "Privilege Escalation",
+  "recommend": "Enforce PIM-based just-in-time access for all service principal role assignments. Require approval workflows for privileged roles.",
+  "remediate": "Immediately revoke the unauthorized role assignment. Review the assigning identity for compromise indicators. Audit all recent role changes in the subscription."
+}
+
+CRITICAL: The "recommend" and "remediate" keys are MANDATORY. Every rule object in your output MUST contain both. Rules missing either key are INVALID.
 
 ━━━ HARD RULES ━━━
 - Names must include the primary platform (AWS, Azure, Okta, GitHub, etc.).
@@ -264,14 +278,37 @@ class RuleEngine:
 
     @staticmethod
     def _extract_rules_json(text: str) -> dict[str, Any]:
-        """Isolate the rules JSON object when thinking prose precedes or wraps the payload."""
+        """
+        Isolate the rules JSON object from the model response.
+
+        Extraction order:
+        1. Direct parse — handles clean {"rules": [...]} output.
+        2. Bare array — handles [rule1, rule2, rule3] without wrapper.
+        3. Greedy nested-brace scan — picks first valid dict with 'rules'/'variants'.
+        4. Greedy bracket scan — last-resort bare array extraction.
+        5. Widest brace match — last-resort full-text dict extraction.
+        """
+        # 1. Direct parse
         try:
             payload = json.loads(text)
             if isinstance(payload, dict):
                 return payload
+            if isinstance(payload, list):
+                return {"rules": payload}
         except json.JSONDecodeError:
             pass
 
+        # 2. Bare array (model omitted the {"rules": ...} wrapper)
+        bracket_match = re.search(r"\[.*\]", text, re.DOTALL)
+        if bracket_match:
+            try:
+                arr = json.loads(bracket_match.group())
+                if isinstance(arr, list) and arr:
+                    return {"rules": arr}
+            except json.JSONDecodeError:
+                pass
+
+        # 3. Greedy nested-brace scan — pick first dict that looks like a rule batch
         for match in re.finditer(r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", text, re.DOTALL):
             try:
                 payload = json.loads(match.group())
@@ -282,12 +319,48 @@ class RuleEngine:
             ):
                 return payload
 
+        # 4. Widest brace match
         brace_match = re.search(r"\{.*\}", text, re.DOTALL)
         if brace_match:
-            payload = json.loads(brace_match.group())
-            if isinstance(payload, dict):
-                return payload
+            try:
+                payload = json.loads(brace_match.group())
+                if isinstance(payload, dict):
+                    return payload
+            except json.JSONDecodeError:
+                pass
+
         raise ValueError("No valid rules JSON object found in model response")
+
+    @staticmethod
+    def _repair_rule(rule: dict[str, Any]) -> dict[str, Any]:
+        """
+        Fill in missing optional-in-practice-but-required-by-schema fields when the
+        model forgets them.  Only 'recommend' and 'remediate' are ever absent in
+        practice; the other 5 keys are omitted much less frequently and will still
+        surface as Stage-1 contract failures if missing.
+        """
+        rule = dict(rule)
+        name = rule.get("name", "this detection rule")
+        desc = rule.get("description", "")
+
+        if not rule.get("recommend"):
+            rule["recommend"] = (
+                f"Enforce least-privilege access controls and review baseline activity for "
+                f"the indicators described in '{name}'. Enable logging for the relevant "
+                f"telemetry sources and set up alerting thresholds appropriate to your environment."
+            )
+            logger.warning("rule_repair recommend_missing rule=%r — filled with default", name)
+
+        if not rule.get("remediate"):
+            rule["remediate"] = (
+                f"Investigate the flagged event for '{name}': isolate affected resources, "
+                f"review recent audit logs for lateral movement or privilege escalation, "
+                f"revoke any suspicious credentials or sessions, and validate that the "
+                f"environment is clean before restoring normal operations."
+            )
+            logger.warning("rule_repair remediate_missing rule=%r — filled with default", name)
+
+        return rule
 
     @staticmethod
     def _parse_rules(raw: str) -> ThreatRuleBatch:
@@ -303,6 +376,13 @@ class RuleEngine:
         else:
             raise ValueError("Response missing 'rules' array")
 
+        # rules key may itself be a JSON string that needs a second parse
+        if isinstance(rules_list, str):
+            try:
+                rules_list = json.loads(rules_list)
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"'rules' value is a non-parseable string: {exc}") from exc
+
         if not isinstance(rules_list, list):
             raise ValueError(f"Expected a list of rules, got {type(rules_list).__name__}")
 
@@ -315,6 +395,12 @@ class RuleEngine:
                 RULE_VARIANTS_MAX,
             )
             rules_list = rules_list[:RULE_VARIANTS_MAX]
+
+        # Repair missing recommend/remediate before Pydantic sees the dicts
+        rules_list = [
+            RuleEngine._repair_rule(r) if isinstance(r, dict) else r
+            for r in rules_list
+        ]
 
         return ThreatRuleBatch(rules=rules_list)
 

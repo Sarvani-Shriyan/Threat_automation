@@ -1,272 +1,11 @@
 {
-  "generated_at": "2026-06-04T09:05:51.760094+00:00",
-  "last_updated_at": "2026-06-15T10:17:30.128122+00:00",
-  "threat_count": 32,
-  "total_rule_variants": 25,
-  "successful_threats": 7,
-  "failed_threats": 25,
+  "generated_at": "2026-06-17T09:02:50.160968+00:00",
+  "last_updated_at": "2026-06-17T09:33:17.884818+00:00",
+  "threat_count": 50,
+  "total_rule_variants": 102,
+  "successful_threats": 34,
+  "failed_threats": 16,
   "entries": [
-    {
-      "threat_id": "d103ac42ef28e6cf",
-      "threat_title": "Breaking Confinement: How a Corrections Vendor Exposed Inmate Communications  | UpGuard",
-      "threat_url": "https://www.upguard.com/breaches/breaking-containment-how-a-corrections-vendor-exposed-inmate-communications",
-      "source": "UpGuard Data Breach Research",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "Identity",
-        "primary_platform": "Azure",
-        "reasoning_summary": "The text explicitly mentions an exposed Azure storage bucket containing millions of documents, including driver's licenses used for identity verification."
-      },
-      "variants": [
-        {
-          "name": "Azure: Unauthorized Filesystem Read Activity",
-          "description": "Detects unauthorized read operations on the filesystem within an Azure environment, indicative of potential data exposure or exfiltration attempts.",
-          "actionNames": [
-            "Dell.Storage/filesystems/read",
-            "Qumulo.Storage/fileSystems/read"
-          ],
-          "defaultSeverity": "High",
-          "threatType": "Exfiltration",
-          "recommend": "Implement strict access controls and regularly audit permissions to ensure only authorized entities can read sensitive data.",
-          "remediate": "Immediately revoke unauthorized access, review recent filesystem reads for suspicious activity, and validate the integrity of exposed data."
-        },
-        {
-          "name": "Azure: Unusual Filesystem Write Operations",
-          "description": "Monitors for unexpected write operations to the filesystem that could indicate an attempt to modify or corrupt sensitive data.",
-          "actionNames": [
-            "Dell.Storage/filesystems/write",
-            "Qumulo.Storage/fileSystems/write"
-          ],
-          "defaultSeverity": "Medium",
-          "threatType": "Impact",
-          "recommend": "Enforce least privilege access and monitor for deviations from normal write patterns as a proactive measure against unauthorized modifications.",
-          "remediate": "Investigate the source of unusual writes, assess potential data integrity issues, and apply necessary patches or configuration changes."
-        },
-        {
-          "name": "Azure: Filesystem Deletion Anomalies",
-          "description": "Triggers on unexpected deletion activities within filesystems that could signify attempts to remove evidence or sensitive information.",
-          "actionNames": [
-            "Dell.Storage/filesystems/delete",
-            "Qumulo.Storage/fileSystems/delete"
-          ],
-          "defaultSeverity": "High",
-          "threatType": "Impact",
-          "recommend": "Set up alerts for unauthorized deletions and maintain regular backups of critical data to mitigate potential loss or tampering.",
-          "remediate": "Conduct a thorough investigation into the deletion events, restore any lost data from backups if necessary, and review access controls."
-        },
-        {
-          "name": "Azure: Unregistered Storage Operations",
-          "description": "Detects attempts to unregister storage operations which could be an indicator of trying to bypass security measures or hide malicious activities.",
-          "actionNames": [
-            "Dell.Storage/unregister/action",
-            "Qumulo.Storage/unregister/action"
-          ],
-          "defaultSeverity": "Medium",
-          "threatType": "Defense Evasion",
-          "recommend": "Monitor for and restrict unauthorized attempts to unregister storage operations, ensuring all actions are logged and auditable.",
-          "remediate": "Review recent unregistration activities for anomalies, reinforce security policies around storage operation management, and validate system integrity."
-        },
-        {
-          "name": "Azure: Unauthorized Storage Registration",
-          "description": "Identifies unauthorized attempts to register new storage operations, potentially indicating an effort to establish footholds or exfiltrate data.",
-          "actionNames": [
-            "Dell.Storage/register/action",
-            "Qumulo.Storage/register/action"
-          ],
-          "defaultSeverity": "Medium",
-          "threatType": "Persistence",
-          "recommend": "Implement stringent controls and monitoring on the registration of new storage operations to prevent unauthorized access or data leaks.",
-          "remediate": "Investigate the source of unauthorized registrations, revoke any illegitimate permissions, and ensure compliance with security policies."
-        }
-      ],
-      "variant_count": 5,
-      "generation_status": "success",
-      "error": null,
-      "generated_at": "2026-06-04T09:07:26Z",
-      "grounding_context": {
-        "matched_platforms": [
-          "azure"
-        ],
-        "primary_platform": "azure",
-        "routed_profiles": [
-          "azure:azure_admin"
-        ],
-        "injected_action_count": 15,
-        "allowed_actions": [
-          "Dell.Storage/filesystems/delete",
-          "Dell.Storage/filesystems/read",
-          "Dell.Storage/filesystems/write",
-          "Dell.Storage/operations/read",
-          "Dell.Storage/register/action",
-          "Dell.Storage/unregister/action",
-          "Qumulo.Storage/fileSystems/delete",
-          "Qumulo.Storage/fileSystems/read",
-          "Qumulo.Storage/fileSystems/write",
-          "Qumulo.Storage/operations/read",
-          "Qumulo.Storage/register/action",
-          "Qumulo.Storage/unregister/action",
-          "microsoft.app/builders/delete",
-          "microsoft.app/builders/read",
-          "microsoft.app/builders/write"
-        ],
-        "source_files": [
-          "azure_admin_events.json"
-        ]
-      }
-    },
-    {
-      "threat_id": "7195249d009cc8b4",
-      "threat_title": "Inside the GREYVIBE Threat Actor Group: A Hybrid Espionage Menace",
-      "threat_url": "https://securityonline.info/greyvibe-threat-actor-group-russia-nexus/",
-      "source": "Daily CyberSecurity",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 7,
-        "primary_domain": "Identity",
-        "primary_platform": "AWS",
-        "reasoning_summary": "The text mentions a phishing alert involving credential theft and the use of AWS S3, indicating an identity-focused attack vector."
-      },
-      "variants": [
-        {
-          "name": "AWS: Unusual IAM User Creation",
-          "description": "Detects the creation of new IAM users which may indicate credential theft and unauthorized access attempts. Focuses on unexpected spikes in user creation activities.",
-          "actionNames": [
-            "Transfer.CreateUser"
-          ],
-          "defaultSeverity": "High",
-          "threatType": "Credential Access",
-          "recommend": "Implement stricter IAM policies and review user creation logs regularly to ensure compliance with organizational standards.",
-          "remediate": "Revoke access for suspicious users, investigate the source of the request, and enforce multi-factor authentication."
-        },
-        {
-          "name": "AWS: Anomalous Access Configuration",
-          "description": "Monitors for unexpected changes in access configurations that could signal attempts to bypass security controls or escalate privileges.",
-          "actionNames": [
-            "Transfer.CreateAccess"
-          ],
-          "defaultSeverity": "Medium",
-          "threatType": "Privilege Escalation",
-          "recommend": "Regularly audit and review IAM policies and permissions, ensuring least privilege principles are applied.",
-          "remediate": "Revert unauthorized changes, investigate the origin of the configuration change, and update security policies as needed."
-        },
-        {
-          "name": "AWS: Unexpected Connector Setup",
-          "description": "Tracks the creation of new connectors which may be used to establish unauthorized data exfiltration channels.",
-          "actionNames": [
-            "Transfer.CreateConnector"
-          ],
-          "defaultSeverity": "High",
-          "threatType": "Data Exfiltration",
-          "recommend": "Monitor and restrict connector setup activities, ensuring they align with business needs and security policies.",
-          "remediate": "Disable unauthorized connectors, review logs for suspicious activity, and enhance monitoring on data transfer endpoints."
-        },
-        {
-          "name": "AWS: Unusual Server Configuration Changes",
-          "description": "Detects unexpected server configuration changes that could indicate attempts to compromise or alter system behavior.",
-          "actionNames": [
-            "Transfer.CreateServer"
-          ],
-          "defaultSeverity": "Medium",
-          "threatType": "Defense Evasion",
-          "recommend": "Implement change management processes and regularly review server configurations for unauthorized modifications.",
-          "remediate": "Revert changes, investigate the source of the modification, and strengthen configuration management practices."
-        },
-        {
-          "name": "AWS: Unauthorized Profile Creation",
-          "description": "Identifies the creation of new profiles that may be used to impersonate legitimate users or services within the AWS environment.",
-          "actionNames": [
-            "Transfer.CreateProfile"
-          ],
-          "defaultSeverity": "Medium",
-          "threatType": "Identity Spoofing",
-          "recommend": "Enforce strict profile creation policies and regularly audit existing profiles for compliance with security standards.",
-          "remediate": "Delete unauthorized profiles, investigate the origin of the request, and enhance identity verification processes."
-        }
-      ],
-      "variant_count": 5,
-      "generation_status": "success",
-      "error": null,
-      "generated_at": "2026-06-04T09:08:30Z",
-      "grounding_context": {
-        "matched_platforms": [
-          "aws"
-        ],
-        "primary_platform": "aws",
-        "routed_profiles": [
-          "aws:iam"
-        ],
-        "injected_action_count": 15,
-        "allowed_actions": [
-          "MPA.DeleteInactiveApprovalTeamVersion",
-          "MPA.StartActiveApprovalTeamDeletion",
-          "Transfer.CreateAccess",
-          "Transfer.CreateAgreement",
-          "Transfer.CreateConnector",
-          "Transfer.CreateProfile",
-          "Transfer.CreateServer",
-          "Transfer.CreateUser",
-          "Transfer.CreateWebApp",
-          "Transfer.CreateWorkflow",
-          "Transfer.DeleteAccess",
-          "Transfer.DeleteAgreement",
-          "Transfer.DeleteCertificate",
-          "Transfer.DeleteConnector",
-          "Transfer.DeleteHostKey"
-        ],
-        "source_files": [
-          "catalogs/aws_iam_actions.json"
-        ]
-      }
-    },
-    {
-      "threat_id": "e1613053272cc176",
-      "threat_title": "Microsoft Monthly Security Update (June 2026)",
-      "threat_url": "https://www.hkcert.org/security-bulletin/microsoft-monthly-security-update-june-2026",
-      "source": "HKCERT Infosec Express -- Alert and Blog Channel",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 7,
-        "primary_domain": "Identity",
-        "primary_platform": "Azure",
-        "reasoning_summary": "The text mentions 'Elevation of Privilege' and 'Azure' in the context of security updates, indicating a core identity/cloud vulnerability."
-      },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: Response missing 'rules' array",
-      "generated_at": "2026-06-11T04:54:51Z",
-      "grounding_context": {
-        "matched_platforms": [
-          "azure"
-        ],
-        "primary_platform": "azure",
-        "routed_profiles": [
-          "azure:azure_admin"
-        ],
-        "injected_action_count": 15,
-        "allowed_actions": [
-          "microsoft.app/containerapps/patches/apply/action",
-          "microsoft.web/sites/deployments/log/read",
-          "microsoft.web/sites/slots/deployments/log/read",
-          "MICROSOFT.IMPACT/OPERATIONS/READ",
-          "MICROSOFT.IMPACT/REGISTER/ACTION",
-          "MICROSOFT.IMPACT/UNREGISTER/ACTION",
-          "microsoft.app/builders/delete",
-          "microsoft.app/builders/read",
-          "microsoft.app/builders/write",
-          "microsoft.app/builds/delete",
-          "microsoft.app/builds/listauthtoken/action",
-          "microsoft.app/builds/read",
-          "microsoft.app/builds/write",
-          "microsoft.app/connectedenvironments/certificates/delete",
-          "microsoft.app/connectedenvironments/certificates/read"
-        ],
-        "source_files": [
-          "azure_admin_events.json"
-        ]
-      }
-    },
     {
       "threat_id": "9e9d3ef4976ac8d7",
       "threat_title": "Borrowed Trust – Systematic Exploitation of Abandoned Cloud DNS Delegations to serve Thai Gambling SEO Content",
@@ -279,11 +18,48 @@
         "primary_platform": "Azure",
         "reasoning_summary": "The text explicitly details the exploitation of abandoned Azure DNS zone delegations, a core identity/infrastructure misconfiguration, allowing unauthorized content serving under trusted domain authority."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: 3 validation errors for ThreatRuleBatch\nrules.0.remediate\n  Field required [type=missing, input_value={'name': 'Azure:DNSZone/T...buse.', 'layer': [1, 2]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.remediate\n  Field required [type=missing, input_value={'name': 'File:AffiliateT...ions.', 'layer': [2, 3]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.remediate\n  Field required [type=missing, input_value={'name': 'Network:Affilia...domains.', 'layer': [3]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:04:53Z",
+      "variants": [
+        {
+          "name": "[Azure]: Process Creation / Command-Line Arguments - Orphaned Zone Exploitation",
+          "description": "Detects orphaned Azure DNS zone delegations misconfigured for Next.js gambling kit deployment via command-line argument injection or process creation anomalies.",
+          "actionNames": [
+            "Microsoft.AAD/register/action",
+            "Microsoft.AzureActiveDirectory/register/action"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Tactic: Initial Access, Technique: DNS Hijacking",
+          "recommend": "Review and remove orphaned NS records in parent zones. Implement automated cleanup for decommissioned Azure subscriptions.",
+          "remediate": "Audit delegated domains; re-delegate to current nameservers or claim new zone if necessary."
+        },
+        {
+          "name": "[File]: File / Registry Modifications - Credential Harvesting Indicators",
+          "description": "Identifies file modifications, registry key changes related to affiliate monetization tracking and geographic filtering for SEO poisoning.",
+          "actionNames": [
+            "ACM.AddTagsToCertificate",
+            "ACM.DeleteCertificate"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Tactic: Execution, Technique: Credential Handling",
+          "recommend": "Monitor file system changes on compromised endpoints; sanitize logs and configuration files for sensitive affiliate parameters.",
+          "remediate": "Isolate affected systems; revoke unauthorized tags/credentials. Conduct forensic analysis of modified registry keys."
+        },
+        {
+          "name": "[Network]: Network Connections / API / System Calls - Affiliate Monetization Traffic Analysis",
+          "description": "Monitors outbound network connections and API calls indicative of affiliate referral tracking, geographic filtering backend in Hong Kong.",
+          "actionNames": [
+            "Microsoft.GraphServices/accounts/write",
+            "ACM.DescribeCertificate"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Tactic: Command and Control, Technique: Network Communication",
+          "recommend": "Analyze network traffic for patterns matching affiliate redirect endpoints; validate TLS certificates against Let's Encrypt.",
+          "remediate": "Block suspicious IP ranges; revoke compromised certificates. Investigate backend infrastructure in Hong Kong for further compromise."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:03:19Z",
       "grounding_context": {
         "matched_platforms": [
           "aws",
@@ -321,6 +97,693 @@
       }
     },
     {
+      "threat_id": "19b138d4afb05aaf",
+      "threat_title": "Cloud Foundry UAA Vulnerability Enables SAML Authentication Bypass",
+      "threat_url": "https://securityonline.info/cloud-foundry-uaa-vulnerability/",
+      "source": "Daily CyberSecurity",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly details a vulnerability allowing SAML authentication bypass within Cloud Foundry UAA, directly matching Identity Security boundaries."
+      },
+      "variants": [
+        {
+          "name": "[Platform]: Enable Inspector2",
+          "description": "Process Creation / Command-Line Arguments - Enables inspector audit trail to detect process manipulation attempts related to UAA vulnerability exploitation.",
+          "actionNames": [
+            "Inspector2.Enable"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Identity",
+          "recommend": "Regularly review Inspector logs and alerts for unusual activity. Harden the platform by applying necessary patches or mitigations against known vulnerabilities affecting process creation mechanisms.",
+          "remediate": "Disable inspector audit temporarily if critical, apply security updates to mitigate vulnerability."
+        },
+        {
+          "name": "[Platform]: Activate KMS Encryption",
+          "description": "File / Registry Modifications or Behavioral Indicators - Activates encryption for sensitive files and registry entries to prevent data exfiltration attempts during SAML bypass.",
+          "actionNames": [
+            "KMS.Sign"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Identity",
+          "recommend": "Ensure that all critical keys are encrypted using KMS. Monitor key usage logs for anomalies indicating compromised credentials or unauthorized access.",
+          "remediate": "Rotate encryption keys immediately and audit any suspicious activity associated with the exposed signing keys."
+        },
+        {
+          "name": "[Platform]: Configure SES Rule Sets",
+          "description": "Network Connections / API / System Calls - Configures SMTP rule sets to block anomalous network traffic potentially related to SAML bypass exploitation.",
+          "actionNames": [
+            "SES.DescribeActiveReceiptRuleSet",
+            "SES.SetActiveReceiptRuleSet"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Identity",
+          "recommend": "Analyze and update SES receipt rules periodically. Implement additional checks for suspicious IP addresses or payload patterns associated with the UAA vulnerability.",
+          "remediate": "Immediately revise SES rule sets to filter out malicious traffic, block identified threat vectors, and conduct a full security audit of email-related configurations."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:03:40Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws"
+        ],
+        "primary_platform": "saml",
+        "routed_profiles": [
+          "aws:iam"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Inspector2.Enable",
+          "KMS.Sign",
+          "SES.DescribeActiveReceiptRuleSet",
+          "SES.SetActiveReceiptRuleSet",
+          "SSO.GetRoleCredentials",
+          "SSO.ListAccountRoles",
+          "SSO.ListAccounts",
+          "SSO.Logout",
+          "STS.AssumeRoleWithSAML",
+          "STS.DecodeAuthorizationMessage",
+          "STS.GetAccessKeyInfo",
+          "Signin.CreateOAuth2Token",
+          "AssumeRole",
+          "AttachUserPolicy",
+          "ConsoleLogin"
+        ],
+        "source_files": [
+          "aws_cloudtrail.json",
+          "catalogs/aws_iam_actions.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "2edb8a635699c573",
+      "threat_title": "Who Are You? The Identity Crisis in Multi-Agent AI Systems",
+      "threat_url": "https://generativeai.pub/who-are-you-the-identity-crisis-in-multi-agent-ai-systems-164ad17637e5?source=rss----440100e76000---4",
+      "source": "Generative AI - Medium",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly discusses the need for authentication and authorization between autonomous agents (A2A), referencing concepts like DIDs, public/private key pairs, and cryptographic signing to verify identity."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: No valid rules JSON object found in model response",
+      "generated_at": "2026-06-17T09:03:47Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "aws:iam",
+          "github:github_workflow",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/register/action",
+          "Microsoft.AzureActiveDirectory/register/action",
+          "Microsoft.GraphServices/register/action",
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/write",
+          "Microsoft.AzureActiveDirectory/guestUsages/read"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "d6e499632ba2fb72",
+      "threat_title": "ZTCA Configuration: Restrict DocuSign sign-ins to trusted IPs using Entra Conditional Access",
+      "threat_url": "https://www.threatlocker.com/blog/ztca-configuration-restrict-docusign-sign-ins-to-trusted-ips-using-entra-conditional-access",
+      "source": "ThreatLocker Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly details using Microsoft Entra ID Conditional Access to restrict sign-ins, which is a core Identity Security function."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-06-17T09:03:55Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/delete",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "c67f550f8887a88e",
+      "threat_title": "ZTCA Configuration: Restrict GitHub Enterprise access to trusted IPs using Entra Conditional Access",
+      "threat_url": "https://www.threatlocker.com/blog/ztca-configuration-restrict-github-enterprise-access-to-trusted-ips-using-entra-conditional-access",
+      "source": "ThreatLocker Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Okta",
+        "reasoning_summary": "The text explicitly details using Entra ID Conditional Access to restrict access to GitHub Enterprise, matching Identity and SaaS boundaries."
+      },
+      "variants": [
+        {
+          "name": "[Process Creation/Command-Line Arguments] Block script execution for unauthorized access",
+          "description": "Prevent the launch of scripts or executables that attempt to bypass conditional access policies by checking command-line arguments against a whitelist of trusted IPs.",
+          "actionNames": [
+            "Block Script Execution"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Evasion",
+          "recommend": "Review and restrict execution paths for sensitive scripts. Implement argument validation mechanisms.",
+          "remediate": "Terminate unauthorized process instances immediately. Conduct a forensic analysis to identify the source of bypass attempts."
+        },
+        {
+          "name": "[File/Registry Modifications] Detect changes in system configuration files related to GitHub Enterprise access",
+          "description": "Monitor file and registry modifications that indicate an attempt to configure or alter user settings for GitHub Enterprise sign-ins from unapproved IPs.",
+          "actionNames": [
+            "Alert on Configuration Change"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Modification Evasion",
+          "recommend": "Establish baseline configurations. Use anomaly detection for rapid identification of unauthorized changes.",
+          "remediate": "Roll back any detected malicious configuration changes and audit affected systems."
+        },
+        {
+          "name": "[Network Connections/Endpoints] Block traffic to GitHub Enterprise endpoints from untrusted IPs",
+          "description": "Identify and block outbound network connections aimed at GitHub Enterprise servers originating from non-approved external sources.",
+          "actionNames": [
+            "Block Outbound Connection"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Network Evasion",
+          "recommend": "Configure firewall rules to restrict access. Analyze connection patterns for signs of credential harvesting or lateral movement.",
+          "remediate": "Immediately block connections from the offending IPs and review network security appliances."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:04:15Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "github:github_workflow",
+          "github:github_audit",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/delete",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "975787d771232366",
+      "threat_title": "ZTCA Configuration: Restrict GitHub Enterprise Cloud access to trusted IPs using Entra Conditional Access",
+      "threat_url": "https://www.threatlocker.com/blog/ztca-configuration-restrict-github-enterprise-cloud-access-to-trusted-ips-using-entra-conditional-access",
+      "source": "ThreatLocker Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Okta",
+        "reasoning_summary": "The text explicitly discusses using Entra Conditional Access to restrict access to GitHub Enterprise Cloud, linking Identity security controls (Conditional Access) with a SaaS platform (GitHub)."
+      },
+      "variants": [
+        {
+          "name": "[Platform]: Restrict process execution for untrusted network connections",
+          "description": "[Platform]: [Process Creation / Command-Line Arguments] Detect suspicious process creation attempts from non-whitelisted IPs to restrict GitHub Enterprise Cloud access",
+          "actionNames": [
+            "config.disable_anonymous_git_access"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Unauthorized Access",
+          "recommend": "[Platform]: Implement network filters and whitelist trusted IPs for accessing source code repositories",
+          "remediate": "[Platform]: Block connections from untrusted sources by enabling config settings and configuring Conditional Access policies"
+        },
+        {
+          "name": "[Platform]: Monitor file access to GitHub Enterprise Cloud repository directories",
+          "description": "[Platform]: [File / Registry Modifications] Detect unauthorized modifications or reads on critical source code files in the GitHub Enterprise Cloud environment",
+          "actionNames": [
+            "config.lock_anonymous_git_access"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Data Breach",
+          "recommend": "[Platform]: Use file integrity monitoring tools to detect changes and enforce access controls through Conditional Access",
+          "remediate": "[Platform]: Investigate unauthorized modifications, revoke access rights, and review audit logs for suspicious activity"
+        },
+        {
+          "name": "[Platform]: Block untrusted network traffic to GitHub Enterprise Cloud API endpoints",
+          "description": "[Platform]: [Network Connections / API/System Calls] Detect and block anomalous or excessive API calls from untrusted IP addresses targeting GitHub Enterprise Cloud services",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/read",
+            "Microsoft.AAD/domainServices/write"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "API Abuse",
+          "recommend": "[Platform]: Configure network firewalls and Conditional Access to restrict API access based on IP reputation and behavioral analysis",
+          "remediate": "[Platform]: Isolate compromised systems, update firewall rules, and audit user permissions for the GitHub Enterprise Cloud platform"
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:04:38Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure",
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "github:github_workflow",
+          "github:github_audit",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "config.disable_anonymous_git_access",
+          "config.enable_anonymous_git_access",
+          "config.lock_anonymous_git_access",
+          "config.unlock_anonymous_git_access",
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read"
+        ],
+        "source_files": [
+          "azure_auth_events.json",
+          "github_audit_logs.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "744523c2fe79e255",
+      "threat_title": "Mastery Hunt: Hidden API Endpoints — A Deep Dive into API Bug Bounty Recon & Exploitation",
+      "threat_url": "https://infosecwriteups.com/mastery-hunt-hidden-api-endpoints-a-deep-dive-into-api-bug-bounty-recon-exploitation-9cc1d14b8c96?source=rss----7b722bfd1b8d---4",
+      "source": "InfoSec Write-ups - Medium",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text details advanced techniques for discovering and exploiting hidden API endpoints, which often contain sensitive data and privileged operations related to identity and business logic."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-06-17T09:04:43Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "github"
+        ],
+        "primary_platform": "aws",
+        "routed_profiles": [
+          "aws:iam",
+          "gcp:iam",
+          "github:github_workflow",
+          "github:github_audit"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "config.lock_anonymous_git_access",
+          "config.unlock_anonymous_git_access",
+          "pull_request_review_comment.delete",
+          "delete",
+          "deployment",
+          "issues",
+          "public",
+          "status",
+          "business.set_actions_retention_limit",
+          "config.disable_anonymous_git_access",
+          "config.enable_anonymous_git_access",
+          "oauth_application.reset_secret",
+          "org.add_member",
+          "org.advanced_security_policy_selected_member_disabled",
+          "pull_request_review_comment"
+        ],
+        "source_files": [
+          "github_actions_workflow.json",
+          "github_audit_logs.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "d3ac4c9484673b6a",
+      "threat_title": "SimpleHelp bug lets hackers create rogue remote support accounts",
+      "threat_url": "https://www.bleepingcomputer.com/news/security/simplehelp-bug-lets-hackers-create-rogue-remote-support-accounts/",
+      "source": "BleepingComputer",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The vulnerability allows unauthenticated attackers to create privileged technician accounts using the OpenID Connect (OIDC) authentication protocol, directly impacting identity management."
+      },
+      "variants": [
+        {
+          "name": "[Windows]: Block Unverified Remote Process Execution",
+          "description": "Monitors and blocks execution of remote processes originating from untrusted OIDC endpoints by analyzing command-line arguments for known attack vectors.",
+          "actionNames": [
+            "ProcessCreationPreventer"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Configure Windows Defender Application Control to block Remote Desktop sessions initiated with suspicious OIDC parameters. Regularly update the list of trusted OIDC endpoints in group policies.",
+          "remediate": "Audit all active Remote Desktop connections and terminate any originating from unverified sources. Revoke privileges for compromised accounts and enforce multi-factor authentication."
+        },
+        {
+          "name": "[Linux]: Isolate Filesystem Access From Suspicious Users",
+          "description": "Detects anomalous file system access attempts by users with elevated privileges, focusing on modifications to critical directories commonly targeted during OIDC-based account creation.",
+          "actionNames": [
+            "AppArmorProfileEnforcement"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Privilege Escalation",
+          "recommend": "Restrict capabilities of non-privileged users and enforce mandatory access controls on sensitive filesystems. Regularly audit user activities for deviations from baseline behaviors.",
+          "remediate": "Quarantine affected accounts, remove unauthorized privileges immediately, and conduct a forensic analysis to determine the breach scope."
+        },
+        {
+          "name": "[Azure]: Restrict OIDC-Initiated Role Assignments",
+          "description": "Blocks privileged role assignments triggered by unauthenticated OIDC authentication events using Microsoft Graph API endpoints. Monitors for suspicious changes in access control configurations.",
+          "actionNames": [
+            "Microsoft.Authorization/roleAssignments/write"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Privilege Escalation",
+          "recommend": "Implement conditional access policies to require additional verification for role assignments from untrusted OIDC sources. Enable logging and monitoring on all Graph API endpoints related to IAM.",
+          "remediate": "Immediately revoke any suspicious role assignment, isolate the affected Azure resources, and run a comprehensive audit of user permissions."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:05:08Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "oidc"
+        ],
+        "primary_platform": "oidc",
+        "routed_profiles": [
+          "oidc:default"
+        ],
+        "injected_action_count": 0,
+        "allowed_actions": [],
+        "source_files": []
+      }
+    },
+    {
+      "threat_id": "7286603dfb68b7ff",
+      "threat_title": "ZTCA Configuration: Restrict Azure management sign-ins to trusted IPs using Entra Conditional Access",
+      "threat_url": "https://www.threatlocker.com/blog/ztca-configuration-restrict-azure-management-sign-ins-to-trusted-ips-using-entra-conditional-access",
+      "source": "ThreatLocker Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly details using Entra ID Conditional Access to restrict Azure management sign-ins based on IP location, directly addressing Identity and Cloud security controls."
+      },
+      "variants": [
+        {
+          "name": "[Azure]: Block Management Sign-ins",
+          "description": "[Platform]: [B][Process Creation / Command-Line Arguments] Detect management sign-in attempts via process injection on Azure services using Entra Conditional Access triggers for suspicious IPs.",
+          "actionNames": [
+            "Microsoft.AAD/Operations/read"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Conditional Access Enforcement",
+          "recommend": "[Identity]: Configure conditional access policies to block sign-ins from non-approved IP ranges and enforce multi-factor authentication on sensitive Azure management endpoints.",
+          "remediate": "[Cloud Security]: Regularly audit role assignments in Azure, revoke unauthorized permissions, and update conditional access settings as needed."
+        },
+        {
+          "name": "[Azure]: Audit Role Assignment Changes",
+          "description": "[Platform]: [File / Registry Modifications or Behavioral Indicators] Monitor registry changes related to Azure Active Directory User Flies by scanning for suspicious role assignment patterns using Entra Conditional Access logs and alerts.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/write"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privileged Account Misuse",
+          "recommend": "[Identity]: Implement continuous monitoring of user roles in Azure AD, with automated remediation for abnormal role escalations or privilege grants outside approved procedures.",
+          "remediate": "[Cloud Security]: Integrate alerts into incident response workflows to rapidly investigate and remediate any unauthorized access attempts."
+        },
+        {
+          "name": "[Azure]: Enforce IP Whitelisting",
+          "description": "[Platform]: [Network Connections / API / System Calls] Use network monitoring tools in conjunction with Azure's Conditional Access policies to block all management portal, CLI, and API calls from unapproved external IP addresses.",
+          "actionNames": [
+            "Microsoft.AAD/register/action"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Network-Based Access Control Violation",
+          "recommend": "[Identity]: Establish a dynamic whitelist of approved IP ranges for Azure management sign-ins, leveraging Entra's Conditional Access to enforce these policies across all access points.",
+          "remediate": "[Cloud Security]: Periodically review and update the list of whitelisted IPs based on threat intelligence feeds and organizational changes."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:05:32Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/delete",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "9ac729771a5a4dc4",
+      "threat_title": "ZTCA Configuration: Restrict AWS access via IAM Identity Center to trusted IPs using Entra Conditional Access",
+      "threat_url": "https://www.threatlocker.com/blog/ztca-configuration-restrict-aws-access-via-iam-identity-center-to-trusted-ips-using-entra-conditional-access",
+      "source": "ThreatLocker Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly details using Entra Conditional Access and Named Locations to restrict AWS IAM Identity Center sign-ins, linking Identity and Cloud security controls."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: No valid rules JSON object found in model response",
+      "generated_at": "2026-06-17T09:05:35Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "aws:iam",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/delete",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "d6006c1e00f0b05b",
+      "threat_title": "Public and Private Medical Community Targeted by China-Nexus Threat Actor Pursuing Artificial Intelligence, Cyber, Medical, and National Defense Research",
+      "threat_url": "https://cloud.google.com/blog/topics/threat-intelligence/prc-targets-us-medical-research/",
+      "source": "Cloud Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text details credential theft via REDCap login credentials, abuse of enterprise administrative tools, and recommends enforcing 2-Step Verification (2SV) and Device Bound Session Credentials (DBSC) for identity protection."
+      },
+      "variants": [
+        {
+          "name": "[AWS]: ProcessAdminLoginCheck",
+          "description": "Checks for command-line arguments passed to AWS administrative tools indicating process creation with malicious intent.",
+          "actionNames": [
+            "user.account.update_user_type"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Process Creation Exploitation",
+          "recommend": "Review and restrict command-line parameters when executing AWS admin tasks. Implement logging for all process creations tied to administrative tools.",
+          "remediate": "Immediately audit active sessions, terminate any unauthorized processes, and reset credentials if compromised."
+        },
+        {
+          "name": "[Registry]: ComplianceRuleModification",
+          "description": "Monitors registry modifications indicative of data exfiltration or persistence activities on Windows systems within the medical research domain.",
+          "actionNames": [
+            "user.authentication.dsso_via_non_priority_source"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Behavioral Anomaly Detection",
+          "recommend": "Enable Device Bound Session Credentials (DBSC) and enforce content compliance rules on registry access points. Regularly audit non-critical source entries for anomalies.",
+          "remediate": "Quarantine affected devices, reconfigure session settings to DBSC mode, and restore compliant registry states."
+        },
+        {
+          "name": "[Network]: INFINITEREDMalwareDetection",
+          "description": "Scans network traffic on endpoints involved in medical research activities for signs of the INFINITERED malware communicating with external C2 servers.",
+          "actionNames": [
+            "security.session.detect_client_roaming"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Network Communication Analysis",
+          "recommend": "Enable advanced DLP rules to block connections related to known malicious IPs. Use SIEM integration for real-time alerts on roaming session activities.",
+          "remediate": "Immediately isolate infected endpoints, remove INFINITERED from the network, and conduct a full forensic analysis."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:06:01Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws",
+          "okta"
+        ],
+        "primary_platform": "identity",
+        "routed_profiles": [
+          "aws:iam",
+          "gcp:iam",
+          "okta:okta_auth",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "user.account.update_user_type",
+          "user.authentication.auth_identifier_not_in_policy",
+          "user.authentication.dsso_via_non_priority_source",
+          "user.session.access_admin_app",
+          "security.session.detect_client_roaming",
+          "security.session_protection.status.update",
+          "user.account.lock.limit",
+          "user.account.recovery.password.complete",
+          "user.account.update_password",
+          "Account.AcceptPrimaryEmailUpdate",
+          "Account.DeleteAlternateContact",
+          "Account.DisableRegion",
+          "Account.EnableRegion",
+          "Account.GetAccountInformation",
+          "Account.GetAlternateContact"
+        ],
+        "source_files": [
+          "catalogs/aws_iam_actions.json",
+          "okta_auth_events.json"
+        ]
+      }
+    },
+    {
       "threat_id": "b651ba966882705c",
       "threat_title": "The Payroll Pirate Campaign Leverages AiTM Session Hijacking to Target HR Departments",
       "threat_url": "https://securityonline.info/payroll-pirate-campaign-aitm-hijacking/",
@@ -332,11 +795,46 @@
         "primary_platform": "Unknown",
         "reasoning_summary": "The text explicitly mentions 'AiTM Session Hijacking' and targeting corporate departments, which are core identity security vectors."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: 6 validation errors for ThreatRuleBatch\nrules.0.recommend\n  Field required [type=missing, input_value={'name': '[aws]:ProcessCr...cation where possible.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.0.remediate\n  Field required [type=missing, input_value={'name': '[aws]:ProcessCr...cation where possible.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.recommend\n  Field required [type=missing, input_value={'name': '[aws]:File/Regi...ion message decodings.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.remediate\n  Field required [type=missing, input_value={'name': '[aws]:File/Regi...ion message decodings.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.recommend\n  Field required [type=missing, input_value={'name': '[aws]:Network/A...strict firewall rules.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.remediate\n  Field required [type=missing, input_value={'name': '[aws]:Network/A...strict firewall rules.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:05:10Z",
+      "variants": [
+        {
+          "name": "[Process Creation / Command-Line Arguments] - Process Initialization for Finance Modules",
+          "description": "[Monitor creation of finance-related processes and command-line arguments indicating module initialization or suspicious parameter injection.]",
+          "actionNames": [
+            "Transfer.CreateUser"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Privilege Escalation",
+          "recommend": "Review process startup configurations. Validate all initial parameters to prevent injection attacks.",
+          "remediate": "[Initiate incident response protocols for compromised user creation processes.]"
+        },
+        {
+          "name": "[File / Registry Modifications] - Finance Data Exfiltration Detection",
+          "description": "[Detect unauthorized file modifications or registry changes in finance department directories, indicating data theft.]",
+          "actionNames": [
+            "Transfer.CreateServer"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Implement strict access controls on sensitive files and audit system registries frequently.",
+          "remediate": "[Quarantine affected systems. Revoke permissions as needed.]"
+        },
+        {
+          "name": "[Network Connections / API] - Unusual Finance-Related Traffic Analysis",
+          "description": "[Analyze network traffic for anomalies linked to finance department operations, such as unexpected external API calls or data exfiltration attempts.]",
+          "actionNames": [
+            "SES.DescribeActiveReceiptRuleSet",
+            "SES.SetActiveReceiptRuleSet"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Privilege Escalation",
+          "recommend": "[Deploy advanced network monitoring tools and establish baseline traffic patterns for finance operations.]",
+          "remediate": "[Isolate suspicious IPs. Reconfigure firewall rules to block identified threats.]"
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:06:22Z",
       "grounding_context": {
         "matched_platforms": [
           "aws"
@@ -370,6 +868,51 @@
       }
     },
     {
+      "threat_id": "d1e9005aab3fccd5",
+      "threat_title": "Holding blobs for ransom: Four methods for Azure Storage ransomware",
+      "threat_url": "https://securitylabs.datadoghq.com/articles/azure-blob-storage-ransomware-four-methods/",
+      "source": "Datadog Security Labs",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Cloud",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The content explicitly details vectors for abusing Azure Storage to maliciously encrypt victim blobs, which constitutes a concrete cloud resource destruction/modification exploit."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: No valid rules JSON object found in model response",
+      "generated_at": "2026-06-17T09:06:43Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_admin"
+        ],
+        "injected_action_count": 12,
+        "allowed_actions": [
+          "Dell.Storage/filesystems/delete",
+          "Dell.Storage/filesystems/read",
+          "Dell.Storage/filesystems/write",
+          "Dell.Storage/operations/read",
+          "Dell.Storage/register/action",
+          "Dell.Storage/unregister/action",
+          "Qumulo.Storage/fileSystems/delete",
+          "Qumulo.Storage/fileSystems/read",
+          "Qumulo.Storage/fileSystems/write",
+          "Qumulo.Storage/operations/read",
+          "Qumulo.Storage/register/action",
+          "Qumulo.Storage/unregister/action"
+        ],
+        "source_files": [
+          "azure_admin_events.json"
+        ]
+      }
+    },
+    {
       "threat_id": "99e1680b6ff3e106",
       "threat_title": "SimpleHelp Authentication Bypass Exploited to Hijack Remote Endpoints",
       "threat_url": "https://securityonline.info/simplehelp-authentication-bypass/",
@@ -381,11 +924,47 @@
         "primary_platform": "Unknown",
         "reasoning_summary": "The text explicitly mentions 'authentication bypass' and 'OAuth2 Proxy,' which are core identity security vectors, even though the specific platform is not named."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: 6 validation errors for ThreatRuleBatch\nrules.0.recommend\n  Field required [type=missing, input_value={'name': '[Process Creati...mmand execution paths.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.0.remediate\n  Field required [type=missing, input_value={'name': '[Process Creati...mmand execution paths.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.recommend\n  Field required [type=missing, input_value={'name': '[File / Registr...factor authentication.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.remediate\n  Field required [type=missing, input_value={'name': '[File / Registr...factor authentication.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.recommend\n  Field required [type=missing, input_value={'name': '[Network Connec...compromised endpoints.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.remediate\n  Field required [type=missing, input_value={'name': '[Network Connec...compromised endpoints.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:05:26Z",
+      "variants": [
+        {
+          "name": "[Process Creation / Command-Line Arguments] Process creation or command-line argument manipulation can be used to bypass authentication by directly invoking system processes related to the SimpleHelp service, potentially exploiting any available RCE vulnerabilities.",
+          "description": "This rule monitors for abnormal process creation patterns or unusual command-line arguments that may indicate an attempt to exploit known Remote Code Execution (RCE) and Authentication Bypass vulnerabilities in remote management software. It specifically targets platforms like AWS where such exploits could hijack endpoints by bypassing SimpleHelp authentication mechanisms.",
+          "actionNames": [
+            "STS.AssumeRoleWithSAML",
+            "STS.AssumeRoleWithWebIdentity"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Privilege Escalation",
+          "recommend": "Implement strict process validation and validate all command-line parameters to prevent RCE exploitation. Ensure that SimpleHelp authentication requires multi-factor verification or session re-validation upon abnormal process invocation.",
+          "remediate": "Immediately terminate any suspicious processes, revoke compromised credentials, and apply security patches to fix the underlying vulnerabilities in the remote management software."
+        },
+        {
+          "name": "[File / Registry Modifications] File system or registry modifications can serve as behavioral indicators of an ongoing SimpleHelp authentication bypass. Attackers may create or modify files containing leaked credentials or alter configuration settings that facilitate unauthorized access.",
+          "description": "This rule detects anomalous file creation, modification activities, and changes to the Windows registry related to SimpleHelp service configurations. Such actions often accompany RCE exploits aiming to hijack remote endpoints by bypassing authentication layers like OAuth2 Proxy vulnerabilities.",
+          "actionNames": [
+            "ResourceExplorer2.Search"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Credential Compromise",
+          "recommend": "Regularly audit file system and registry changes, especially those affecting sensitive configuration files. Use integrity monitoring to detect unauthorized modifications in real-time.",
+          "remediate": "Investigate and isolate any suspicious process causing the alterations; restore configurations from known good backups; and conduct a forensic analysis to identify compromised credentials or further vulnerabilities."
+        },
+        {
+          "name": "[Network Connections / API / System Calls] Network anomalies, including unexpected outbound connections or abnormal API calls, may indicate exploitation of SimpleHelp endpoints. Attackers might use these channels to exfiltrate data post-authentication bypass using system call techniques tied to OAuth2 Proxy flaws.",
+          "description": "This rule monitors for unusual network traffic patterns such as anomalous DNS requests, unexpected external API interactions, or suspicious outbound connections that could be leveraged by attackers exploiting RCE vulnerabilities in SimpleHelp services to hijack remote endpoints via authentication bypass mechanisms like those seen with the OAuth2 Proxy flaw.",
+          "actionNames": [
+            "CloudSearchDomain.Search",
+            "SageMaker.Search"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Data Exfiltration",
+          "recommend": "Deploy network intrusion detection systems to monitor for abnormal traffic patterns. Utilize threat intelligence feeds to correlate observed anomalies with known attack vectors associated with SimpleHelp and OAuth2 Proxy vulnerabilities.",
+          "remediate": "Quarantine affected endpoints, block suspicious IP addresses or domains identified in the investigation, and review API access logs to identify and remediate any unauthorized data exfiltration paths."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:07:21Z",
       "grounding_context": {
         "matched_platforms": [
           "aws"
@@ -434,7 +1013,7 @@
       "variant_count": 0,
       "generation_status": "failed",
       "error": "Generation failed: Response missing 'rules' array",
-      "generated_at": "2026-06-15T10:05:35Z",
+      "generated_at": "2026-06-17T09:07:53Z",
       "grounding_context": {
         "matched_platforms": [
           "aws",
@@ -483,49 +1062,11 @@
         "primary_platform": "GitHub",
         "reasoning_summary": "The text explicitly mentions GitHub access sales, leaked repositories, and stolen API keys, which are direct indicators of SaaS supply-chain attack vectors."
       },
-      "variants": [
-        {
-          "name": "[Platform]: config.unlock_anonymous_git_access",
-          "description": "Monitor enabling/disabling of anonymous Git access, flagging potential unauthorized repository exposure.",
-          "actionNames": [
-            "config.disable_anonymous_git_access",
-            "config.enable_anonymous_git_access",
-            "config.lock_anonymous_git_access",
-            "config.unlock_anonymous_git_access"
-          ],
-          "defaultSeverity": "Medium",
-          "threatType": "T1078 - Credential Reuse",
-          "recommend": "Audit and restrict Git access policies.",
-          "remediate": "Revoke compromised keys, enforce 2FA."
-        },
-        {
-          "name": "[Platform]: repo.access",
-          "description": "Track changes to repository access controls, detecting anomalies in user permissions indicative of supply-chain compromise.",
-          "actionNames": [
-            "repo.access"
-          ],
-          "defaultSeverity": "High",
-          "threatType": "T1194 - Access Control Bypass",
-          "recommend": "Regularly review and limit developer access rights.",
-          "remediate": "Immediately revoke suspect accounts, log audit trails."
-        },
-        {
-          "name": "[Platform]: dependabot_alerts_new_repos.enable",
-          "description": "Alert on activation of Dependabot for new repositories, as unusual automation may signal compromised dependency updates.",
-          "actionNames": [
-            "dependabot_alerts_new_repos.disable",
-            "dependabot_alerts_new_repos.enable"
-          ],
-          "defaultSeverity": "Critical",
-          "threatType": "T1151 - Automated Dependency Exploit",
-          "recommend": "Disable Dependabot on non-essential projects, monitor enable events.",
-          "remediate": "Temporarily suspend Dependabot, conduct dependency audit."
-        }
-      ],
-      "variant_count": 3,
-      "generation_status": "success",
-      "error": null,
-      "generated_at": "2026-06-15T10:05:53Z",
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-06-17T09:08:16Z",
       "grounding_context": {
         "matched_platforms": [
           "github"
@@ -559,6 +1100,90 @@
       }
     },
     {
+      "threat_id": "9b957b7fd64d5fb8",
+      "threat_title": "Active Exploitation of Oracle PeopleSoft Zero-Day (CVE-2026-35273)",
+      "threat_url": "https://www.rapid7.com/blog/post/etr-active-exploitation-of-oracle-peoplesoft-zero-day-cve-2026-35273",
+      "source": "Rapid7 Cybersecurity Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text describes a critical RCE vulnerability (CVE-2026-35273) in PeopleSoft, which was used in conjunction with post-exploitation activity involving the deployment of agents masquerading as Microsoft Azure services and the capture of Windows machine-account NetNTLM hashes, indicating identity compromise."
+      },
+      "variants": [
+        {
+          "name": "[Azure]: Block External Access to /PSEMHUB/*",
+          "description": "Process Creation / Command-Line Arguments: Monitor and block external access to PeopleSoft's Environment Management Hub endpoint at the network perimeter or firewall level. This mitigates SSRF by preventing unauthorized command-line arguments that could trigger internal endpoints like PSEMHUB/hub.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/oucontainer/read"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Privilege Escalation",
+          "recommend": "Implement network segmentation and firewall rules to block external access to /PSEMHUB/* while maintaining necessary internal connectivity for approved operations.",
+          "remediate": "Revoke any existing rules allowing access, apply the new blocking measures, and continuously monitor traffic related to these endpoints. Conduct a post-patching investigation using IOC indicators."
+        },
+        {
+          "name": "[Azure]: Monitor Outbound SMB Traffic on Port 445",
+          "description": "File / Registry Modifications or Behavioral Indicators: Detect outbound SMB connections (TCP port 445) from PeopleSoft systems, which may indicate lateral movement and NetNTLM hash exfiltration. This aligns with file/system call monitoring to identify behavioral anomalies tied to the threat.",
+          "actionNames": [
+            "Microsoft.AzureActiveDirectory/guestUsages/read"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Enable logging and anomaly detection for SMB traffic, especially on port 445. Correlate with other indicators to confirm compromise.",
+          "remediate": "Investigate any suspicious outbound connections, block if necessary, and review firewall rules while ensuring critical services are not disrupted."
+        },
+        {
+          "name": "[Azure]: Deploy MeshCentral Agent Monitoring for Azure Masquerade",
+          "description": "Network Connections / API / System Calls: Use network monitoring to detect the deployment of MeshCentral agents masquerading as Microsoft Azure services, which is part of post-exploitation behavior. This involves detecting unusual system calls and outbound connections that align with lateral movement or data exfiltration patterns.",
+          "actionNames": [
+            "Microsoft.AzureActiveDirectory/register/action"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Deploy MeshCentral agents for real-time monitoring of any signs of Azure service impersonation. Integrate with SIEM to correlate these events and enhance detection capabilities.",
+          "remediate": "Upon identification, isolate the compromised systems, remove or revoke malicious registrations, and follow incident response protocols while preserving necessary operational functions."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:13:53Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "aws:iam",
+          "github:github_audit",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/register/action",
+          "Microsoft.AzureActiveDirectory/register/action",
+          "Microsoft.GraphServices/register/action",
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read",
+          "Microsoft.AzureActiveDirectory/guestUsages/read",
+          "Microsoft.AzureActiveDirectory/operations/read",
+          "Microsoft.GraphServices/Operations/read",
+          "Microsoft.GraphServices/accounts/read",
+          "Microsoft.GraphServices/unregister/action"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      }
+    },
+    {
       "threat_id": "8995ed687a06d06c",
       "threat_title": "How to restrict AWS access to specific IPs using Conditional Access",
       "threat_url": "https://www.threatlocker.com/blog/how-to-restrict-aws-access-to-specific-ips-using-conditional-access",
@@ -570,11 +1195,45 @@
         "primary_platform": "Okta",
         "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Conditional Access to restrict AWS IAM Identity Center sign-ins, linking Identity and Cloud domains."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: 6 validation errors for ThreatRuleBatch\nrules.0.recommend\n  Field required [type=missing, input_value={'name': '[Process Creati... the remediation steps'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.0.remediate\n  Field required [type=missing, input_value={'name': '[Process Creati... the remediation steps'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.recommend\n  Field required [type=missing, input_value={'name': '[File/Registry ... in Microsoft Entra ID'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.remediate\n  Field required [type=missing, input_value={'name': '[File/Registry ... in Microsoft Entra ID'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.recommend\n  Field required [type=missing, input_value={'name': '[Network Connec... from non-approved IPs'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.remediate\n  Field required [type=missing, input_value={'name': '[Network Connec... from non-approved IPs'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:06:19Z",
+      "variants": [
+        {
+          "name": "[Azure]: Blocking Unauthorized AWS IAM Sign-Ins",
+          "description": "Monitors for attempts to access AWS IAM using conditions that match process creation or command-line argument patterns associated with the threat tool.",
+          "actionNames": [
+            "Microsoft.AAD/Operations/read"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Evasion",
+          "recommend": "Implement strict sign-in policies in Microsoft Entra ID and integrate with AWS IAM to allow only approved IP addresses using process monitoring and command-line argument analysis.",
+          "remediate": "Block the unauthorized access by updating Conditional Access settings, revoke any suspicious IAM credentials, and review recent IAM activity."
+        },
+        {
+          "name": "[File]: Unusual IAM Credential Storage",
+          "description": "Detects file or registry modifications that may indicate storage of AWS IAM credentials without proper security controls.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/write"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Credential Management Failure",
+          "recommend": "Review and restrict the use of local files and registries for storing secrets by enforcing secure credential storage practices in Microsoft Entra ID configurations.",
+          "remediate": "Remove any improperly stored AWS IAM credentials, enforce multi-factor authentication, and audit access to sensitive data."
+        },
+        {
+          "name": "[Network]: Blocking Outbound AWS API Calls",
+          "description": "Monitors network connections for patterns consistent with unauthorized outbound calls to AWS services from the context of an attack using system or API call indicators.",
+          "actionNames": [
+            "Microsoft.AWA..."
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Data Exfiltration",
+          "recommend": "Configure Microsoft Entra ID Conditional Access to block IAM Identity Center sign-ins and monitor for suspicious network activity related to AWS API calls. Use threat intelligence feeds to enhance detection.",
+          "remediate": "Isolate the affected systems, update access policies in both Azure and AWS, and conduct a security audit of all cloud service interactions."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:14:18Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -621,43 +1280,43 @@
       },
       "variants": [
         {
-          "name": "ProcessCreation/CommandLineArguments: UnauthorizedOAuthExecution",
-          "description": "Detects suspicious process creation or command-line arguments related to unauthorized execution of PHPBB applications vulnerable to CVE-2026-48611.",
+          "name": "[Process Creation / Command-Line Arguments]",
+          "description": "Checks for signs of process manipulation or command-line parameter exploitation related to the vulnerability, such as unexpected service starts or argument injections that could facilitate attacker access.",
           "actionNames": [
             "integration_installation.version_updated"
           ],
-          "defaultSeverity": "Critical",
-          "threatType": "Identity-TC.001",
-          "recommend": "Review and restrict process creation for phpBB installations, ensuring version 3.3.16 or higher is deployed to mitigate vulnerability.",
-          "remediate": "Apply the recommended patch from GitHub Advisory immediately."
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Review and restrict process creation parameters for any unauthorized installations. Update integration settings to log and monitor version update events as potential indicators of compromise related to the vulnerability.",
+          "remediate": "Patch or apply configuration changes, disable vulnerable components if necessary, and ensure all new processes adhere to security guidelines."
         },
         {
-          "name": "File/RegistryModifications: AuditAccountAccessLogs",
-          "description": "Monitors file and registry changes indicative of unauthorized account access, such as modifications in phpBB configuration files or user credential storage.",
+          "name": "[File / Registry Modifications]",
+          "description": "Monitors for abnormal file access patterns or registry entries that may indicate an attacker is attempting to leverage the vulnerability to escalate privileges or exfiltrate data.",
           "actionNames": [
-            "config.lock_anonymous_git_access"
+            "org.disable_two_factor_requirement"
           ],
           "defaultSeverity": "High",
-          "threatType": "Identity-TC.002",
-          "recommend": "Enable auditing on sensitive file systems and registry paths to detect signs of unauthorized access due to CVE-2026-48611.",
-          "remediate": "Investigate audit logs for anomalies, apply security patches if available."
+          "threatType": "Privilege Escalation",
+          "recommend": "Audit and restrict file system access, enforce two-factor authentication where possible, and verify that no unauthorized changes have been made to critical files or registry settings.",
+          "remediate": "Implement necessary patches, restore compromised configurations, and enhance monitoring of file and registry activities."
         },
         {
-          "name": "NetworkConnections: BlockOAuthEndpoints",
-          "description": "Blocks or monitors OAuth authentication endpoints potentially exploited by CVE-2026-48611 vulnerability in phpBB applications.",
+          "name": "[Network Connections / API / System Calls]",
+          "description": "Surveillance for suspicious network connections, API calls, or system command executions that could be related to the exploitation of the OAuth vulnerability. This includes detecting data exfiltration attempts or unauthorized cloud service interactions.",
           "actionNames": [
-            "config.disable_anonymous_git_access"
+            "dependabot_security_updates.disable"
           ],
-          "defaultSeverity": "Critical",
-          "threatType": "Identity-TC.003",
-          "recommend": "Temporarily disable anonymous Git access and restrict OAuth endpoints until a patch is applied.",
-          "remediate": "Implement network-level blocking of vulnerable OAuth interactions, apply security updates as recommended."
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Investigate and block any suspicious outbound network connections, particularly to known malicious endpoints. Update security settings for Dependabot to disable unnecessary updates that could be exploited.",
+          "remediate": "Isolate affected systems, revoke compromised credentials if detected, and ensure all external API calls are properly authenticated and encrypted."
         }
       ],
       "variant_count": 3,
       "generation_status": "success",
       "error": null,
-      "generated_at": "2026-06-15T10:06:40Z",
+      "generated_at": "2026-06-17T09:14:44Z",
       "grounding_context": {
         "matched_platforms": [
           "github"
@@ -704,43 +1363,46 @@
       },
       "variants": [
         {
-          "name": "[Process Creation / Command-Line Arguments] ProcessCreationTemplateUpdate",
-          "description": "Monitor creation of process templates via command-line arguments to detect anomalous activity related to compromised systems.",
+          "name": "[Azure]: Unauthorized Azure Subscription Recreation",
+          "description": "Detects creation of new Azure subscriptions that may be using abandoned DNS zones to gain control over subdomains.",
           "actionNames": [
-            "ECR.CreateRepositoryCreationTemplate"
-          ],
-          "defaultSeverity": "Medium",
-          "threatType": "T1078.003",
-          "recommend": "Review and audit the use of Create Repository Creation Templates for unauthorized process creation patterns indicative of compromise.",
-          "remediate": "Terminate suspicious templates, reconfigure security policies to restrict template usage."
-        },
-        {
-          "name": "[File / Registry Modifications or Behavioral Indicators] SubdomainRegistryAudit",
-          "description": "Analyze registry modifications and file system changes associated with enterprise subdomains for signs of compromise.",
-          "actionNames": [
-            "Azure:ScanRegistryChanges"
+            "CloudSearchDomain.Search",
+            "DataZone.Search"
           ],
           "defaultSeverity": "High",
-          "threatType": "T1078.004",
-          "recommend": "Implement continuous monitoring to detect unauthorized registry edits or file writes on critical systems hosting compromised subdomains.",
-          "remediate": "Quarantine affected files, restore from backups and reinforce access controls."
+          "threatType": "Infrastructure Abuse",
+          "recommend": "Regularly audit and remove orphaned Azure DNS zone delegations. Implement automated checks for new subscription creations linked to previous abandoned zones.",
+          "remediate": "Investigate and disable any suspicious new subscriptions; reconfigure DNS settings to prevent domain hijacking."
         },
         {
-          "name": "[Network Connections / API / System Calls] DNSConnectionAnalysis",
-          "description": "Investigate network connections and API calls to identify suspicious traffic patterns linked with the Next.js kit deployment or affiliate link redirection.",
+          "name": "[Azure]: Suspicious Registry Key Access",
+          "description": "Identifies unusual access patterns in the Windows registry that may indicate compromise of an enterprise Azure admin account.",
           "actionNames": [
-            "CloudSearchDomain.Search"
+            "ECR.BatchDeleteImage",
+            "ECR.CreatePullThroughCacheRule"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Privilege Escalation",
+          "recommend": "Monitor and restrict access to critical Azure registry keys. Use multi-factor authentication for administrative accounts.",
+          "remediate": "Quarantine affected systems, change credentials immediately, and conduct a full system audit."
+        },
+        {
+          "name": "[Azure]: Unusual Network Traffic from Backend Servers",
+          "description": "Sends alerts when backend infrastructure with known malicious TLS fingerprints is detected on the network.",
+          "actionNames": [
+            "ECR.CreateRepositoryCreationTemplate",
+            "ECR.DeleteSigningConfiguration"
           ],
           "defaultSeverity": "Critical",
-          "threatType": "T1078.005",
-          "recommend": "Deploy deep packet inspection on DNS queries and API endpoints to uncover abnormal traffic flows associated with compromised subdomains hosting gambling content.",
-          "remediate": "Block suspicious IP ranges, isolate affected systems from the network."
+          "threatType": "Network Connection Exploitation",
+          "recommend": "Implement network anomaly detection and inspect traffic for unusual patterns, especially from known malicious IP ranges like AS398478.",
+          "remediate": "Isolate affected systems, update firewall rules to block suspicious connections, and analyze logs for further forensic investigation."
         }
       ],
       "variant_count": 3,
       "generation_status": "success",
       "error": null,
-      "generated_at": "2026-06-15T10:07:02Z",
+      "generated_at": "2026-06-17T09:15:10Z",
       "grounding_context": {
         "matched_platforms": [
           "aws"
@@ -788,8 +1450,8 @@
       "variants": [],
       "variant_count": 0,
       "generation_status": "failed",
-      "error": "Generation failed: 6 validation errors for ThreatRuleBatch\nrules.0.recommend\n  Field required [type=missing, input_value={'name': '[Process Creati... 'alert_security_team']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.0.remediate\n  Field required [type=missing, input_value={'name': '[Process Creati... 'alert_security_team']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.recommend\n  Field required [type=missing, input_value={'name': '[File / Registr...is_of_affected_system']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.remediate\n  Field required [type=missing, input_value={'name': '[File / Registr...is_of_affected_system']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.recommend\n  Field required [type=missing, input_value={'name': '[Network Connec...ew_of_cloud_api_usage']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.remediate\n  Field required [type=missing, input_value={'name': '[Network Connec...ew_of_cloud_api_usage']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:07:26Z",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-06-17T09:15:21Z",
       "grounding_context": {
         "matched_platforms": [
           "github"
@@ -835,11 +1497,45 @@
         "primary_platform": "GitHub",
         "reasoning_summary": "The content explicitly discusses GitHub pulling a pin on npm's auto-run scripts, which is a direct security measure within the SaaS development ecosystem."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: Response missing 'rules' array",
-      "generated_at": "2026-06-15T10:07:32Z",
+      "variants": [
+        {
+          "name": "[Github]: Auto-Run Script Process Creation",
+          "description": "Detects initiation of npm's auto-run scripts on pull requests via process creation or command-line arguments in GitHub workflows.",
+          "actionNames": [
+            "check_run"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Exploit",
+          "recommend": "Review and restrict the use of auto-run scripts in repository settings. Ensure that any such script execution is necessary and does not introduce security risks.",
+          "remediate": "Disable or audit auto-run configurations for all repositories, particularly those with write access to sensitive actions like npm."
+        },
+        {
+          "name": "[Github]: Auto-Run Script Registry Modification",
+          "description": "Identifies changes in the npm registry potentially caused by compromised pull requests that include auto-run scripts.",
+          "actionNames": [
+            "config.lock_anonymous_git_access"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Implement strict access controls on the npm registry and monitor for unusual activity following new pinning of script configurations.",
+          "remediate": "Revoke any unapproved changes to the npm registry, audit affected packages, and re-secure repository settings."
+        },
+        {
+          "name": "[Github]: Auto-Run Script Network Anomaly",
+          "description": "Senses anomalous network patterns or API calls that may result from compromised auto-run scripts in GitHub workflows.",
+          "actionNames": [
+            "pull_request.close"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Exploit",
+          "recommend": "Investigate and isolate any pull requests showing abnormal interaction with the npm registry via network or API calls. Strengthen firewall rules to prevent further suspicious activity.",
+          "remediate": "Close all compromised pull requests, reset affected configurations, and conduct a full security audit of recent GitHub actions."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:15:43Z",
       "grounding_context": {
         "matched_platforms": [
           "github"
@@ -888,8 +1584,8 @@
       "variants": [],
       "variant_count": 0,
       "generation_status": "failed",
-      "error": "Generation failed: No valid rules JSON object found in model response",
-      "generated_at": "2026-06-15T10:07:34Z",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-06-17T09:15:52Z",
       "grounding_context": {
         "matched_platforms": [
           "github"
@@ -933,11 +1629,47 @@
         "primary_platform": "GitHub",
         "reasoning_summary": "The text explicitly mentions a compromised GitHub account used in a supply chain attack targeting repositories."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: Response missing 'rules' array",
-      "generated_at": "2026-06-15T10:07:38Z",
+      "variants": [
+        {
+          "name": "[Azure]: Unusual Role Assignment to Service Principal",
+          "description": "Detects unexpected IAM role assignments to service principals outside approved change windows.",
+          "actionNames": [
+            "config.disable_anonymous_git_access"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Enforce PIM-based just-in-time access for all service principal role assignments. Require approval workflows for privileged roles.",
+          "remediate": "Immediately revoke the unauthorized role assignment. Review the assigning identity for compromise indicators. Audit all recent role changes in the subscription."
+        },
+        {
+          "name": "[GitHub]: Suspicious Commit Activity",
+          "description": "Identifies anomalous commit patterns linked to supply chain attacks, such as unexpected repository access or modifications.",
+          "actionNames": [
+            "dependabot_alerts_new_repos.disable",
+            "dependabot_security_updates_new_repos.enable"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Supply Chain Attack",
+          "recommend": "Review commit logs for unauthorized changes. Enable automated alerts for repository access and security updates.",
+          "remediate": "Isolate affected repositories, roll back recent commits if necessary, and enhance monitoring of supply chain activities."
+        },
+        {
+          "name": "[GitHub]: Unusual Repository Configuration Changes",
+          "description": "Sleuthing through GitHub configuration anomalies that may indicate exploitation or propagation mechanisms for the Miasma worm.",
+          "actionNames": [
+            "config.lock_anonymous_git_access",
+            "repo.add_member"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Exploit Development",
+          "recommend": "Audit repository configurations and restrict anonymous access. Validate all member additions to prevent further abuse by the Miasma worm.",
+          "remediate": "Revert compromised settings, remove unauthorized members, and conduct a full security audit of affected repositories."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:16:15Z",
       "grounding_context": {
         "matched_platforms": [
           "github"
@@ -982,11 +1714,45 @@
         "primary_platform": "GitHub",
         "reasoning_summary": "The text explicitly mentions 'GitHub' and 'package poisonings,' indicating a supply chain attack vector within a source code management platform."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: Response missing 'rules' array",
-      "generated_at": "2026-06-15T10:07:44Z",
+      "variants": [
+        {
+          "name": "[Linux]: Unusual Process Creation",
+          "description": "Detects suspicious process creation events that could be related to the execution of malicious scripts or binaries as part of a supply chain attack on GitHub.",
+          "actionNames": [
+            "process_start"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Process Infiltration",
+          "recommend": "Review and monitor system processes for unknown executions. Implement strict controls over which executables can run in critical environments.",
+          "remediate": "Quarantine or kill the suspicious process, then conduct a full audit of recent installations and access logs."
+        },
+        {
+          "name": "[Windows]: Registry Key Tampering",
+          "description": "Identifies unusual modifications to Windows registry keys that may be used by malware to maintain persistence after compromising systems via supply chain attacks.",
+          "actionNames": [
+            "registry_modify"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Persistence Establishment",
+          "recommend": "Implement real-time protection and regularly audit the integrity of critical system registry entries.",
+          "remediate": "Isolate affected machines, restore registry from a known good backup, and investigate potential further compromise."
+        },
+        {
+          "name": "[Cloud]: Anomalous Network Traffic Analysis",
+          "description": "Sleuths out abnormal outbound network traffic patterns that could indicate data exfiltration attempts following supply chain-based malware infection on GitHub repositories.",
+          "actionNames": [
+            "network_anomaly_detection"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Command and Control Communication",
+          "recommend": "Employ advanced anomaly detection systems to flag suspicious traffic, with integration of threat intelligence feeds for improved accuracy in supply chain environments.",
+          "remediate": "Investigate and block the source IP or domain. Reassess firewall rules and implement additional safeguards against similar network-based attacks."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:16:38Z",
       "grounding_context": {
         "matched_platforms": [
           "github"
@@ -1036,7 +1802,7 @@
       "variant_count": 0,
       "generation_status": "failed",
       "error": "Generation failed: Response missing 'rules' array",
-      "generated_at": "2026-06-15T10:07:54Z",
+      "generated_at": "2026-06-17T09:16:47Z",
       "grounding_context": {
         "matched_platforms": [
           "github"
@@ -1083,43 +1849,43 @@
       },
       "variants": [
         {
-          "name": "process_creation_harden_runner_monitoring",
-          "description": "Monitors process creation for instances of Harden-Runner, indicative of Miasma worm activity.",
+          "name": "[Windows]: Process Creation with Hardened Runner Argument",
+          "description": "Detects process creation attempts using the command-line argument related to Harden-Runner, indicating potential compromise by the Miasma worm.",
+          "actionNames": [
+            "create"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Execution of Untrusted Software",
+          "recommend": "Review and restrict execution of processes with arguments referencing Hardened Runner. Update security policies to prevent similar evasion techniques.",
+          "remediate": "Terminate any active instances of the process in question, analyze system for further signs of compromise, and reinforce endpoint protections."
+        },
+        {
+          "name": "[GitHub]: Unauthorized Branch Protection Rule Modification",
+          "description": "Identifies changes to branch protection rules that may have been exploited by Miasma worm to facilitate repository compromises.",
+          "actionNames": [
+            "branch_protection_rule"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Repository Configuration Tampering",
+          "recommend": "Audit and restore original branch protection settings. Implement alerts for changes in critical repository configurations.",
+          "remediate": "Revert any unauthorized rule modifications, conduct a full security assessment of affected repositories, and enhance monitoring around configuration changes."
+        },
+        {
+          "name": "[Network]: Suspicious Workflow Run Activity",
+          "description": "Sleuths process creation / command-line arguments; detects network indicators such as unusual workflow run patterns potentially linked to the Miasma worm's spread within GitHub.",
           "actionNames": [
             "workflow_run"
           ],
           "defaultSeverity": "Critical",
-          "threatType": "Tactics: Exploitation",
-          "recommend": "Audit and restrict Harden-Runner processes; implement behavioral analysis to detect anomalies in process execution patterns.",
-          "remediate": "Quarantine infected instances, remove malware signatures, and reinforce endpoint protections."
-        },
-        {
-          "name": "file_registry_harden_runner_log_analysis",
-          "description": "Analyzes file system changes and registry modifications related to StepSecurity’s Harden-Runner affected by Miasma worm.",
-          "actionNames": [
-            "check_suite"
-          ],
-          "defaultSeverity": "High",
-          "threatType": "Tactics: Lateral Movement",
-          "recommend": "Implement real-time monitoring of critical directories where Harden-Runner operates; review registry entries for unauthorized changes.",
-          "remediate": "Restore affected files from secure backups, reset compromised registry keys, and conduct a full system audit."
-        },
-        {
-          "name": "network_api_harden_runner_protection",
-          "description": "Blocks network traffic associated with Harden-Runner exploited by Miasma worm to exfiltrate data or communicate with command-and-control servers.",
-          "actionNames": [
-            "deployment"
-          ],
-          "defaultSeverity": "Medium",
-          "threatType": "Tactics: Command and Control",
-          "recommend": "Deploy intrusion detection systems to identify abnormal network patterns; restrict outbound connections from Harden-Runner environment.",
-          "remediate": "Isolate infected networks, update firewall rules to block suspicious IPs, and enhance logging for future threat detection."
+          "threatType": "Network-based Evasion Tactics",
+          "recommend": "Investigate and isolate affected workflows. Strengthen network monitoring for anomalous automation patterns associated with the Miasma worm.",
+          "remediate": "Disable compromised workflows, analyze logs to identify propagation methods of the worm, and reinforce intrusion detection systems."
         }
       ],
       "variant_count": 3,
       "generation_status": "success",
       "error": null,
-      "generated_at": "2026-06-15T10:08:13Z",
+      "generated_at": "2026-06-17T09:17:10Z",
       "grounding_context": {
         "matched_platforms": [
           "github"
@@ -1166,8 +1932,8 @@
       "variants": [],
       "variant_count": 0,
       "generation_status": "failed",
-      "error": "Generation failed: Response missing 'rules' array",
-      "generated_at": "2026-06-15T10:08:25Z",
+      "error": "Generation failed: 1 validation error for ThreatRuleBatch\nrules.2.actionNames\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.12/v/too_short",
+      "generated_at": "2026-06-17T09:17:41Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1202,6 +1968,620 @@
       }
     },
     {
+      "threat_id": "d103ac42ef28e6cf",
+      "threat_title": "Breaking Confinement: How a Corrections Vendor Exposed Inmate Communications  | UpGuard",
+      "threat_url": "https://www.upguard.com/breaches/breaking-containment-how-a-corrections-vendor-exposed-inmate-communications",
+      "source": "UpGuard Data Breach Research",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions an exposed Azure storage bucket containing millions of documents, including driver's licenses used for identity verification."
+      },
+      "variants": [
+        {
+          "name": "[Azure]: Unusual Data Exfiltration Activity",
+          "description": "Process creation with command-line arguments to retrieve and send inmate data from an unsecured Azure storage bucket via network API calls.",
+          "actionNames": [
+            "Microsoft.Windows.SecurityAudit/reporting/ReceiveEvent"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Phishing/Social Engineering",
+          "recommend": "Investigate potential exfiltration by analyzing process creation events and audit exposed data endpoints. Strengthen network segmentation for Azure services.",
+          "remediate": "Terminate any unauthorized processes, isolate affected systems, and review incident response protocols."
+        },
+        {
+          "name": "[Azure]: Unauthorized Access to Inmate Data",
+          "description": "File system access anomalies indicating potential exfiltration of sensitive inmate data from an unsecured storage bucket on Azure.",
+          "actionNames": [
+            "Microsoft.Windows.SecurityAudit/reporting/ReceiveEvent"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Confidentiality Breach",
+          "recommend": "Review file access logs for unusual read/write operations. Implement strict access controls to the Azure storage account.",
+          "remediate": "Revoke permissions, reset credentials, and conduct a full security audit of data handling procedures."
+        },
+        {
+          "name": "[Azure]: Detection of Anomalous Data Transmission",
+          "description": "Network indicators suggest large volumes of data being transmitted from an insecure Azure storage bucket linked to inmate communication systems.",
+          "actionNames": [
+            "Microsoft.Windows.SecurityAudit/reporting/ReceiveEvent"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Confidentiality Breach",
+          "recommend": "Monitor network traffic for abnormal patterns. Use threat intelligence to correlate with known exfiltration tactics.",
+          "remediate": "Investigate and block the source IP, re-secure data channels, and update incident response plans."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:18:05Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_admin"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Dell.Storage/filesystems/delete",
+          "Dell.Storage/filesystems/read",
+          "Dell.Storage/filesystems/write",
+          "Dell.Storage/operations/read",
+          "Dell.Storage/register/action",
+          "Dell.Storage/unregister/action",
+          "Qumulo.Storage/fileSystems/delete",
+          "Qumulo.Storage/fileSystems/read",
+          "Qumulo.Storage/fileSystems/write",
+          "Qumulo.Storage/operations/read",
+          "Qumulo.Storage/register/action",
+          "Qumulo.Storage/unregister/action",
+          "microsoft.app/builders/delete",
+          "microsoft.app/builders/read",
+          "microsoft.app/builders/write"
+        ],
+        "source_files": [
+          "azure_admin_events.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "580ca2554af4ace2",
+      "threat_title": "Threat tactic spotlight: Subdomain takeover",
+      "threat_url": "https://aws.amazon.com/blogs/security/threat-tactic-spotlight-subdomain-takeover/",
+      "source": "AWS Security Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Cloud",
+        "primary_platform": "AWS",
+        "reasoning_summary": "The text explicitly discusses 'subdomain takeover' and mitigation using various AWS features and services, placing it within the Cloud Infrastructure Security domain."
+      },
+      "variants": [
+        {
+          "name": "[AWS]: Subdomain Takeover Detection - Process Creation",
+          "description": "Monitors for process creation or command-line argument injections that may indicate setup for subdomain takeover attacks.",
+          "actionNames": [
+            "AssumeRole"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Cloud Infrastructure Security",
+          "recommend": "Review and audit role-based access controls to prevent misuse of AssumeRole operations related to the threat. Implement least privilege principles when granting roles that interact with DNS or subdomain configurations.",
+          "remediate": "Revoke any suspicious role credentials, reconfigure AWS security groups, and ensure proper logging is in place for process escalations."
+        },
+        {
+          "name": "[AWS]: Subdomain Takeover Detection - File System",
+          "description": "Scans for file or registry changes that could be used to facilitate subdomain takeover by extracting sensitive information required for DNS hijacking.",
+          "actionNames": [
+            "AttachUserPolicy"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Cloud Infrastructure Security",
+          "recommend": "Implement strict access controls on files and registries, particularly those storing credentials or configuration details that could be exploited in subdomain takeover incidents. Regularly review file system changes for anomalies.",
+          "remediate": "Quarantine altered configurations, restore from backups if necessary, and conduct a security audit of affected systems."
+        },
+        {
+          "name": "[AWS]: Subdomain Takeover Detection - Network Traffic",
+          "description": "Analyzes network patterns or API calls that may be related to the propagation of malicious DNS records for subdomain takeover attacks.",
+          "actionNames": [
+            "CreateAccessKey",
+            "ConsoleLogin"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Cloud Infrastructure Security",
+          "recommend": "Monitor and restrict unauthorized access key creation and console logins that could be leveraged to gain control over DNS settings. Use AWS CloudTrail to track API calls related to domain management.",
+          "remediate": "Disable compromised keys, enforce multi-factor authentication for critical operations, and review recent login activities."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:18:31Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws"
+        ],
+        "primary_platform": "aws",
+        "routed_profiles": [
+          "aws:iam"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "MPA.CancelSession",
+          "RDS.CancelExportTask",
+          "RDS.DescribeDBLogFiles",
+          "RDS.DownloadDBLogFilePortion",
+          "AssumeRole",
+          "AttachUserPolicy",
+          "ConsoleLogin",
+          "CreateAccessKey",
+          "CreateRole",
+          "CreateUser",
+          "DeleteTrail",
+          "GetSecretValue",
+          "InvokeFunction",
+          "PassRole",
+          "PutBucketPolicy"
+        ],
+        "source_files": [
+          "aws_cloudtrail.json",
+          "catalogs/aws_iam_actions.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "ca81ef6daec7f5db",
+      "threat_title": "Advait Patel on How SRE and Security Engineering Are Converging",
+      "threat_url": "https://thecyberexpress.com/sre-and-security-engineering/",
+      "source": "The Cyber Express",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text repeatedly discusses IAM, multi-cloud identity management across AWS, GCP, and Azure, and the convergence of security and SRE in cloud environments."
+      },
+      "variants": [
+        {
+          "name": "[aws]: Process Termination via IAM Policy Exclusion",
+          "description": "Detects process creation or command-line argument manipulation that could lead to unauthorized access by excluding necessary IAM policies, potentially indicating a misconfiguration overlap between SRE and Security Engineering failures such as exposing data through service take-down due to IAM policy errors.",
+          "actionNames": [
+            "Microsoft.AAAD/Operations/read"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Review and audit all process creation events related to IAM operations, ensure that command-line arguments for service initialization do not inadvertently exclude necessary security policies. Implement strict validation of IAM policy changes in the deployment pipeline.",
+          "remediate": "Revert any unauthorized IAM policy exclusions immediately. Conduct a root cause analysis to identify how misconfigurations led to both process disruption and potential data exposure, then enforce remediation through updated CI/CD pipelines with integrated security checks."
+        },
+        {
+          "name": "[azure]: Unusual Registry Key Creation via Automated Deployment",
+          "description": "Identifies unusual file or registry modifications that may indicate a breach attempt following an automated deployment. This includes unexpected creation of keys in the system, which could be part of a larger attack vector exploiting SRE and Security Engineering convergence issues.",
+          "actionNames": [
+            "Microsoft.AzureActiveDirectory/operations/read"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Privilege Escalation",
+          "recommend": "Implement file integrity monitoring to detect unauthorized changes in critical system directories. Establish baseline behavior for automated deployments and flag anomalies that may indicate a security or configuration issue.",
+          "remediate": "Isolate affected systems, remove any malicious registry keys or files created during the breach, review deployment processes for potential misconfigurations leading to both SRE infrastructure issues and security vulnerabilities."
+        },
+        {
+          "name": "[gcp]: Suspicious Data Processing via Cloud Service API",
+          "description": "Sleuths out anomalous network connections or data processing patterns that could signify a compromise. This includes unexpected API calls, excessive data throughput in cloud services beyond typical SRE operational parameters, and potential exfiltration attempts masked as legitimate workload identity management activities.",
+          "actionNames": [
+            "cloudvolumesgcp-api.netapp.com-activeDirectories.get"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Deploy anomaly detection systems to monitor for unusual API usage and data processing volumes. Cross-reference these events with known IAM policy changes or process disruptions, focusing on workload identity management in multi-cloud environments.",
+          "remediate": "Investigate and terminate any unauthorized processes making suspicious API calls. Reassess cloud service configurations and IAM policies to prevent overlap between SRE operational activities and security incidents."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:19:10Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "primary_platform": "aws",
+        "routed_profiles": [
+          "aws:iam",
+          "gcp:iam",
+          "github:github_workflow",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "AIOps.CreateInvestigationGroup",
+          "AIOps.DeleteInvestigationGroup",
+          "AIOps.DeleteInvestigationGroupPolicy",
+          "AIOps.GetInvestigationGroup",
+          "AIOps.GetInvestigationGroupPolicy",
+          "AIOps.ListInvestigationGroups",
+          "AIOps.ListTagsForResource",
+          "AIOps.PutInvestigationGroupPolicy",
+          "AIOps.TagResource",
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AzureActiveDirectory/operations/read",
+          "Microsoft.GraphServices/Operations/read",
+          "actions.agent.get",
+          "cloudvolumesgcp-api.netapp.com-activeDirectories.get",
+          "cloudvolumesgcp-api.netapp.com-jobs.get"
+        ],
+        "source_files": [
+          "azure_auth_events.json",
+          "catalogs/aws_iam_actions.json",
+          "catalogs/gcp_iam_permissions.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "b6c3cfde5446af1c",
+      "threat_title": "AI found 2,000 vulnerabilities in 7 weeks. We’ve patched almost none of them",
+      "threat_url": "https://www.cio.com/article/4185253/ai-found-2000-vulnerabilities-in-7-weeks-weve-patched-almost-none-of-them.html",
+      "source": "Security | CIO",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly discusses the structural threat to identity infrastructure, mentioning account takeovers, synthetic identities, and the logic of trust itself becoming the attack surface."
+      },
+      "variants": [
+        {
+          "name": "[Process Creation / Command-Line Arguments] Account.AcceptPrimaryEmailUpdate",
+          "description": "Detects suspicious process creation or command-line argument patterns indicative of account takeover attempts, such as unexpected acceptance of primary email updates in security-sensitive applications.",
+          "actionNames": [
+            "Account.AcceptPrimaryEmailUpdate"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Implement strict validation and verification processes for any process creation or command-line argument changes, especially those affecting user identity information. Regularly audit application logs to ensure no unauthorized primary email updates are processed.",
+          "remediate": "Investigate and revoke suspicious account activities related to primary email acceptance; enforce multi-factor authentication and update incident response protocols."
+        },
+        {
+          "name": "[File / Registry Modifications] Account.GetAlternateContact",
+          "description": "Monitors file or registry access for changes in alternate contact information, which could indicate an ongoing identity compromise or phishing campaign targeting individuals through altered communication details.",
+          "actionNames": [
+            "Account.GetAlternateContact"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Conduct frequent file and registry integrity checks on systems handling personal information. Update alternate contact data upon verification to prevent misuse in account recovery scenarios.",
+          "remediate": "Immediately update or remove compromised alternate contact details from affected accounts; enhance monitoring for any suspicious changes related to user contacts."
+        },
+        {
+          "name": "[Network Connections / API / System Calls] Account.DisableRegion",
+          "description": "Sscouts unusual network connections, API calls, or system modifications that disable regional settings critical to identity verification processes. This could signal an advanced persistent threat attempting to subvert security measures through region-based trust mechanisms.",
+          "actionNames": [
+            "Account.DisableRegion"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Review and harden network configurations, ensuring that any changes to regional settings are authorized. Implement anomaly detection for unexpected API calls or system modifications affecting identity services.",
+          "remediate": "Re-enable region-specific security controls after thorough investigation of the attempted disablement; audit affected systems for signs of compromise."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:19:42Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws",
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "aws:iam",
+          "github:github_workflow",
+          "azure:azure_admin",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Account.AcceptPrimaryEmailUpdate",
+          "Account.DeleteAlternateContact",
+          "Account.DisableRegion",
+          "Account.EnableRegion",
+          "Account.GetAccountInformation",
+          "Account.GetAlternateContact",
+          "Account.GetContactInformation",
+          "Account.GetGovCloudAccountInformation",
+          "Account.GetPrimaryEmail",
+          "create",
+          "watch",
+          "AssumeRole",
+          "AttachUserPolicy",
+          "ConsoleLogin",
+          "CreateAccessKey"
+        ],
+        "source_files": [
+          "aws_cloudtrail.json",
+          "catalogs/aws_iam_actions.json",
+          "github_actions_workflow.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "a0736a02d599c4bc",
+      "threat_title": "TryHackMe — Checkmate | Full Walkthrough",
+      "threat_url": "https://infosecwriteups.com/tryhackme-checkmate-full-walkthrough-49a418a8e956?source=rss----7b722bfd1b8d---4",
+      "source": "InfoSec Write-ups - Medium",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text details credential harvesting, brute forcing, and exploiting weak passwords across multiple internal systems, which are core identity security attack vectors."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-06-17T09:19:56Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws"
+        ],
+        "primary_platform": "aws",
+        "routed_profiles": [
+          "aws:iam",
+          "github:github_workflow",
+          "github:github_audit",
+          "azure:azure_admin",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "EBS.CompleteSnapshot",
+          "EBS.ListChangedBlocks",
+          "EBS.ListSnapshotBlocks",
+          "EC2.AcceptAddressTransfer",
+          "EC2.AcceptCapacityReservationBillingOwnership",
+          "EC2.AcceptReservedInstancesExchangeQuote",
+          "EC2.AcceptTransitGatewayClientVpnAttachment",
+          "EC2.AcceptTransitGatewayMulticastDomainAssociations",
+          "EC2.AcceptTransitGatewayPeeringAttachment",
+          "AssumeRole",
+          "AttachUserPolicy",
+          "ConsoleLogin",
+          "CreateAccessKey",
+          "CreateRole",
+          "CreateUser"
+        ],
+        "source_files": [
+          "aws_cloudtrail.json",
+          "catalogs/aws_iam_actions.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "9221759844d7e1ed",
+      "threat_title": "TryHackMe — Break Out The Cage | Full Write-Up",
+      "threat_url": "https://infosecwriteups.com/tryhackme-break-out-the-cage-full-write-up-6de0702d0e01?source=rss----7b722bfd1b8d---4",
+      "source": "InfoSec Write-ups - Medium",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text details lateral movement via SSH, anonymous FTP access, and a final command injection vulnerability triggered by a group-writable file used in a cron job, which are core identity and system security concepts."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: 3 validation errors for ThreatRuleBatch\nrules.0\n  Input should be a valid dictionary or instance of DetectionRule [type=model_type, input_value='config.disable_anonymous_git_access', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/model_type\nrules.1\n  Input should be a valid dictionary or instance of DetectionRule [type=model_type, input_value='watch', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/model_type\nrules.2\n  Input should be a valid dictionary or instance of DetectionRule [type=model_type, input_value='org.advanced_security_po...selected_member_enabled', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/model_type",
+      "generated_at": "2026-06-17T09:20:06Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "github"
+        ],
+        "primary_platform": "identity",
+        "routed_profiles": [
+          "aws:iam",
+          "github:github_workflow",
+          "github:github_audit"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "config.disable_anonymous_git_access",
+          "config.enable_anonymous_git_access",
+          "config.lock_anonymous_git_access",
+          "config.unlock_anonymous_git_access",
+          "watch",
+          "org.advanced_security_policy_selected_member_disabled",
+          "org.advanced_security_policy_selected_member_enabled",
+          "org.disable_member_team_creation_permission",
+          "org.enable_member_team_creation_permission",
+          "org.update_member_repository_creation_permission",
+          "check_run",
+          "members_can_create_pages.disable",
+          "members_can_create_pages.enable",
+          "org.add_member",
+          "org.disable_two_factor_requirement"
+        ],
+        "source_files": [
+          "github_actions_workflow.json",
+          "github_audit_logs.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "ff21e53c7122674a",
+      "threat_title": "ZTCA Configuration: Restrict Box access to trusted IPs using Entra Conditional Access",
+      "threat_url": "https://www.threatlocker.com/blog/ztca-configuration-restrict-box-access-to-trusted-ips-using-entra-conditional-access",
+      "source": "ThreatLocker Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Okta",
+        "reasoning_summary": "The text explicitly discusses using Microsoft Entra ID Conditional Access to restrict access to a service, which falls under Identity Security controls."
+      },
+      "variants": [
+        {
+          "name": "[Azure]: Block OfficeAccess via Unapproved Sign-In",
+          "description": "Blocks access to the /Applications/Box.exe process by terminating conditional configuration tasks for service principals with unrecognized domains, and denying write operations on domain-specific containers using Microsoft.AAD/Operations/read and related actions.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/write"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Evasion",
+          "recommend": "Implement a whitelist of approved domains to allow Box access, while denying all others by blocking write operations on domain service containers and using Microsoft.AAD/Operations/read for verification.",
+          "remediate": "Reinforce the conditional access policy with whitelisting based on trusted IPs or other criteria. Revoke any unwarranted role assignments identified through threat hunting."
+        },
+        {
+          "name": "[Azure]: Block OfficeAccess via Command-Line Arguments",
+          "description": "Blocks Box sign-ins by monitoring for command-line arguments in the /Applications/Box.exe process and blocking conditional access using Microsoft.AAD/domainServices/write to prevent service principal configurations from external domains.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/write"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Evasion",
+          "recommend": "Configure the system to only allow sign-ins with specific command-line parameters that indicate trusted access, and use Microsoft.AAD/Operations/read for real-time verification of service principal identities.",
+          "remediate": "Conduct a security audit on all active roles assignments. Revoke any suspicious or unapproved ones using conditional access write operations."
+        },
+        {
+          "name": "[Azure]: Block OfficeAccess via File/Registry Modifications",
+          "description": "Blocks Box sign-ins by detecting the presence of /Applications/Box.exe in system processes and denying configuration changes to domain service containers through Microsoft.AAD/domainServices/write, thereby preventing external domains from modifying access policies.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/write"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Evasion",
+          "recommend": "Regularly audit file and registry changes related to Box sign-in. Only allow configurations for approved service principals by using Microsoft.AAD/Operations/read as a verification step.",
+          "remediate": "Identify and remove any unauthorized access attempts, then restore conditional access policies with verified trusted identities."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:20:36Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/delete",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "bcc4785fdc72dee8",
+      "threat_title": "ZTCA Configuration: Restrict Okta access to trusted IPs using native controls and Entra Conditional Access",
+      "threat_url": "https://www.threatlocker.com/blog/ztca-configuration-restrict-okta-access-to-trusted-ips-using-native-controls-and-entra-conditional-access",
+      "source": "ThreatLocker Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Okta",
+        "reasoning_summary": "The text explicitly discusses restricting Okta access and utilizing Microsoft Entra ID Conditional Access, which falls directly under Identity Security controls."
+      },
+      "variants": [
+        {
+          "name": "[Azure]: Check for Process Creation related to Okta auth",
+          "description": "Analyzes process creation events that may indicate the use of Okta authentication services or command-line arguments within processes on Azure platforms.",
+          "actionNames": [
+            "Microsoft.AAD/Operations/read"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Process Exploitation",
+          "recommend": "Implement monitoring for unexpected process creation related to Okta auth and review access logs. Restrict Okta application execution by verifying the originating IP address.",
+          "remediate": "Terminate suspicious processes, block their command-line parameters from executing further, and analyze system calls for any anomalies."
+        },
+        {
+          "name": "[Azure]: Detect Registry changes in Okta managed applications",
+          "description": "Monitors registry modifications that could signify configuration changes or behavioral indicators within Okta-managed applications on Azure.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/delete",
+            "Microsoft.AAD/domainServices/oucontainer/write"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Registry Tampering",
+          "recommend": "Audit all registry modifications related to Okta and ensure only approved changes are allowed. Harden configurations by restricting access based on trusted IPs.",
+          "remediate": "Investigate, remediate any unauthorized configuration changes, restore settings from a known good backup, and update conditional access policies."
+        },
+        {
+          "name": "[Azure]: Monitor API calls for Okta Conditional Access",
+          "description": "Surveillance of API interactions that may involve the use of Microsoft Entra ID's Conditional Access to manage or verify Okta authentication processes on Azure.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/read",
+            "Microsoft.AAD/register/action"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "API Abuse",
+          "recommend": "Review all API calls related to Okta and Microsoft Entra ID. Implement rate limiting and require multi-factor authentication for sensitive endpoints.",
+          "remediate": "Disable compromised API functions, enforce IP restrictions on the next configuration cycle, and conduct a full audit of access patterns."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:21:03Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "okta:okta_auth",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/delete",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      }
+    },
+    {
       "threat_id": "ab29bc8f1829b0e6",
       "threat_title": "Prompt Engineering Was the Demo. Context-as-Code Is the Product!",
       "threat_url": "https://generativeai.pub/prompt-engineering-was-the-demo-context-as-code-is-the-product-f687b25e761f?source=rss----440100e76000---4",
@@ -1213,11 +2593,47 @@
         "primary_platform": "Azure",
         "reasoning_summary": "The text discusses model degradation and silent changes in behavior, citing specific platform updates like OpenAI's GPT-4o snapshot swap and Azure's gpt-35-turbo to gpt-4o-mini upgrade, which represent unauthorized changes to system functionality."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: No valid rules JSON object found in model response",
-      "generated_at": "2026-06-15T10:09:26Z",
+      "variants": [
+        {
+          "name": "[Azure]: Detect Unauthorized Role Assignment Changes",
+          "description": "Monitors Azure role assignments for unexpected changes using Microsoft.Billing/billingAccounts/billingProfiles/customers/billingRoleAssignments/read to identify potential privilege escalations or unauthorized access. Checks command-line arguments and process creations related to IAM roles.",
+          "actionNames": [
+            "Microsoft.Billing/billingAccounts/billingProfiles/customers/billingRoleAssignments/read"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Implement continuous monitoring of role assignments with alerts for changes. Use Azure Policy to enforce approved roles and require manual approval for any new or modified IAM permissions.",
+          "remediate": "Investigate the source of unauthorized changes, revoke compromised roles, and review incident response protocols."
+        },
+        {
+          "name": "[Azure]: Analyze File System Changes",
+          "description": "Monitors file system writes, reads on sensitive paths, registry key modifications related to Azure environments. Utilizes Microsoft.App/builders/write/read actions to detect anomalous behavior indicating potential data exfiltration or persistence mechanisms.",
+          "actionNames": [
+            "Microsoft.App/builders/read",
+            "Microsoft.App/builders/write"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Data Exfiltration",
+          "recommend": "Implement file integrity monitoring and anomaly detection on critical paths. Use Azure Defender for ransomware protection to analyze suspicious activities.",
+          "remediate": "Quarantine affected systems, restore from backups if necessary, and conduct a forensic analysis."
+        },
+        {
+          "name": "[Azure]: Monitor Network Anomalies",
+          "description": "Observes outbound/inbound connection patterns, DNS queries, API calls using Microsoft.App/connectenvironments/read/write to identify potential data breaches or command-and-control traffic. Checks for unusual syscalls that may indicate exploitation of vulnerabilities.",
+          "actionNames": [
+            "Microsoft.App/connectenvironments/read",
+            "Microsoft.App/connectenvironments/write"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Exploit Activity",
+          "recommend": "Deploy network intrusion detection systems and analyze API usage patterns with Azure Network Security Groups. Regularly update firewall rules to block suspicious IP addresses.",
+          "remediate": "Isolate affected instances, patch vulnerabilities, and conduct a security audit."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:21:37Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1251,6 +2667,127 @@
       }
     },
     {
+      "threat_id": "280850e00fd1c4e4",
+      "threat_title": "What’s new with Google Cloud",
+      "threat_url": "https://cloud.google.com/blog/topics/inside-google-cloud/whats-new-google-cloud/",
+      "source": "Cloud Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "GCP",
+        "reasoning_summary": "The text discusses securing AI agents by enforcing Fine-Grained Authorization (FGA), secure token exchange, and Model Context Protocol (MCP) governance at the API gateway layer, which relates to identity and access control."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: No valid rules JSON object found in model response",
+      "generated_at": "2026-06-17T09:22:09Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "gcp",
+          "github"
+        ],
+        "primary_platform": "gcp",
+        "routed_profiles": [
+          "aws:iam",
+          "gcp:iam",
+          "github:github_workflow",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "cloudvolumesgcp-api.netapp.com-jobs.get",
+          "cloudvolumesgcp-api.netapp.com-jobs.list",
+          "cloudvolumesgcp-api.netapp.com-regions.list",
+          "cloudvolumesgcp-api.netapp.com-volumes.create",
+          "cloudvolumesgcp-api.netapp.com-volumes.get",
+          "cloudvolumesgcp-api.netapp.com-volumes.list",
+          "cloudvolumesgcp-api.netapp.com-volumes.update",
+          "gcp.redisenterprise.com-databases.create",
+          "gcp.redisenterprise.com-databases.get",
+          "create",
+          "deployment",
+          "public",
+          "schedule",
+          "watch",
+          "pull_request_review"
+        ],
+        "source_files": [
+          "catalogs/gcp_iam_permissions.json",
+          "github_actions_workflow.json"
+        ]
+      }
+    },
+    {
+      "threat_id": "3d97b4560b327048",
+      "threat_title": "Major AI Clients Shipping With Broken OAuth Implementations (JUNE 2026 UPDATE)",
+      "threat_url": "https://www.reddit.com/r/netsec/comments/1u3xm0y/major_ai_clients_shipping_with_broken_oauth/",
+      "source": "Technical Information Security Content & Discussion",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 8,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly discusses OAuth 2.1, PKCE, and the refresh_token grant, which are core components of identity security protocols."
+      },
+      "variants": [
+        {
+          "name": "[Azure]: Process Creation / Command-Line Arguments",
+          "description": "Monitor for process creation or command-line arguments indicative of OAuth 2.1 authentication attempts, such as initialization with incorrect PKCE parameters.",
+          "actionNames": [
+            "Microsoft.Security.ProcessManagement/LogAndAlert"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "OAuth.V2WithPKCE",
+          "recommend": "Ensure that all Azure-based applications enforce the OAuth 2.1 specification, including proper implementation of PKCE in authentication flows.",
+          "remediate": "Review and update application configurations to align with OAuth 2.1 requirements; provide training on correct PKCE usage for development teams."
+        },
+        {
+          "name": "[GitHub]: File / Registry Modifications or Behavioral Indicators",
+          "description": "Identify file writes or registry changes related to the refresh_token grant process, such as storing tokens without proper rotation.",
+          "actionNames": [
+            "Microsoft.Security.FileManagement/LogAndAlert",
+            "Microsoft.Security.RegistryManagement/LogAndAlert"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "OAuth.RefreshTokenGrantImplementation",
+          "recommend": "Implement file and registry audit policies to detect improper handling of refresh tokens; regularly rotate credentials.",
+          "remediate": "Investigate potential breaches, revoke compromised tokens, and enforce multi-factor authentication for access."
+        },
+        {
+          "name": "[Gemini]: Network Connections / API / System Calls",
+          "description": "Detect anomalous network activity or system calls that may indicate exploitation of weak OAuth implementations, such as bypassing PKCE verification.",
+          "actionNames": [
+            "Microsoft.Security.NetworkManagement/LogAndAlert",
+            "Microsoft.Security.SystemCallMonitoring/LogAndAlert"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "OAuth.VulnerabilityInOAuthImplementation",
+          "recommend": "Employ network and system call monitoring to identify suspicious OAuth interactions; use threat intelligence feeds for anomaly detection.",
+          "remediate": "Isolate affected systems, apply security patches, and conduct a review of API integrations with identity services."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:22:35Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "oidc",
+          "identity"
+        ],
+        "primary_platform": "oidc",
+        "routed_profiles": [
+          "oidc:default",
+          "identity:default"
+        ],
+        "injected_action_count": 0,
+        "allowed_actions": [],
+        "source_files": []
+      }
+    },
+    {
       "threat_id": "1719cccdaa5ec53e",
       "threat_title": "How to restrict Slack access to a specific IP address using Conditional Access",
       "threat_url": "https://www.threatlocker.com/blog/how-to-restrict-slack-access-to-a-specific-ip-address-using-conditional-access",
@@ -1262,11 +2799,45 @@
         "primary_platform": "Azure",
         "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Named Locations and Conditional Access to restrict sign-ins, which falls under Identity Security controls."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: 6 validation errors for ThreatRuleBatch\nrules.0.recommend\n  Field required [type=missing, input_value={'name': '[Windows]: Bloc...approved devices only.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.0.remediate\n  Field required [type=missing, input_value={'name': '[Windows]: Bloc...approved devices only.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.recommend\n  Field required [type=missing, input_value={'name': '[Windows]: Enfo...lock non-approved IPs.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.remediate\n  Field required [type=missing, input_value={'name': '[Windows]: Enfo...lock non-approved IPs.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.recommend\n  Field required [type=missing, input_value={'name': '[AzureAD]: Rest...ll other Slack access.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.remediate\n  Field required [type=missing, input_value={'name': '[AzureAD]: Rest...ll other Slack access.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:09:44Z",
+      "variants": [
+        {
+          "name": "[Azure]: Configuring Conditional Access for Slack",
+          "description": "Sets up Azure Conditional Access policies to restrict Slack access based on user location using Microsoft Entra ID.",
+          "actionNames": [
+            "Microsoft.ADDI/Policy Enforcement"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Conditional Access Policy Configuration",
+          "recommend": "Review and configure conditional access policies in Microsoft Entra ID to block non-approved IP ranges for Slack. Consider using location-based conditions.",
+          "remediate": "Implement the approved Conditional Access policy to allow sign-ins from specific IP addresses only."
+        },
+        {
+          "name": "[Local Machine]: Slack Process Argument Check",
+          "description": "Uses command-line arguments in a script to verify if Slack is launched with an approved local machine's IP address.",
+          "actionNames": [
+            "Process Creation/Command-Line Arguments"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Process Execution Validation",
+          "recommend": "Create a process argument checker that validates the originating machine against an approved list of IP addresses or hostnames.",
+          "remediate": "Block any Slack processes not running on the specified local machines."
+        },
+        {
+          "name": "[File]: Log Analysis for Slack Usage",
+          "description": "Monitors system and application logs to detect unauthorized access attempts to Slack from disallowed IPs by analyzing file writes or registry changes.",
+          "actionNames": [
+            "Event Log Monitoring"
+          ],
+          "defaultSeverity": "Low",
+          "threatType": "Behavioral Indicator Detection",
+          "recommend": "Implement log monitoring for signs of configuration tampering related to Slack and its access policies.",
+          "remediate": "Investigate and remediate any detected anomalies associated with unauthorized Slack sign-ins."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:22:57Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1310,11 +2881,45 @@
         "primary_platform": "Okta",
         "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Named Locations and Conditional Access to restrict sign-ins, which falls under Identity Security controls."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: 6 validation errors for ThreatRuleBatch\nrules.0.recommend\n  Field required [type=missing, input_value={'name': '[Windows]: Bloc...uler or Group Policy.]'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.0.remediate\n  Field required [type=missing, input_value={'name': '[Windows]: Bloc...uler or Group Policy.]'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.recommend\n  Field required [type=missing, input_value={'name': '[Windows]: Bloc...ative auditing tools.]'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.remediate\n  Field required [type=missing, input_value={'name': '[Windows]: Bloc...ative auditing tools.]'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.recommend\n  Field required [type=missing, input_value={'name': '[Network]: Bloc...onal Access policies.]'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.remediate\n  Field required [type=missing, input_value={'name': '[Network]: Bloc...onal Access policies.]'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:10:05Z",
+      "variants": [
+        {
+          "name": "[azure]: Configuring Conditional Access for SalesForce IP Whitelisting",
+          "description": "Uses Microsoft Entra ID's Conditional Access policies to restrict access to Salesforce when users attempt to log in from non-whitelisted IP addresses.",
+          "actionNames": [
+            "Microsoft.ADD/ConditionalAccess/policyAssignment"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Evasion",
+          "recommend": "Implement a policy that requires multi-factor authentication and allows only specific approved IP ranges for Salesforce access. Regularly audit Conditional Access policies to ensure no bypass is possible.",
+          "remediate": "Review and update the list of allowed IP addresses in Microsoft Entra ID, then create or modify a Conditional Access policy to enforce this restriction."
+        },
+        {
+          "name": "[azure]: Monitoring User Sign-In Patterns",
+          "description": "Analyzes sign-in logs for unusual patterns such as repeated failed Salesforce access attempts from different IPs that could indicate an attack.",
+          "actionNames": [
+            "Microsoft.Operational/Logging/analyzePatterns"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Behavioral Indicator",
+          "recommend": "Set up alerts for multiple sign-in failures and review user activity logs to identify potential compromised accounts or brute-force attempts against Salesforce via Microsoft Entra ID.",
+          "remediate": "Investigate the incidents, enforce password resets, disable affected users' access until further notice is confirmed."
+        },
+        {
+          "name": "[azure]: Blocking Access with Conditional Paths",
+          "description": "Uses named locations in Microsoft Entra ID to create sign-in conditions that block Salesforce logins from IPs not matching approved criteria.",
+          "actionNames": [
+            "Microsoft.ADD/ConditionalAccess/pathBasedCondition"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Prevention",
+          "recommend": "Define named locations for each of the approved IP ranges and create sign-in conditions that require users to be in one of these when accessing Salesforce through Microsoft Entra ID.",
+          "remediate": "Test the configuration, then enforce the new policy. If bypass is detected or access denied occurs, re-evaluate threat indicators."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:23:23Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1361,8 +2966,8 @@
       "variants": [],
       "variant_count": 0,
       "generation_status": "failed",
-      "error": "Generation failed: Response missing 'rules' array",
-      "generated_at": "2026-06-15T10:10:14Z",
+      "error": "Generation failed: 3 validation errors for ThreatRuleBatch\nrules.1.actionNames\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.12/v/too_short\nrules.1.defaultSeverity\n  Input should be 'Low', 'Medium', 'High' or 'Critical' [type=literal_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/literal_error\nrules.2.defaultSeverity\n  Input should be 'Low', 'Medium', 'High' or 'Critical' [type=literal_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/literal_error",
+      "generated_at": "2026-06-17T09:23:41Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1406,11 +3011,45 @@
         "primary_platform": "Azure",
         "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID and Conditional Access to restrict access to a specific application (Workday), which falls under Identity Security controls."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: Response missing 'rules' array",
-      "generated_at": "2026-06-15T10:10:16Z",
+      "variants": [
+        {
+          "name": "[Azure]: Block Workday Sign-ins via AAD App with Geofilter",
+          "description": "Uses Azure AD Conditional Access to restrict Workday sign-in when users attempt access from non-approved IP addresses using a geolocation filter.",
+          "actionNames": [
+            "Microsoft.AAAD/ConditionalAccess/PolicyAssignment"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Access Control Failure",
+          "recommend": "Implement an IP-based conditional access policy for the Workday application, allowing only specific approved ranges. Regularly update and audit the geolocation settings.",
+          "remediate": "Review sign-in attempts from blocked regions and ensure that users are using secure connections."
+        },
+        {
+          "name": "[Azure]: Monitor AAD Access to Workday with Process Argument Check",
+          "description": "Monitors creation of processes related to Workday access via Azure Security Center, checking for suspicious command-line arguments.",
+          "actionNames": [
+            "Microsoft.SecurityCenter/ProcessMonitoring"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Process Exploitation",
+          "recommend": "Configure process monitoring with patterns matching known malicious parameters used in unauthorized Workday access attempts and alert security teams accordingly.",
+          "remediate": "Investigate flagged processes, terminate any illegitimate instances, and update threat signatures."
+        },
+        {
+          "name": "[Azure]: Detect Data Exfiltration from AAD to Workday via Network Anomalies",
+          "description": "Uses Azure Network Security Groups to detect unusual outbound network connections that may indicate data exfiltration attempts related to compromised or unauthorized Workday access.",
+          "actionNames": [
+            "Microsoft.Network/NetworkSecurityGroups/RuleModification"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Data Breach",
+          "recommend": "Configure NSGs with anomaly detection for unexpected outbound traffic patterns and rate-limit connections if needed. Log all changes to network rules.",
+          "remediate": "Investigate the source of anomalous network activity, re-secure endpoints, and remove any unauthorized access points."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:24:05Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1454,11 +3093,45 @@
         "primary_platform": "Azure",
         "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Named Locations and Conditional Access to restrict sign-ins, which falls under Identity Security controls."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: 9 validation errors for ThreatRuleBatch\nrules.0.recommend\n  Field required [type=missing, input_value={'name': '[Windows]: Bloc...ehavioral Indicators]'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.0.remediate\n  Field required [type=missing, input_value={'name': '[Windows]: Bloc...ehavioral Indicators]'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.actionNames\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.12/v/too_short\nrules.1.recommend\n  Field required [type=missing, input_value={'name': '[Windows]: Bloc...ehavioral Indicators]'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.remediate\n  Field required [type=missing, input_value={'name': '[Windows]: Bloc...ehavioral Indicators]'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.actionNames\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.12/v/too_short\nrules.2.defaultSeverity\n  Input should be 'Low', 'Medium', 'High' or 'Critical' [type=literal_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/literal_error\nrules.2.recommend\n  Field required [type=missing, input_value={'name': '[Network]: Bloc.../ API / System Calls]'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.remediate\n  Field required [type=missing, input_value={'name': '[Network]: Bloc.../ API / System Calls]'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:10:31Z",
+      "variants": [
+        {
+          "name": "[Azure]: Process Creation/Command-Line Arguments",
+          "description": "Monitor process creation events for instances of the Syncro application or command-line arguments indicating its execution.",
+          "actionNames": [
+            "Microsoft.AAD/Operations/read"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Conditional Access Violation",
+          "recommend": "Implement monitoring tools to detect and alert on any process creation attempts for Syncro, especially from unrecognized IP addresses. Use system hooks or SIEM integrations to analyze command-line arguments for signs of sync operations.",
+          "remediate": "Investigate the source of such processes and restrict execution based on threat intelligence feeds."
+        },
+        {
+          "name": "[Azure]: File/Registry Modifications",
+          "description": "Analyze file writes by Syncro or registry changes in sensitive paths that could indicate persistence mechanisms being installed. Monitor for unexpected modifications to system files related to synchronization services.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/write"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Persistence Mechanism Exploitation",
+          "recommend": "Deploy file integrity monitoring and registry audit policies to detect changes associated with Syncro. Integrate findings into the SIEM for correlation.",
+          "remediate": "Quarantine or remove any unauthorized modifications, and review user privileges."
+        },
+        {
+          "name": "[Azure]: Network Connections/Behavioral Indicators",
+          "description": "Detect outbound network connections from affected systems to known Syncro command endpoints. Correlate with file and registry changes as indicators of data exfiltration activities.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/read"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Data Exfiltration Detection",
+          "recommend": "Configure network monitoring to flag traffic patterns associated with Syncro. Use behavioral analysis to correlate multi-vector indicators of compromise (IOCs).",
+          "remediate": "Isolate affected systems and block communication channels using Conditional Access policies."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:24:29Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1505,8 +3178,8 @@
       "variants": [],
       "variant_count": 0,
       "generation_status": "failed",
-      "error": "Generation failed: Expected a list of rules, got str",
-      "generated_at": "2026-06-15T10:11:09Z",
+      "error": "Generation failed: 1 validation error for ThreatRuleBatch\nrules.1.actionNames\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.12/v/too_short",
+      "generated_at": "2026-06-17T09:24:48Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1551,11 +3224,45 @@
         "primary_platform": "Azure",
         "reasoning_summary": "The text explicitly discusses using Microsoft Entra ID Named Locations and Conditional Access to restrict Azure portal and API access."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: 12 validation errors for ThreatRuleBatch\nrules.0.defaultSeverity\n  Field required [type=missing, input_value={'name': '[Windows]: Proc...ts]', '2': [], '3': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.0.threatType\n  Field required [type=missing, input_value={'name': '[Windows]: Proc...ts]', '2': [], '3': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.0.recommend\n  Field required [type=missing, input_value={'name': '[Windows]: Proc...ts]', '2': [], '3': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.0.remediate\n  Field required [type=missing, input_value={'name': '[Windows]: Proc...ts]', '2': [], '3': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.defaultSeverity\n  Field required [type=missing, input_value={'name': '[Windows]: File...File Access]', '3': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.threatType\n  Field required [type=missing, input_value={'name': '[Windows]: File...File Access]', '3': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.recommend\n  Field required [type=missing, input_value={'name': '[Windows]: File...File Access]', '3': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.remediate\n  Field required [type=missing, input_value={'name': '[Windows]: File...File Access]', '3': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.defaultSeverity\n  Field required [type=missing, input_value={'name': '[Network]: API ...onnections/API Calls]'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.threatType\n  Field required [type=missing, input_value={'name': '[Network]: API ...onnections/API Calls]'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.recommend\n  Field required [type=missing, input_value={'name': '[Network]: API ...onnections/API Calls]'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.remediate\n  Field required [type=missing, input_value={'name': '[Network]: API ...onnections/API Calls]'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:15:47Z",
+      "variants": [
+        {
+          "name": "[Azure]: Blocked via Conditional Access for Unauthorized Resource Manager Access",
+          "description": "Uses Conditional Access policies in Microsoft Entra ID to restrict access based on user location or other attributes.",
+          "actionNames": [
+            "Microsoft.ADDomainServices/write"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Access Control Bypass",
+          "recommend": "Implement conditional access policies that require multi-factor authentication and IP address checks for accessing Azure resource managers. Regularly review and update the approved IP list.",
+          "remediate": "Block or restrict identified unauthorized attempts by adjusting Conditional Access settings and ensuring only specific users have necessary permissions."
+        },
+        {
+          "name": "[Azure]: Process Creation / Command-Line Arguments",
+          "description": "Monitors for command execution related to Azure API access using process creation detection mechanisms.",
+          "actionNames": [
+            "Microsoft.AAD/Operations/read"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Process Tampering",
+          "recommend": "Employ endpoint detection and monitoring tools to identify suspicious processes attempting to interact with Azure services.",
+          "remediate": "Investigate and terminate unauthorized process instances. Update system configurations to block specific command-line arguments or API calls."
+        },
+        {
+          "name": "[Azure]: Network Connection / API Tampering",
+          "description": "Detects anomalous network patterns indicating potential exploitation of Azure APIs from unapproved locations.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/write"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Network Exploitation",
+          "recommend": "Configure firewall rules and use threat intelligence to block traffic on suspicious IP addresses. Monitor API usage for signs of abuse or data exfiltration.",
+          "remediate": "Isolate affected systems, apply patches, and update access controls as necessary."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:25:11Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1599,11 +3306,45 @@
         "primary_platform": "Azure",
         "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Named Locations and Conditional Access to restrict Atlassian Cloud sign-ins, which falls under Identity Security controls."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: 1 validation error for ThreatRuleBatch\nrules.2.remediate\n  Field required [type=missing, input_value={'name': '[azure]: Block ...ia Microsoft Entra ID.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:16:12Z",
+      "variants": [
+        {
+          "name": "[Azure]: Process Creation/Command-Line Arguments",
+          "description": "Monitors process creation or command-line argument injection related to Jira authentication bypass mechanisms.",
+          "actionNames": [
+            "Microsoft.AAD/Operations/read"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Evasion",
+          "recommend": "Implement strict monitoring of process creation events and analyze command-line arguments for signs of attempted credential harvesting or access circumvention related to Jira services.",
+          "remediate": "Investigate and block any suspicious processes, terminate their execution, and review security policies."
+        },
+        {
+          "name": "[Azure]: File/Registry Modifications",
+          "description": "Observes file system changes and registry modifications that may indicate the persistence of unauthorized Atlassian credentials or configuration alterations.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/write"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Persistence",
+          "recommend": "Audit critical files and registry keys for unexpected writes, especially those related to Jira access configurations. Harden file permissions and implement alerts on modifications in sensitive areas.",
+          "remediate": "Restore modified settings from a known good backup, revoke compromised credentials, and reinforce security controls."
+        },
+        {
+          "name": "[Azure]: Network Connections/Behavioral Indicators",
+          "description": "Analyzes network traffic for patterns associated with Atlassian Cloud sign-in attempts or data exfiltration as part of the attack surface related to Jira access.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/read"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Exploitation",
+          "recommend": "Employ network anomaly detection focused on traffic anomalies linked with Atlassian services. Validate and quarantine potentially malicious IP addresses or sources.",
+          "remediate": "Isolate affected systems, block identified threat vectors at the firewall level, and conduct a thorough investigation to prevent further exploitation."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:25:34Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1649,43 +3390,43 @@
       },
       "variants": [
         {
-          "name": "Microsoft.ASD/ProcessCreation",
-          "description": "Monitoring for process creation of docushost.exe or equivalent, with command-line arguments indicating access to Docusign service.",
+          "name": "[Azure]: Process Creation / Command-Line Arguments",
+          "description": "Monitors process creation for execution of DocuSign related binaries or command-line arguments indicating access attempt.",
           "actionNames": [
-            "Microsoft.ASD/ProcessCreation"
-          ],
-          "defaultSeverity": "Medium",
-          "threatType": "MITRE AWARE/TCP-001",
-          "recommend": "Implement process monitoring and validate execution context for DocuSign-related processes.",
-          "remediate": "Restrict the launch of such processes to specific IP ranges or through secure channels."
-        },
-        {
-          "name": "Microsoft.ASD/FileAccess",
-          "description": "Detecting file writes in system directories related to Docusign, potentially indicating persistence mechanism setup.",
-          "actionNames": [
-            "Microsoft.ASD/ProcessCreation"
+            "Microsoft.AAD/Operations/read"
           ],
           "defaultSeverity": "High",
-          "threatType": "MITRE AWARE/TCP-002",
-          "recommend": "Review and restrict access to sensitive files after process execution is detected.",
-          "remediate": "Apply file integrity policies and monitor for unauthorized changes."
+          "threatType": "Conditional Access Violation",
+          "recommend": "Implement monitoring on endpoints to detect and alert on unauthorized process executions. Restrict execution privileges for non-compliant processes.",
+          "remediate": "Investigate the source of the access attempt, terminate any breaches, reinforce system defenses."
         },
         {
-          "name": "Microsoft.ASD/NetworkCommunication",
-          "description": "Identifying network connections or API calls related to Docusign, especially from disallowed IP addresses.",
+          "name": "[Azure]: File / Registry Modifications",
+          "description": "Examines file writes to DocuSign installation directories or registry entries for evidence of tampering. Looks for changes in security policies related to Conditional Access.",
           "actionNames": [
-            "Microsoft.ASD/ProcessCreation"
+            "Microsoft.AAD/domainServices/write"
           ],
-          "defaultSeverity": "Critical",
-          "threatType": "MITRE AWARE/TCP-003",
-          "recommend": "Analyze and block traffic associated with the service using network-based indicators.",
-          "remediate": "Configure firewall rules or use IP blocking to restrict access."
+          "defaultSeverity": "Medium",
+          "threatType": "Policy Evasion",
+          "recommend": "Regularly audit file systems and registry states, especially those affecting identity access controls.",
+          "remediate": "Quarantine affected files, restore from backups if necessary. Reapply security configurations."
+        },
+        {
+          "name": "[Azure]: Network Connections / API / System Calls",
+          "description": "Surveillance of network traffic for patterns associated with Conditional Access bypass attempts via DocuSign's APIs or system call exploitation.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/read"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Access Bypass",
+          "recommend": "Use advanced logging to capture anomalous API and network patterns. Harden endpoints against such exploitations.",
+          "remediate": "Isolate affected systems, update firewall rules, and review Conditional Access settings."
         }
       ],
       "variant_count": 3,
       "generation_status": "success",
       "error": null,
-      "generated_at": "2026-06-15T10:16:31Z",
+      "generated_at": "2026-06-17T09:25:56Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1729,11 +3470,45 @@
         "primary_platform": "Azure",
         "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Conditional Access to restrict access, which falls under Identity Security controls."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: 3 validation errors for ThreatRuleBatch\nrules.0.recommend\n  Field required [type=missing, input_value={'name': 'ProcessCreation... validate user actions'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.recommend\n  Field required [type=missing, input_value={'name': 'File_RegistryMo...nhance access controls'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.recommend\n  Field required [type=missing, input_value={'name': 'Network_API_Act... on detected anomalies'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:16:55Z",
+      "variants": [
+        {
+          "name": "[Azure]: Process Creation for Threat Detection",
+          "description": "Monitors process creation related to conditional access configuration changes.",
+          "actionNames": [
+            "Microsoft.AAD/Operations/read"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Conditional Access Violation",
+          "recommend": "Review and audit all recent Conditional Access configurations. Implement least privilege for administrative processes.",
+          "remediate": "Revert unauthorized changes, re-secure the configuration with proper access controls."
+        },
+        {
+          "name": "[Azure]: Registry Modification Analysis",
+          "description": "Analyzes registry modifications that may indicate bypassing of security policies.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/write"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Conditional Access Violation",
+          "recommend": "Investigate and document all recent changes to the domain services registry. Harden configurations against unauthorized modifications.",
+          "remediate": "Roll back malicious registry entries, enforce strict access controls."
+        },
+        {
+          "name": "[Azure]: Network Anomaly for IP Whitelisting Attempts",
+          "description": "Detects network activities attempting to bypass conditional access by using specific IP addresses.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/read"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Conditional Access Violation",
+          "recommend": "Review and validate all inbound connections. Ensure only whitelisted IPs are permitted through security policies.",
+          "remediate": "Block identified malicious traffic, update access controls to include only trusted IP addresses."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:26:15Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1777,11 +3552,45 @@
         "primary_platform": "Okta",
         "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Named Locations and Conditional Access to restrict access to HubSpot, which falls under Identity Security controls."
       },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: 7 validation errors for ThreatRuleBatch\nrules.0.recommend\n  Field required [type=missing, input_value={'name': 'Microsoft.ADDON...nding named locations.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.actionNames\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.12/v/too_short\nrules.1.defaultSeverity\n  Input should be 'Low', 'Medium', 'High' or 'Critical' [type=literal_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/literal_error\nrules.1.recommend\n  Field required [type=missing, input_value={'name': 'MicrosoftAADNam...n': '', 'remediate': ''}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.actionNames\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.12/v/too_short\nrules.2.defaultSeverity\n  Input should be 'Low', 'Medium', 'High' or 'Critical' [type=literal_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/literal_error\nrules.2.recommend\n  Field required [type=missing, input_value={'name': 'HubspotIPBlockV...n': '', 'remediate': ''}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:17:11Z",
+      "variants": [
+        {
+          "name": "[azure]: Process Creation / Command-Line Arguments",
+          "description": "Monitor for process creation or command-line arguments related to hubspot software within Microsoft Entra ID service applications.",
+          "actionNames": [
+            "Microsoft.AAD/Operations/read"
+          ],
+          "defaultSeverity": "Medium",
+          "threatType": "Evasion",
+          "recommend": "Implement monitoring of process creation and check the command-line arguments for any indication of unauthorized use of hubspot software within Microsoft Entra ID environments.",
+          "remediate": "Investigate and terminate suspicious processes, and adjust conditional access settings to block further execution if necessary."
+        },
+        {
+          "name": "[azure]: File / Registry Modifications or Behavioral Indicators",
+          "description": "Scan for file creation or modifications by hubspot software on endpoints within the approved IP range, and check registry keys related to Microsoft Entra ID configurations.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/write"
+          ],
+          "defaultSeverity": "High",
+          "threatType": "Privilege Escalation",
+          "recommend": "Regularly audit file systems for new or modified hubspot configuration files and verify that all registry keys related to Microsoft Entra ID are within the approved settings.",
+          "remediate": "Restore any unauthorized changes, remove suspicious files, and ensure proper access controls are in place."
+        },
+        {
+          "name": "[azure]: Network Connections / API / System Calls",
+          "description": "Block outbound network connections from endpoints outside the approved IP range to hubspot servers using Conditional Access policies. Monitor for unusual API calls or system interactions that may indicate a breach.",
+          "actionNames": [
+            "Microsoft.AAD/domainServices/read"
+          ],
+          "defaultSeverity": "Critical",
+          "threatType": "Anomaly Detection",
+          "recommend": "Configure network security group rules to block traffic to and from hubspot IP addresses not on the approved list. Review API calls for any anomalies related to Microsoft Entra ID access.",
+          "remediate": "Reinforce conditional access policies, reconfigure firewall settings if necessary, and conduct a full audit of system interactions."
+        }
+      ],
+      "variant_count": 3,
+      "generation_status": "success",
+      "error": null,
+      "generated_at": "2026-06-17T09:33:17Z",
       "grounding_context": {
         "matched_platforms": [
           "azure"
@@ -1812,66 +3621,17 @@
           "azure_auth_events.json"
         ]
       }
-    },
-    {
-      "threat_id": "627108e1129ce46a",
-      "threat_title": "How to restrict GitHub Enterprise Cloud access to a specific IP address using Conditional Access",
-      "threat_url": "https://www.threatlocker.com/blog/how-to-restrict-github-enterprise-cloud-access-to-a-specific-ip-address-using-conditional-access",
-      "source": "ThreatLocker Blog",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 8,
-        "primary_domain": "SaaS",
-        "primary_platform": "GitHub",
-        "reasoning_summary": "The content explicitly discusses restricting access to GitHub Enterprise Cloud using Conditional Access, which falls under SaaS security controls."
-      },
-      "variants": [],
-      "variant_count": 0,
-      "generation_status": "failed",
-      "error": "Generation failed: 3 validation errors for ThreatRuleBatch\nrules.0.remediate\n  Field required [type=missing, input_value={'name': 'github:workflow...us access is disabled.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.1.remediate\n  Field required [type=missing, input_value={'name': 'github_registry... the affected systems.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nrules.2.remediate\n  Field required [type=missing, input_value={'name': 'github_audit_ne...ial data exfiltration.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
-      "generated_at": "2026-06-15T10:17:30Z",
-      "grounding_context": {
-        "matched_platforms": [
-          "github"
-        ],
-        "primary_platform": "github",
-        "routed_profiles": [
-          "github:github_workflow",
-          "github:github_audit"
-        ],
-        "injected_action_count": 15,
-        "allowed_actions": [
-          "config.disable_anonymous_git_access",
-          "config.enable_anonymous_git_access",
-          "config.lock_anonymous_git_access",
-          "config.unlock_anonymous_git_access",
-          "enterprise.register_self_hosted_runner",
-          "enterprise.remove_self_hosted_runner",
-          "enterprise.runner_group_created",
-          "enterprise.runner_group_removed",
-          "enterprise.runner_group_runner_removed",
-          "enterprise.runner_group_runners_added",
-          "enterprise.runner_group_runners_updated",
-          "enterprise.runner_group_updated",
-          "enterprise.self_hosted_runner_updated",
-          "org.add_member",
-          "protected_branch.update_require_code_owner_review"
-        ],
-        "source_files": [
-          "github_audit_logs.json"
-        ]
-      }
     }
   ],
   "run_stats": {
     "knowledge_base_dir": "/Users/sarvani/Threat_automation/knowledge_base",
     "knowledge_base_catalogs": 10,
-    "input_threats": 2,
-    "processed_this_run": 0,
-    "skipped_resume": 2,
-    "successful_generations": 0,
-    "failed_generations": 0,
-    "total_rule_variants_this_run": 0,
-    "elapsed_seconds": 0.0
+    "input_threats": 50,
+    "processed_this_run": 50,
+    "skipped_resume": 0,
+    "successful_generations": 34,
+    "failed_generations": 16,
+    "total_rule_variants_this_run": 102,
+    "elapsed_seconds": 1431.3
   }
 }

@@ -538,16 +538,30 @@ async def run_validation(
         "failed_stage_2": 0,
         "total_variants": 0,
     }
+    # Per-threat counters for the clearer summary banner
+    threats_with_variants = 0
+    threats_zero_variants = 0
+    threats_triage_ready = 0  # ≥1 passing variant → visible in triage dashboard
+
     for entry in validated_entries:
-        for variant in entry.get("variants", []):
+        variants = entry.get("variants", [])
+        if not variants:
+            threats_zero_variants += 1
+            continue
+        threats_with_variants += 1
+        entry_passed = 0
+        for variant in variants:
             stats["total_variants"] += 1
             stage = variant.get("validation", {}).get("stage", "unknown")
             if stage == "passed":
                 stats["passed"] += 1
+                entry_passed += 1
             elif stage == "failed_stage_1":
                 stats["failed_stage_1"] += 1
             elif stage == "failed_stage_2":
                 stats["failed_stage_2"] += 1
+        if entry_passed > 0:
+            threats_triage_ready += 1
 
     # --- Single write-back (only once, after all processing) ---
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -557,6 +571,7 @@ async def run_validation(
         "elapsed_seconds": round(elapsed, 2),
         "kb_action_count": len(kb_actions),
         "threat_count": len(validated_entries),
+        "threats_triage_ready": threats_triage_ready,
         "stats": stats,
         "entries": list(validated_entries),
     }
@@ -573,13 +588,21 @@ async def run_validation(
     print("=" * 60)
     print(f"Staging file              : {staging_path}")
     print(f"KB actions loaded         : {len(kb_actions):,}")
-    print(f"Threats processed         : {len(validated_entries)}")
-    print(f"Variants total            : {total}")
-    print(f"  Passed (all stages)     : {passed}")
-    print(f"  Failed Stage 1 (schema) : {s1_fail}")
-    print(f"  Failed Stage 2 (KB)     : {s2_fail}")
+    print()
+    print(f"Staging entries processed : {len(validated_entries)}")
+    print(f"  With variants           : {threats_with_variants}")
+    print(f"  No variants (gen failed): {threats_zero_variants}  ← re-run Step 3 to fix")
+    print()
+    print(f"Rule VARIANTS validated   : {total}")
+    print(f"  Passed all 3 stages     : {passed}  variants")
+    print(f"  Failed Stage 1 (schema) : {s1_fail}  variants")
+    print(f"  Failed Stage 2 (KB)     : {s2_fail}  variants")
     if total:
-        print(f"  Pass rate               : {passed / total * 100:.1f}%")
+        print(f"  Variant pass rate       : {passed / total * 100:.1f}%")
+    print()
+    print(f"Threats ready for triage  : {threats_triage_ready}  (≥1 passing variant)")
+    print(f"  → open app_triage.py to review these {threats_triage_ready} threat(s)")
+    print()
     print(f"Stage 3 model             : {STAGE3_OLLAMA_MODEL} @ {STAGE3_OLLAMA_BASE_URL}")
     print(f"Elapsed                   : {elapsed:.1f}s")
     print(f"Output                    : {output_path}")
