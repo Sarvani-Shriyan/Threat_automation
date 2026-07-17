@@ -1,5 +1,3 @@
-# pip install openai pydantic
-
 import asyncio
 import json
 import logging
@@ -7,7 +5,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Literal
 
-from openai import APIConnectionError, APITimeoutError, OpenAI
+from openai import APIConnectionError, APITimeoutError
 from pydantic import BaseModel, Field, field_validator
 
 from ingestion.config import (
@@ -16,6 +14,8 @@ from ingestion.config import (
     OLLAMA_MODEL,
     OLLAMA_TIMEOUT_SECONDS,
 )
+from llm.schemas import GEMMA_VERDICT_SCHEMA
+from llm.structured_client import StructuredLLMClient
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +119,13 @@ class GemmaVerdict(BaseModel):
 
 
 class GemmaVerifier:
-    """Local Gemma 4 dynamic semantic filter via Ollama (OpenAI-compatible API)."""
+    """
+    Local Gemma 4 dynamic semantic filter via the hybrid StructuredLLMClient.
+
+    Routes to:
+      • OpenAI cloud  → strict JSON schema enforcement (GEMMA_VERDICT_SCHEMA)
+      • Local Ollama  → json_object mode + existing Pydantic validation backstop
+    """
 
     def __init__(
         self,
@@ -132,25 +138,26 @@ class GemmaVerifier:
         self._model = model
         self._max_workers = max_workers
         self._min_confidence_score = min_confidence_score
-        self._client = OpenAI(
+        self._llm = StructuredLLMClient(
             base_url=base_url,
+            model=model,
             api_key="ollama",
             timeout=timeout_seconds,
         )
 
     def verify_article(self, article: dict[str, Any]) -> GemmaVerdict:
+        messages: list[dict[str, str]] = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": self._build_user_prompt(article)},
+        ]
         try:
-            response = self._client.chat.completions.create(
-                model=self._model,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": self._build_user_prompt(article)},
-                ],
+            raw_dict = self._llm.generate_structured_output(
+                messages,
+                GEMMA_VERDICT_SCHEMA,
+                "gemma_verdict",
                 temperature=0.0,
-                response_format={"type": "json_object"},
             )
-            raw = response.choices[0].message.content or "{}"
-            return parse_semantic_verdict(raw)
+            return GemmaVerdict.model_validate(normalize_verdict_payload(raw_dict))
         except (APIConnectionError, APITimeoutError, ConnectionError, TimeoutError) as exc:
             logger.error("gemma_offline_or_timeout error=%s title=%s", exc, article.get("title"))
             return GemmaVerdict.safe_default(reasoning_summary=f"GEMMA_UNAVAILABLE: {exc}")

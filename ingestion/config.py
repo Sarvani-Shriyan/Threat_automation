@@ -302,3 +302,33 @@ RULE_VARIANTS_MAX = 3
 # Step 3 — grounded retrieval knowledge base
 KNOWLEDGE_BASE_DIR = "knowledge_base"
 KNOWLEDGE_BASE_MAX_ACTIONS = 15
+
+# ---------------------------------------------------------------------------
+# Step 2 — Tiered Semantic Deduplication
+# ---------------------------------------------------------------------------
+
+# LanceDB local vector store (persistent across pipeline runs)
+LANCEDB_PATH = "data/lancedb_vectors"
+LANCEDB_TABLE_NAME = "threat_vectors"
+
+# Embedding model — sentence-transformers all-MiniLM-L6-v2
+# Small (80 MB), 384-dimensional, CPU-friendly.
+# Cache location: ~/.cache/torch/sentence_transformers/
+EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
+EMBEDDING_DIM = 384
+
+# Tier 2: cosine distance ceiling.
+# LanceDB returns cosine distance in [0, 1]; 0 = identical, 1 = orthogonal.
+# 0.15 ≈ 0.85 cosine similarity — flags topics already covered in the pipeline.
+COSINE_DISTANCE_THRESHOLD: float = 0.15
+
+# Tier 1: SimHash Hamming distance ceiling.
+# Hamming distance ≤ 3 over a 64-bit fingerprint flags near-textual duplicates.
+SIMHASH_HAMMING_THRESHOLD: int = 3
+
+# Rolling prune ceiling — maximum records kept in both the LanceDB table and
+# the SimHash state file. Oldest entries are evicted when exceeded.
+VECTOR_MAX_RECORDS: int = 500
+
+# Persisted SimHash fingerprint state (survives across runs)
+SIMHASH_STATE_PATH = "data/filter_simhash_state.json"

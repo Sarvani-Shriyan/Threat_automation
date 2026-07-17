@@ -1,10 +1,10 @@
 {
   "generated_at": "2026-06-17T09:02:50.160968+00:00",
-  "last_updated_at": "2026-06-17T09:33:17.884818+00:00",
-  "threat_count": 50,
+  "last_updated_at": "2026-07-17T04:36:35.869517+00:00",
+  "threat_count": 73,
   "total_rule_variants": 102,
   "successful_threats": 34,
-  "failed_threats": 16,
+  "failed_threats": 39,
   "entries": [
     {
       "threat_id": "9e9d3ef4976ac8d7",
@@ -3621,17 +3621,1155 @@
           "azure_auth_events.json"
         ]
       }
+    },
+    {
+      "threat_id": "ae5b712aa2e33254",
+      "threat_title": "Investigating Persistence Mechanisms in AWS",
+      "threat_url": "https://www.rapid7.com/blog/post/dr-investigating-aws-persistence-mechanisms",
+      "source": "Rapid7 Cybersecurity Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 10,
+        "primary_domain": "Identity",
+        "primary_platform": "AWS",
+        "reasoning_summary": "The text explicitly details persistence mechanisms using AWS IAM policies and API calls like iam:CreateUser, iam:CreateAccessKey, and iam:AttachUserPolicy."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-16T09:22:47Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws"
+        ],
+        "primary_platform": "aws",
+        "routed_profiles": [
+          "aws:iam",
+          "github:github_workflow",
+          "okta:okta_auth",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "APIGateway.PutIntegration",
+          "IAM.AddUserToGroup",
+          "IAM.AttachUserPolicy",
+          "IAM.CreateAccessKey",
+          "IAM.CreateRole",
+          "IAM.CreateUser",
+          "IAM.PutUserPolicy",
+          "IAM.UpdateAssumeRolePolicy",
+          "KMS.Sign",
+          "AssumeRole",
+          "AttachUserPolicy",
+          "ConsoleLogin",
+          "CreateAccessKey",
+          "CreateRole",
+          "CreateUser"
+        ],
+        "source_files": [
+          "aws_cloudtrail.json",
+          "catalogs/aws_iam_actions.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "965fba42552bbaaf",
+      "threat_title": "CVE-2026-15013 | cyberlord92 SAML Single Sign On Plugin up to 5.4.3 on WordPress SAML Signature Verification mo_saml_cast_key SignatureMethod weak password hash",
+      "threat_url": "https://vuldb.com/vuln/379465",
+      "source": "VulDB Recent Entries",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The vulnerability explicitly targets a SAML Single Sign On Plugin and involves signature verification and password hash manipulation, which are core identity security functions."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "phi4-mini-reasoning offline or timeout: Request timed out.",
+      "generated_at": "2026-07-16T09:38:27Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "saml"
+        ],
+        "primary_platform": "saml",
+        "routed_profiles": [
+          "saml:default"
+        ],
+        "injected_action_count": 0,
+        "allowed_actions": [],
+        "source_files": []
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "02d1994d224197eb",
+      "threat_title": "CVE-2026-55576 | MaaAssistantArknights Pull Request Title release-preparation.yml pull_request.title os command injection",
+      "threat_url": "https://vuldb.com/vuln/379445",
+      "source": "VulDB Recent Entries",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly describes an os command injection vulnerability within a file.github/workflows/release-preparation.yml, which is characteristic of CI/CD pipeline hijacking."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-16T10:13:18Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "github:github_workflow"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "pull_request",
+          "release",
+          "pull_request_review",
+          "pull_request_review_comment",
+          "pull_request_target",
+          "workflow_call",
+          "workflow_dispatch",
+          "workflow_run",
+          "branch_protection_rule",
+          "check_run",
+          "check_suite",
+          "create",
+          "delete",
+          "deployment",
+          "deployment_status"
+        ],
+        "source_files": [
+          "github_actions_workflow.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "03e55a70189cb246",
+      "threat_title": "The Risk of Exposed Cloud Functions and How to Harden",
+      "threat_url": "https://cloud.google.com/blog/topics/threat-intelligence/exposed-cloud-functions-harden/",
+      "source": "Cloud Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Cloud",
+        "primary_platform": "GCP",
+        "reasoning_summary": "The text explicitly discusses vulnerabilities (LFI/RFI, RCE) and attack vectors within serverless applications running on Google Cloud Run services."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-16T10:16:31Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure",
+          "gcp",
+          "github"
+        ],
+        "primary_platform": "identity",
+        "routed_profiles": [
+          "aws:iam",
+          "gcp:iam",
+          "github:github_workflow",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "delete",
+          "deployment",
+          "public",
+          "actions.agent.get",
+          "cloudvolumesgcp-api.netapp.com-activeDirectories.delete",
+          "cloudvolumesgcp-api.netapp.com-activeDirectories.get",
+          "cloudvolumesgcp-api.netapp.com-jobs.get",
+          "cloudvolumesgcp-api.netapp.com-snapshots.delete",
+          "cloudvolumesgcp-api.netapp.com-snapshots.get",
+          "cloudvolumesgcp-api.netapp.com-volumereplication.break",
+          "cloudvolumesgcp-api.netapp.com-volumereplication.delete",
+          "cloudvolumesgcp-api.netapp.com-volumereplication.get",
+          "Microsoft.GraphServices/accounts/delete",
+          "Microsoft.GraphServices/accounts/read",
+          "Microsoft.GraphServices/accounts/write"
+        ],
+        "source_files": [
+          "azure_auth_events.json",
+          "catalogs/gcp_iam_permissions.json",
+          "github_actions_workflow.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "4b94fc3a213beb83",
+      "threat_title": "Active Exploitation of Microsoft AD FS Vulnerability CVE-2026-56155 Detected",
+      "threat_url": "https://threatcluster.io/cluster/active-exploitation-of-microsoft-ad-fs-vulnerability-cve-202-7b016623?utm_source=rss&utm_medium=feed&utm_campaign=rss_feed",
+      "source": "ThreatCluster - Threat Intelligence Feed",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Okta",
+        "reasoning_summary": "The text explicitly details an elevation-of-privilege vulnerability (CVE-2026-56155) in Active Directory Federation Services (AD FS), which is a core identity provider function."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-16T10:16:46Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "active_directory"
+        ],
+        "primary_platform": "saml",
+        "routed_profiles": [
+          "saml:default",
+          "active_directory:default"
+        ],
+        "injected_action_count": 12,
+        "allowed_actions": [
+          "Kerberos Service Ticket",
+          "AdminSDHolder Modified",
+          "Certificate Request",
+          "DCSync",
+          "Group Policy Change",
+          "Kerberos TGT Request",
+          "LDAP Bind",
+          "LDAP Search",
+          "NTLM Authentication",
+          "Replication Event",
+          "SAMR CreateUserInDomain",
+          "SAMR SetPassword"
+        ],
+        "source_files": [
+          "active_directory.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "f1f4e20a7bee793a",
+      "threat_title": "Malicious Go Module Exposes a 222-Repository GitHub Lure Network",
+      "threat_url": "https://securityonline.info/malicious-go-module-lure-network/",
+      "source": "Daily CyberSecurity",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly mentions a 'Malicious Go Module' and a '222-Repository GitHub Lure Network,' directly mapping to SaaS security flaws."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-16T10:17:26Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "github:github_workflow",
+          "github:github_audit"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "dependabot_security_updates_new_repos.disable",
+          "dependabot_security_updates_new_repos.enable",
+          "repo.advanced_security_disabled",
+          "repo.advanced_security_enabled",
+          "config.disable_anonymous_git_access",
+          "config.enable_anonymous_git_access",
+          "config.lock_anonymous_git_access",
+          "config.unlock_anonymous_git_access",
+          "dependabot_alerts_new_repos.disable",
+          "dependabot_alerts_new_repos.enable",
+          "dependabot_security_updates.disable",
+          "dependabot_security_updates.enable",
+          "discussion_post.destroy",
+          "discussion_post.update",
+          "discussion_post_reply.destroy"
+        ],
+        "source_files": [
+          "github_audit_logs.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "0c2b57c803a55fd3",
+      "threat_title": "Passkey Phishing Campaign Uses Vishing Calls to Hijack Microsoft Entra Accounts",
+      "threat_url": "https://securityonline.info/entra-passkey-phishing/",
+      "source": "Daily CyberSecurity",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions 'Passkey Phishing Campaign' and 'Hijack Microsoft Entra Accounts,' directly matching Identity Security core domains."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-16T10:17:43Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "okta:okta_auth",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.GraphServices/accounts/delete",
+          "Microsoft.GraphServices/accounts/read",
+          "Microsoft.GraphServices/accounts/write",
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "3cc4cbbfaf532877",
+      "threat_title": "Defending SaaS-based applications against ShinyHunters OAuth abuse",
+      "threat_url": "https://databreaches.net/2026/07/14/defending-saas-based-applications-against-shinyhunters-oauth-abuse/?pk_campaign=feed&pk_kwd=defending-saas-based-applications-against-shinyhunters-oauth-abuse",
+      "source": "DataBreaches.Net",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly discusses threat actor activity targeting SaaS-based applications and mentions OAuth abuse."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-16T10:20:58Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "identity",
+        "routed_profiles": [
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/delete",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "91f21fdec27de442",
+      "threat_title": "RabbitMQ Flaws Could Leak OAuth Secrets and Expose Cross-Tenant Queue Metadata",
+      "threat_url": "https://thehackernews.com/2026/07/rabbitmq-flaws-could-leak-oauth-secrets.html",
+      "source": "The Hacker News",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly mentions flaws allowing the leakage of OAuth client secrets and bypassing tenant boundaries within a message broker service."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-16T10:21:16Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws"
+        ],
+        "primary_platform": "oidc",
+        "routed_profiles": [
+          "aws:iam"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "CloudSearchDomain.Search",
+          "DataZone.Search",
+          "MPA.CreateApprovalTeam",
+          "MPA.DeleteInactiveApprovalTeamVersion",
+          "MPA.GetApprovalTeam",
+          "MPA.ListApprovalTeams",
+          "MPA.StartActiveApprovalTeamDeletion",
+          "MPA.StartApprovalTeamBaseline",
+          "MPA.UpdateApprovalTeam",
+          "ResourceExplorer2.Search",
+          "SageMaker.Search",
+          "AssumeRole",
+          "AttachUserPolicy",
+          "ConsoleLogin",
+          "CreateAccessKey"
+        ],
+        "source_files": [
+          "aws_cloudtrail.json",
+          "catalogs/aws_iam_actions.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "12e1dea8b1e3acd8",
+      "threat_title": "OAuth Client ID Spoofing Lets Attackers Validate Stolen Microsoft Entra Credentials",
+      "threat_url": "https://thehackernews.com/2026/07/oauth-client-id-spoofing-lets-attackers.html",
+      "source": "The Hacker News",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions OAuth client ID spoofing and validating stolen credentials within Microsoft Entra ID environments."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-16T10:21:41Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.GraphServices/accounts/delete",
+          "Microsoft.GraphServices/accounts/read",
+          "Microsoft.GraphServices/accounts/write",
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "1e670e9d4245ff9d",
+      "threat_title": "M-Red-Team: AsyncAPI Supply Chain Compromise via GitHub Actions",
+      "threat_url": "https://www.wiz.io/blog/m-red-team-asyncapi-supply-chain-compromise-via-github-actions",
+      "source": "Wiz Blog | RSS feed",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly mentions 'npm supply chain attack' and 'via GitHub Actions,' which directly relates to SaaS security boundaries."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "phi4-mini-reasoning offline or timeout: Request timed out.",
+      "generated_at": "2026-07-16T13:47:55Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "github:github_workflow"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "registry_package",
+          "branch_protection_rule",
+          "check_run",
+          "check_suite",
+          "create",
+          "delete",
+          "deployment",
+          "deployment_status",
+          "discussion",
+          "discussion_comment",
+          "fork",
+          "gollum",
+          "image_version",
+          "issue_comment",
+          "issues"
+        ],
+        "source_files": [
+          "github_actions_workflow.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "c388ebc8fbec7d78",
+      "threat_title": "AsyncAPI npm packages backdoored via GitHub Actions",
+      "threat_url": "https://www.aikido.dev/blog/asyncapi-npm-packages-backdoored-via-github-actions",
+      "source": "Aikido Security's Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly mentions packages being backdoored via GitHub Actions, directly matching the SaaS Security domain."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-16T16:20:41Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "github:github_workflow"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "image_version",
+          "registry_package",
+          "branch_protection_rule",
+          "check_run",
+          "check_suite",
+          "create",
+          "delete",
+          "deployment",
+          "deployment_status",
+          "discussion",
+          "discussion_comment",
+          "fork",
+          "gollum",
+          "issue_comment",
+          "issues"
+        ],
+        "source_files": [
+          "github_actions_workflow.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "a11dcc2cc7203966",
+      "threat_title": "Millions of Microsoft Entra Accounts Targeted in OAuth Client ID Spoofing Campaigns",
+      "threat_url": "https://hackread.com/microsoft-entra-accounts-oauth-client-id-spoofing/",
+      "source": "Hackread – Cybersecurity News, Data Breaches, AI and More",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions spoofing OAuth client IDs and targeting Microsoft Entra accounts for credential testing."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-16T21:27:12Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.GraphServices/accounts/delete",
+          "Microsoft.GraphServices/accounts/read",
+          "Microsoft.GraphServices/accounts/write",
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "bd11192b7950de7b",
+      "threat_title": "Pandora’s Container Part 1: Unpacking Azure Container Security",
+      "threat_url": "https://trustedsec.com/blog/pandoras-container-part-1-unpacking-azure-container-security",
+      "source": "TrustedSec",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Cloud",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions offensive techniques targeting registries, token keys, and container instances within Azure services."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-17T04:27:27Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_admin"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "microsoft.web/sites/functions/keys/delete",
+          "microsoft.web/sites/functions/keys/write",
+          "microsoft.web/sites/instances/deployments/delete",
+          "microsoft.web/sites/instances/deployments/read",
+          "microsoft.web/sites/instances/processes/delete",
+          "microsoft.web/sites/instances/processes/modules/read",
+          "microsoft.web/sites/instances/processes/read",
+          "microsoft.web/sites/instances/processes/threads/read",
+          "microsoft.web/sites/instances/read",
+          "microsoft.web/sites/slots/functions/keys/delete",
+          "microsoft.web/sites/slots/functions/keys/write",
+          "microsoft.web/sites/slots/instances/deployments/read",
+          "microsoft.web/sites/slots/instances/processes/delete",
+          "microsoft.web/sites/slots/instances/processes/read",
+          "microsoft.web/sites/slots/instances/read"
+        ],
+        "source_files": [
+          "azure_admin_events.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "2c6c21399315d8f1",
+      "threat_title": "AsyncAPI Supply Chain Compromise via GitHub Actions (Campaign)",
+      "threat_url": "https://threats.wiz.io/all-incidents/asyncapi-supply-chain-compromise-via-github-actions",
+      "source": "Cloud Threat Landscape",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly details an attacker exploiting a misconfigured GitHub Actions workflow to steal credentials within a repository."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-17T04:28:12Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "aws:iam",
+          "github:github_workflow"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "pull_request",
+          "pull_request_review",
+          "pull_request_review_comment",
+          "pull_request_target",
+          "page_build",
+          "repository_dispatch",
+          "workflow_call",
+          "workflow_dispatch",
+          "workflow_run",
+          "branch_protection_rule",
+          "check_run",
+          "check_suite",
+          "create",
+          "delete",
+          "deployment"
+        ],
+        "source_files": [
+          "github_actions_workflow.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "6ff99161e0fe3e4a",
+      "threat_title": "No single pane of glass: Anatomy of an Azure permission takeover",
+      "threat_url": "https://webflow.sysdig.com/blog/no-single-pane-of-glass-anatomy-of-an-azure-permission-takeover",
+      "source": "Sysdig Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly discusses an attacker traversing multiple Azure permission systems to achieve a 'permission takeover'."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-17T04:28:34Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_admin",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/delete",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "bf20874834d4edd2",
+      "threat_title": "Microsoft Entra ID security updates: Passkeys are the default authentication method in Entra ID",
+      "threat_url": "https://www.microsoft.com/en-us/security/blog/2026/07/13/microsoft-entra-id-security-updates-passkeys-are-the-default-authentication-method-in-entra-id/",
+      "source": "Microsoft Security Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Okta",
+        "reasoning_summary": "The text explicitly discusses 'Microsoft Entra ID' and the implementation of 'passkeys' as a default authentication method, which falls directly under Identity Security protocols."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-17T04:31:56Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read",
+          "Microsoft.AzureActiveDirectory/guestUsages/read",
+          "Microsoft.AzureActiveDirectory/operations/read",
+          "Microsoft.GraphServices/Operations/read",
+          "Microsoft.GraphServices/accounts/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "d3c4b5d55ee89e98",
+      "threat_title": "Lessons Learned from CISA’s Recent GitHub Leak",
+      "threat_url": "https://krebsonsecurity.com/2026/07/lessons-learned-from-cisas-recent-github-leak/",
+      "source": "Krebs on Security",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly mentions the leak of internal credentials and AWS Govcloud keys published in a public GitHub repository."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-17T04:32:06Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws",
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "aws:iam",
+          "github:github_workflow",
+          "github:github_audit"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "public",
+          "dependabot_security_updates_new_repos.disable",
+          "dependabot_security_updates_new_repos.enable",
+          "repo.advanced_security_disabled",
+          "repo.advanced_security_enabled",
+          "repo.public",
+          "team.add_repository",
+          "team.change_parent_team",
+          "team.remove_repository",
+          "IoTDataPlane.Publish",
+          "SNS.Publish",
+          "SSO.GetRoleCredentials",
+          "config.disable_anonymous_git_access",
+          "config.enable_anonymous_git_access",
+          "config.lock_anonymous_git_access"
+        ],
+        "source_files": [
+          "catalogs/aws_iam_actions.json",
+          "github_actions_workflow.json",
+          "github_audit_logs.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "2a8f73f3d2abe358",
+      "threat_title": "Injective Labs GitHub Compromise Pushes Wallet-Key-Stealing npm Packages",
+      "threat_url": "https://thehackernews.com/2026/07/injective-labs-github-compromise-pushes.html",
+      "source": "The Hacker News",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly details a GitHub repository compromise used to publish malicious npm packages for key theft, fitting the SaaS pipeline hijacking boundary."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-17T04:32:14Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "github:github_workflow",
+          "github:github_audit"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "push",
+          "registry_package",
+          "config.disable_anonymous_git_access",
+          "config.enable_anonymous_git_access",
+          "config.lock_anonymous_git_access",
+          "config.unlock_anonymous_git_access",
+          "dependabot_alerts_new_repos.disable",
+          "dependabot_alerts_new_repos.enable",
+          "dependabot_security_updates_new_repos.disable",
+          "dependabot_security_updates_new_repos.enable",
+          "image_version",
+          "integration_installation.version_updated",
+          "org.update_default_repository_permission",
+          "org.update_member_repository_creation_permission",
+          "org.update_new_repository_default_branch_setting"
+        ],
+        "source_files": [
+          "github_actions_workflow.json",
+          "github_audit_logs.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "97b76568e1930e15",
+      "threat_title": "Hackers Use Fake Microsoft Entra Passkey Enrollment to Gain Microsoft 365 Access",
+      "threat_url": "https://thehackernews.com/2026/07/hackers-use-fake-microsoft-entra.html",
+      "source": "The Hacker News",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly mentions targeting Microsoft Entra passkey enrollment and gaining Microsoft 365 access using a phishing kit."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-17T04:32:43Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "aws:iam",
+          "okta:okta_auth",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/delete",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "059a3a99e35d20e6",
+      "threat_title": "GitHub API enumeration campaign exposed; GigaWiper Windows backdoor combines disk wipe, spyware",
+      "threat_url": "https://defend.network/briefings/github-api-enumeration-gigawiper-windows-backdoor-npm-s-2026-07-10.html",
+      "source": "defend.network – Daily Threat Briefings",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly mentions automated campaigns systematically enumerating corporate GitHub organizations via API abuse."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-17T04:32:58Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "github:github_workflow",
+          "github:github_audit"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "config.disable_anonymous_git_access",
+          "dependabot_security_updates.disable",
+          "dependabot_security_updates_new_repos.disable",
+          "org.advanced_security_policy_selected_member_disabled",
+          "org.advanced_security_policy_selected_member_enabled",
+          "org.disable_member_team_creation_permission",
+          "org.disable_two_factor_requirement",
+          "org.update_default_repository_permission",
+          "org.update_new_repository_default_branch_setting",
+          "organization_default_label.create",
+          "organization_default_label.destroy",
+          "organization_default_label.update",
+          "config.enable_anonymous_git_access",
+          "config.lock_anonymous_git_access",
+          "config.unlock_anonymous_git_access"
+        ],
+        "source_files": [
+          "github_audit_logs.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "66010a24b17d6dee",
+      "threat_title": "Dormant GitHub Accounts Help Attackers Blend In While Mapping Corporate Orgs",
+      "threat_url": "https://thehackernews.com/2026/07/dormant-github-accounts-help-attackers.html",
+      "source": "The Hacker News",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly details attackers enumerating corporate GitHub organizations and repositories using automated scraping tooling and compromised OAuth tokens."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-17T04:33:05Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "github"
+        ],
+        "primary_platform": "oidc",
+        "routed_profiles": [
+          "github:github_workflow",
+          "github:github_audit"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "dependabot_security_updates_new_repos.disable",
+          "dependabot_security_updates_new_repos.enable",
+          "oauth_application.revoke_tokens",
+          "org.advanced_security_policy_selected_member_disabled",
+          "org.advanced_security_policy_selected_member_enabled",
+          "repo.advanced_security_disabled",
+          "repo.advanced_security_enabled",
+          "config.disable_anonymous_git_access",
+          "config.enable_anonymous_git_access",
+          "config.lock_anonymous_git_access",
+          "config.unlock_anonymous_git_access",
+          "dependabot_alerts_new_repos.disable",
+          "dependabot_alerts_new_repos.enable",
+          "dependabot_security_updates.disable",
+          "dependabot_security_updates.enable"
+        ],
+        "source_files": [
+          "github_audit_logs.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "8f714e791ae89b00",
+      "threat_title": "Safely run AI-generated code in Cloud Run sandboxes",
+      "threat_url": "https://cloud.google.com/blog/topics/developers-practitioners/google-cloud-run-sandboxes-are-in-public-preview/",
+      "source": "Cloud Blog",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Cloud",
+        "primary_platform": "GCP",
+        "reasoning_summary": "The text explicitly details the use of Cloud Run sandboxes for executing untrusted code and mentions securing cloud credentials within a serverless environment."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-17T04:36:35Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "gcp",
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "aws:iam",
+          "gcp:iam",
+          "github:github_workflow"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "deployment",
+          "public",
+          "status",
+          "cloudonefs.isiloncloud.com-clusters.get",
+          "cloudonefs.isiloncloud.com-clusters.list",
+          "cloudvolumesgcp-api.netapp.com-activeDirectories.get",
+          "cloudvolumesgcp-api.netapp.com-activeDirectories.list",
+          "cloudvolumesgcp-api.netapp.com-ipRanges.list",
+          "cloudvolumesgcp-api.netapp.com-jobs.get",
+          "cloudvolumesgcp-api.netapp.com-jobs.list",
+          "cloudvolumesgcp-api.netapp.com-regions.list",
+          "cloudvolumesgcp-api.netapp.com-serviceLevels.list",
+          "cloudvolumesgcp-api.netapp.com-snapshots.get",
+          "cloudvolumesgcp-api.netapp.com-snapshots.list",
+          "cloudvolumesgcp-api.netapp.com-volumereplication.get"
+        ],
+        "source_files": [
+          "catalogs/gcp_iam_permissions.json",
+          "github_actions_workflow.json"
+        ]
+      },
+      "langfuse_trace_id": null
     }
   ],
   "run_stats": {
     "knowledge_base_dir": "/Users/sarvani/Threat_automation/knowledge_base",
     "knowledge_base_catalogs": 10,
     "input_threats": 50,
-    "processed_this_run": 50,
-    "skipped_resume": 0,
-    "successful_generations": 34,
-    "failed_generations": 16,
-    "total_rule_variants_this_run": 102,
-    "elapsed_seconds": 1431.3
+    "processed_this_run": 23,
+    "skipped_resume": 27,
+    "successful_generations": 0,
+    "failed_generations": 23,
+    "total_rule_variants_this_run": 0,
+    "elapsed_seconds": 5213.5
   }
 }

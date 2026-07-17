@@ -1,0 +1,191 @@
+<think>
+
+Okay, I need to create a revised Step 3 rule generation system prompt based on the structured Markdown critique provided by the user. Let me start by breaking down each part of the original prompt and identifying where changes are needed according to the Phase 1 critique.
+
+First, from question 1: The main issues were ambiguous layer definitions, missing platform-specific enforcement, no action name validation, and strategy mismatches leading to false negatives. So the new prompt must address these points directly.
+
+Looking at the HARD RULES constraints mentioned in the output format section of the original problem. Wait, actually, those are part of the structure that needs to be preserved as NON-NEGOTIABLE PRESERVATION CONSTRAINTS. The EVOLUTION CONSTRAINTS from Phase 1's critique outline what new rules should enforce.
+
+So the task is to integrate all these constraints into a rewritten prompt while preserving the mandatory blocks like THE 3-STRATEGY DIVERSITY MATRIX and THE 7-KEY JSON OUTPUT CONTRACT, as well as HARD RULES (though those are already mentioned in the output format's preservation list).
+
+The key points from Phase 1 critique that need to be addressed:
+
+1. Enforce each rule must target exactly one of the three layers: Process, File/Registry, Network.
+2. Ensure platform names match expected values for each layer (e.g., Windows for process rules).
+3. Validate actionNames against a strict LOOKUP_ARRAY provided by the system.
+4. Check threatType alignment with MITRE tactics from approved examples.
+5. Require explicit mention of strategy type in rule content to prevent mismatches.
+
+So, how to structure this into the prompt? The original prompt already includes sections for Strategy Diversity Matrix and 7-Key JSON Output Contract. But perhaps we need to add new constraints that guide the LLM to adhere strictly to these layers, platforms, action names, threat types, etc.
+
+The rewritten prompt should include:
+
+- Explicit instructions on each layer's focus.
+- Platform-specific requirements in rule generation (e.g., process rules must start with [Windows], file rules with [Azure] or similar).
+- A clear statement that actionNames must come from the LOOKUP_ARRAY provided by the system.
+- ThreatType alignment to MITRE tactics as per approved examples.
+- Explicit strategy tags within each rule's "name" key (like "[Windows]: Process Creation").
+- Ensure all 7 keys are present, especially recommend and remediate.
+
+Wait, but according to the output format example, the name is structured with [Platform]: ..., so maybe we need to make sure that when generating rules for a particular layer, the platform part matches. For instance, process creation must have [Windows], file modifications could be [Azure] or similar platforms as per their LOOKUP_ARRAY.
+
+But how does the system know which actionNames are allowed? The prompt mentions "use only strings from the LOOKUP_ARRAY provided." So perhaps in the evolved prompt, we need to include a reference to that array so the model knows it's restricted. But since this is part of the internal setup for the detection engineer (not visible to them), maybe just state it as a constraint.
+
+So putting all together:
+
+The new Step 3 prompt must have sections that enforce each layer's focus, platform alignment per layer, actionNames validation against LOOKUP_ARRAY, threatType mapping to MITRE tactics, and explicit strategy tags. Also, the existing structure for Strategy Diversity Matrix (each rule targets exactly one of three layers) is already present in the original problem statement under Non-negotiable Preservation Constraints. So that part must remain as-is.
+
+Wait, looking back at the user's input: The current generation prompt's non-negotiable parts include THE 3-STRATEGY DIVERSITY MATRIX and the 7-key schema. These are to be preserved exactly or equivalently in any evolved version. Therefore, when writing the new prompt, those sections must remain unchanged.
+
+So the main task is to add evolutionary constraints that address Phase 1's critique points while preserving the existing mandatory blocks.
+
+The original Step 3 prompt (not shown here) probably had general instructions for generating rules across three layers but lacked explicit enforcement of each layer. The rewritten version should include additional directives in natural language, not as bullet points or separate sections—since those are already preserved—and instead integrate them into a coherent instruction that the LLM follows.
+
+For example:
+
+- Explicitly state that process-based rules must focus on processes (e.g., Windows Process Creation), file-based on files/registry changes, network-based on connections/API.
+- For each layer's name, require specific platform prefixes: [Windows], [Azure], etc. This would help ensure the model includes them correctly in the "name" key.
+- Clearly mention that actionNames must be from a predefined list (LOOKUP_ARRAY), perhaps by referencing it as part of the rule generation instructions.
+- Require threatType to align with MITRE tactics, which could involve examples or specific terms like "MITRE: ...".
+- Ensure strategy tags are included in each rule's name (e.g., "[Windows]: Process") and that they match this tag.
+
+Additionally, all 7 keys must be present. The original prompt already mentions the schema for output, so that's covered. But perhaps add a note to ensure recommend/mitiate sections are not omitted but provided with structured content based on MITRE tactics.
+
+Putting it all into natural language within the Step 3 prompt:
+
+The new prompt should start by restating that each rule must target one of the three layers (as per Strategy Diversity Matrix), then for each layer, add specific instructions. For example:
+
+"Generate a security event detection rule targeting exactly one of the following telemetry layers: Process-based rules focusing on system processes and process-related activities; File/Registry-based rules monitoring file changes and registry modifications; Network-based rules detecting network connections and API interactions."
+
+Then, under each strategy's name (like "[Windows]: Process Creation"), add platform-specific instructions. For example:
+
+"Process-based rules must include a primary platform prefix in the rule’s 'name' key matching [Windows], such as '[Windows]: Process Creation'."
+
+Similarly for other platforms.
+
+For actionNames: "Action names used within this rule must be strictly validated against the system-provided LOOKUP_ARRAY to ensure they are valid operations."
+
+ThreatType alignment: "Ensure that threat types align with MITRE ATT&CK tactics relevant to the layer. For example, a process-based rule might map to 'MitM' or similar tactical categories as per approved examples."
+
+Also, include explicit strategy tags in each rule's name (e.g., "[Windows]: Process") and ensure they match.
+
+Finally, reiterate that all 7 keys must be present with structured content for recommend/mitigate sections based on MITRE tactics.
+
+But how to phrase this without making the prompt too verbose? The original Step 3 prompt probably had a general instruction like:
+
+"Generate security detection rules across three layers. Ensure each rule targets exactly one layer, includes necessary metadata, and adheres to provided action names."
+
+The evolved version needs to add more specific constraints here.
+
+So integrating all these into natural language instructions that the LLM follows when generating rules, while preserving existing mandatory sections (Strategy Diversity Matrix and 7-key schema) as per Non-negotiable Preservation Constraints.
+
+Putting it all together:
+
+The rewritten Step 3 prompt would start with a standard introduction, then include explicit layer-specific instructions. For example:
+
+"Generate security detection rules targeting one of the three fundamental telemetry layers: Process-based (e.g., Windows), File/Registry-based (e.g., [Azure]), or Network-based (e.g., [Linux]). Ensure each rule strictly adheres to its assigned strategy by including a platform prefix in the 'name' key. For example, process rules must start with '[Windows]:', file rules with '[Azure]:' etc."
+
+Then proceed to outline the rest of the instructions for action names and threat types.
+
+But since the original prompt already includes sections on Strategy Diversity Matrix (which requires each rule targets exactly one layer) and 7-key schema (ensuring all keys are present), perhaps those parts remain as-is, but we add evolutionary constraints in natural language within the main body of the Step 3 prompt to guide the LLM.
+
+So here's a draft:
+
+**Step 3 Rule Generation System Prompt**
+
+*Non-Negotiable Preservation Constraints:*
+
+- **THE 3-STRATEGY DIVERSITY MATRIX**
+  - Each rule must target exactly one of three layers: Process, File/Registry, Network.
+- **7-KEY JSON OUTPUT CONTRACT**
+  - All rules include keys like 'name', 'strategy', 'actionNames', etc., with specific structures.
+
+*Evolutionary Constraints from Phase 1 Critique:*
+
+"Generate security detection rules across the following telemetry layers:
+
+1. **Process-based**:
+   - Focus on system processes, task automation, and process execution.
+   - Include a primary platform prefix in the rule’s 'name' key (e.g., '[Windows]: Process Creation').
+   - Ensure action names are strictly validated against the provided LOOKUP_ARRAY.
+
+2. **File/Registry-based**:
+   - Monitor file changes, registry modifications, and encryption activities.
+   - Use platforms like [Azure], [Linux], or others as per their respective LOOKUP_ARRAYs in rule generation (e.g., '[Linux]: KMS.Sign' for key management).
+
+3. **Network-based**:
+   - Detect network connections, API interactions, and traffic analysis.
+   - Include a primary platform prefix matching the intended environment (e.g., '[Linux]: NetworkTrafficAnalysis').
+
+For each generated rule:
+
+- Validate that action names are present in the system-provided LOOKUP_ARRAY to ensure they correspond to valid operations.
+- Align threat types with MITRE ATT&CK tactics relevant to the layer. For example, process-based rules should map to tactical categories like 'MitM' or similar as per approved examples.
+- Explicitly include a strategy tag (e.g., "strategy=Process") in each rule’s name key and ensure it matches the content's focus area.
+
+All generated rules must adhere to the following schema:
+
+{
+  "name": "[Platform]: [Strategy]", // e.g., "[Windows]: Process Creation",
+  "actionNames": ["Valid action from LOOKUP_ARRAY"],
+  ... (other keys)
+}
+
+- Ensure mandatory fields 'recommend' and 'mitiate' are present with structured content based on MITRE tactics.
+
+Generate rules that strictly follow these guidelines to avoid false negatives or positives."
+
+This integrates the evolutionary constraints into natural language, directing the LLM to adhere to each layer's specifics without altering the existing non-negotiable parts. The key is phrasing it in a way that's part of the instruction flow rather than separate sections (since those are preserved as per original requirements).
+
+Now, checking if this meets all points:
+
+- Layer-specific focus: Yes.
+- Platform prefixes enforced via examples and instructions for each layer.
+- Action names validated against LOOKUP_ARRAY by stating they must be from that array.
+- ThreatType alignment to MITRE tactics with example mappings (e.g., process-based rules map to certain tactical categories).
+- Explicit strategy tags in the name key, requiring them to match content.
+
+Yes. Also, ensuring all 7 keys are present is covered as part of the schema examples and mandatory fields note.
+
+This should cover Phase 1's critique points while preserving existing constraints. The rewritten prompt must be concise but comprehensive enough for an LLM to generate rules that meet these strict criteria.
+
+</think>
+
+```python
+# Rewritten Step 3 Rule Generation System Prompt
+
+"""
+Your name is as follows: Process-based, File/Registry-based, or Network-based.
+Generate security detection rules targeting exactly one of the three fundamental telemetry layers:
+
+1. **Process-based**:
+   - Focus on system processes, task automation, and process execution.
+   - Include a primary platform prefix in the rule’s 'name' key (e.g., '[Windows]: Process Creation').
+   - Ensure action names are strictly validated against the provided LOOKUP_ARRAY.
+
+2. **File/Registry-based**:
+   - Monitor file changes, registry modifications, and encryption activities.
+   - Use platforms like [Azure], [Linux], or others as per their respective rule generation examples (e.g., '[Linux]: KMS.Sign').
+
+3. **Network-based**:
+   - Detect network connections, API interactions, and traffic analysis.
+   - Include a primary platform prefix matching the intended environment (e.g., '[Linux]: NetworkTrafficAnalysis').
+
+For each generated rule:
+
+- Validate that action names are present in the system-provided LOOKUP_ARRAY to ensure they correspond to valid operations.
+- Align threat types with MITRE ATT&CK tactics relevant to the layer. For example, process-based rules should map to tactical categories like 'MitM' or similar as per approved examples.
+- Explicitly include a strategy tag (e.g., "strategy=Process") in each rule’s name key and ensure it matches the content's focus area.
+
+All generated rules must adhere to the following schema:
+
+{
+  "name": "[Platform]: [Strategy]", // e.g., "[Windows]: Process Creation",
+  "actionNames": ["Valid action from LOOKUP_ARRAY"],
+  ... (other keys)
+}
+
+- Ensure mandatory fields 'recommend' and 'mitigate' are present with structured content based on MITRE tactics.
+
+Generate rules that strictly follow these guidelines to avoid false negatives or positives.
+"""

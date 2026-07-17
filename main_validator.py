@@ -22,6 +22,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from llm.observability import flush as langfuse_flush, step4_validation_span
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -58,6 +60,10 @@ STAGE3_OLLAMA_BASE_URL: str = _os.environ.get(
 )
 STAGE3_OLLAMA_MODEL: str = _os.environ.get("OLLAMA_PHI4_MODEL", "phi4-mini-reasoning")
 STAGE3_TIMEOUT_SECONDS: float = float(_os.environ.get("STAGE3_TIMEOUT_SECONDS", "300"))
+
+# Lazy singleton — created on first Stage 3 call so tests can import this
+# module without triggering an OpenAI client instantiation.
+_STAGE3_CLIENT: "StructuredLLMClient | None" = None  # type: ignore[name-defined]
 
 # ---------------------------------------------------------------------------
 # Stage 3 — Sherman Kent CTI system prompt (exact, word-for-word)
@@ -147,16 +153,17 @@ logger = logging.getLogger("main_validator")
 # Stage 3 — phi4-mini-reasoning cognitive audit (Sherman Kent CTI discipline)
 # ---------------------------------------------------------------------------
 
-# Ordered by specificity so the first full-phrase match wins.
+# Ordered so compound / more-specific phrases are checked before their substrings.
+# e.g. "Highly Likely" before "Likely", "Highly Unlikely" before "Unlikely".
 _KENT_TAGS: list[str] = [
     "Almost Certain",
     "Highly Likely",
+    "Highly Unlikely",
     "Probable",
+    "Unlikely",
     "Likely",
     "Possible",
-    "Unlikely",
     "Remote",
-    "Highly Unlikely",
 ]
 _KENT_PATTERN: re.Pattern[str] = re.compile(
     r"Probability Assessment[:\s]+([^\n]+)", re.IGNORECASE
@@ -175,16 +182,24 @@ def _extract_kent_tag(report: str) -> str:
     """
     Parse the 'Probability Assessment' line from the model's CTI report and
     return the matching Sherman Kent tag, or 'Unknown' if none is found.
+
+    Uses whole-word regex matching so that "Likely" cannot accidentally match
+    inside "Unlikely" or "Highly Likely".  Tags are checked in priority order
+    (most specific / highest confidence first) to prevent shorter tags from
+    shadowing longer compound ones.
     """
+    def _word_match(tag: str, text: str) -> bool:
+        return bool(re.search(r"\b" + re.escape(tag) + r"\b", text, re.IGNORECASE))
+
     match = _KENT_PATTERN.search(report)
     if match:
         assessment_line = match.group(1)
         for tag in _KENT_TAGS:
-            if tag.lower() in assessment_line.lower():
+            if _word_match(tag, assessment_line):
                 return tag
     # Fallback: scan the full report for any recognised tag
     for tag in _KENT_TAGS:
-        if tag.lower() in report.lower():
+        if _word_match(tag, report):
             return tag
     return "Unknown"
 
@@ -204,54 +219,105 @@ def _extract_executive_summary(report: str) -> str:
     return report[:400].strip()
 
 
-def _call_ollama_sync(rule_data: dict[str, Any]) -> dict[str, Any]:
+def _get_stage3_client() -> "StructuredLLMClient":
     """
-    Synchronous Ollama call — run inside asyncio.to_thread() to avoid
-    blocking the event loop during concurrent variant processing.
+    Lazy singleton that creates the StructuredLLMClient once per process.
+
+    Using a singleton avoids re-constructing the OpenAI client on every
+    rule variant while still supporting tests that mock _call_ollama_sync
+    at the function level without needing a client at all.
     """
-    # Lazy import: openai is only required at runtime; avoids hard startup
-    # failure when the package is absent in minimal environments.
-    try:
-        from openai import APIConnectionError, APITimeoutError, OpenAI
-    except ModuleNotFoundError as exc:
-        return {**_STAGE3_FALLBACK, "model_error": f"openai package missing: {exc}"}
+    global _STAGE3_CLIENT
+    if _STAGE3_CLIENT is None:
+        from llm.structured_client import StructuredLLMClient  # noqa: PLC0415
+
+        _STAGE3_CLIENT = StructuredLLMClient(
+            base_url=STAGE3_OLLAMA_BASE_URL,
+            model=STAGE3_OLLAMA_MODEL,
+            api_key="ollama",
+            timeout=STAGE3_TIMEOUT_SECONDS,
+        )
+    return _STAGE3_CLIENT  # type: ignore[return-value]
+
+
+def _call_ollama_sync(rule_data: dict[str, Any], lf_span: Any = None) -> dict[str, Any]:
+    """
+    Synchronous Stage 3 cognitive audit call — run via asyncio.to_thread().
+
+    Hybrid routing
+    ──────────────
+    OpenAI cloud endpoint
+        generate_structured_output() with KENT_AUDIT_SCHEMA enforces the
+        three-key JSON contract server-side.  The kent_probability_tag,
+        audit_rationale, and full_report values arrive pre-validated.
+
+    Local Ollama / LiteLLM endpoint
+        generate_text() returns the free-form 5-section markdown CTI report.
+        The existing _strip_thinking_tags → _extract_kent_tag →
+        _extract_executive_summary regex pipeline populates the three keys,
+        exactly as before this refactor.
+
+    The system prompt (STAGE3_SYSTEM_PROMPT) and all regex helpers are
+    completely unchanged regardless of the routing path taken.
+    """
+    from openai import APIConnectionError, APITimeoutError  # noqa: PLC0415
+    from llm.schemas import KENT_AUDIT_SCHEMA  # noqa: PLC0415
 
     user_prompt = f"### SOURCE DATA TO ANALYZE:\n{json.dumps(rule_data, indent=2)}"
-
-    client = OpenAI(
-        base_url=STAGE3_OLLAMA_BASE_URL,
-        api_key="ollama",
-        timeout=STAGE3_TIMEOUT_SECONDS,
-    )
+    messages: list[dict[str, str]] = [
+        {"role": "system", "content": STAGE3_SYSTEM_PROMPT},
+        {"role": "user", "content": user_prompt},
+    ]
 
     try:
-        response = client.chat.completions.create(
-            model=STAGE3_OLLAMA_MODEL,
-            messages=[
-                {"role": "system", "content": STAGE3_SYSTEM_PROMPT},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0.2,
-        )
-        raw: str = response.choices[0].message.content or ""
+        client = _get_stage3_client()
+
+        if client.is_cloud:
+            # ── OpenAI cloud: strict JSON schema, keys delivered directly ──
+            raw_dict = client.generate_structured_output(
+                messages, KENT_AUDIT_SCHEMA, "kent_audit",
+                temperature=0.2,
+                parent_observation=lf_span,      # Langfuse Span B linkage
+            )
+            kent_tag = raw_dict.get("kent_probability_tag") or "Unknown"
+            rationale = (raw_dict.get("audit_rationale") or "")[:600]
+            full_report = raw_dict.get("full_report") or ""
+            if not full_report:
+                logger.warning(
+                    "stage3_cloud_empty_report model=%s", STAGE3_OLLAMA_MODEL
+                )
+                return {
+                    **_STAGE3_FALLBACK,
+                    "model_error": "Cloud model returned empty full_report",
+                }
+        else:
+            # ── Local Ollama: free-form CTI report → regex extraction ──
+            raw = client.generate_text(
+                messages, temperature=0.2, parent_observation=lf_span
+            )
+            full_report = _strip_thinking_tags(raw)
+            if not full_report:
+                logger.warning(
+                    "stage3_empty_response model=%s", STAGE3_OLLAMA_MODEL
+                )
+                return {
+                    **_STAGE3_FALLBACK,
+                    "model_error": "Model returned empty response after stripping",
+                }
+            kent_tag = _extract_kent_tag(full_report)
+            rationale = _extract_executive_summary(full_report)
+
     except (APIConnectionError, APITimeoutError, ConnectionError, TimeoutError) as exc:
         logger.error("stage3_ollama_timeout model=%s error=%s", STAGE3_OLLAMA_MODEL, exc)
         return {**_STAGE3_FALLBACK, "model_error": f"Ollama timeout/connection: {exc}"}
     except Exception as exc:
         logger.error("stage3_ollama_error model=%s error=%s", STAGE3_OLLAMA_MODEL, exc)
-        return {**_STAGE3_FALLBACK, "model_error": f"Ollama call failed: {exc}"}
-
-    report = _strip_thinking_tags(raw)
-    if not report:
-        logger.warning("stage3_empty_response model=%s", STAGE3_OLLAMA_MODEL)
-        return {**_STAGE3_FALLBACK, "model_error": "Model returned empty response after stripping"}
-
-    kent_tag = _extract_kent_tag(report)
-    rationale = _extract_executive_summary(report)
+        return {**_STAGE3_FALLBACK, "model_error": f"Stage 3 call failed: {exc}"}
 
     logger.info(
-        "stage3_audit_complete model=%s kent_tag=%r rationale_len=%d",
+        "stage3_audit_complete model=%s provider=%s kent_tag=%r rationale_len=%d",
         STAGE3_OLLAMA_MODEL,
+        "cloud" if client.is_cloud else "local",
         kent_tag,
         len(rationale),
     )
@@ -259,20 +325,24 @@ def _call_ollama_sync(rule_data: dict[str, Any]) -> dict[str, Any]:
         "is_valid": True,
         "kent_probability_tag": kent_tag,
         "audit_rationale": rationale,
-        "full_report": report,
+        "full_report": full_report,
         "model": STAGE3_OLLAMA_MODEL,
         "model_error": None,
     }
 
 
-async def run_stage3_cognitive_audit(rule_data: dict[str, Any]) -> dict[str, Any]:
+async def run_stage3_cognitive_audit(
+    rule_data: dict[str, Any],
+    lf_span: Any = None,
+) -> dict[str, Any]:
     """
     phi4-mini-reasoning cognitive audit using Sherman Kent's CTI analytic discipline.
 
     Runs the blocking Ollama call in a thread pool so the asyncio event loop
-    remains free to process other variants concurrently.
+    remains free to process other variants concurrently.  `lf_span` is forwarded
+    to `_call_ollama_sync` so the generation is linked to Step 4's Langfuse span.
     """
-    return await asyncio.to_thread(_call_ollama_sync, rule_data)
+    return await asyncio.to_thread(_call_ollama_sync, rule_data, lf_span)
 
 
 # ---------------------------------------------------------------------------
@@ -395,6 +465,8 @@ async def validate_variant(
     variant_index: int,
     threat_title: str,
     kb_actions: frozenset[str],
+    *,
+    lf_span: Any = None,
 ) -> dict[str, Any]:
     """
     Run a single rule variant through all three stages.
@@ -440,7 +512,7 @@ async def validate_variant(
         return result
 
     # -- Stage 3 — phi4-mini-reasoning cognitive audit --
-    audit = await run_stage3_cognitive_audit(variant)
+    audit = await run_stage3_cognitive_audit(variant, lf_span=lf_span)
 
     result["validation"] = {
         "stage": "passed",
@@ -468,17 +540,55 @@ async def validate_entry(
 ) -> dict[str, Any]:
     """
     Validate all variants inside one staging entry.
-    Returns the entry dict with each variant's 'validation' key populated.
+
+    Opens Langfuse Span B (step4-kent-cognitive-audit) attached to the root
+    trace that was created by Step 3 (identified via `langfuse_trace_id`).
+    Updates the span output with aggregated is_valid and kent_probability_tag
+    values from all variants before closing.
     """
-    title = entry.get("threat_title", "unknown")
+    title    = entry.get("threat_title", "unknown")
+    trace_id = entry.get("langfuse_trace_id")
     raw_variants: list[dict[str, Any]] = entry.get("variants") or []
 
-    validated_variants = await asyncio.gather(
-        *[
-            validate_variant(v, idx, title, kb_actions)
-            for idx, v in enumerate(raw_variants)
-        ]
-    )
+    with step4_validation_span(trace_id, entry) as span_b:
+        validated_variants = await asyncio.gather(
+            *[
+                validate_variant(v, idx, title, kb_actions, lf_span=span_b)
+                for idx, v in enumerate(raw_variants)
+            ]
+        )
+
+        # Update Span B with aggregated validation outcomes
+        if span_b is not None:
+            try:
+                kent_tags = [
+                    v.get("validation", {}).get("stage3_audit", {}).get("kent_probability_tag")
+                    for v in validated_variants
+                    if (v.get("validation", {}).get("stage") == "passed"
+                        and v.get("validation", {}).get("stage3_audit"))
+                ]
+                passed_count  = sum(
+                    1 for v in validated_variants
+                    if v.get("validation", {}).get("stage") == "passed"
+                )
+                s1_fail_count = sum(
+                    1 for v in validated_variants
+                    if v.get("validation", {}).get("stage") == "failed_stage_1"
+                )
+                s2_fail_count = sum(
+                    1 for v in validated_variants
+                    if v.get("validation", {}).get("stage") == "failed_stage_2"
+                )
+                span_b.update(output={
+                    "variants_total":   len(validated_variants),
+                    "variants_passed":  passed_count,
+                    "failed_stage_1":   s1_fail_count,
+                    "failed_stage_2":   s2_fail_count,
+                    "kent_tags":        [t for t in kent_tags if t],
+                    "triage_ready":     passed_count > 0,
+                })
+            except Exception:
+                pass
 
     annotated = dict(entry)
     annotated["variants"] = list(validated_variants)
@@ -607,6 +717,9 @@ async def run_validation(
     print(f"Elapsed                   : {elapsed:.1f}s")
     print(f"Output                    : {output_path}")
     print("=" * 60 + "\n")
+
+    # Flush Langfuse telemetry before the process exits (important in Docker)
+    langfuse_flush()
 
     return 0
 

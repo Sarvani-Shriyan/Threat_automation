@@ -1,0 +1,233 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "threat_id": "f1f4e20a7bee793a",
+      "simhash": 3130776224038514523,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Malicious Go Module Exposes a 222-Repository GitHub Lure Network"
+    },
+    {
+      "threat_id": "0c2b57c803a55fd3",
+      "simhash": 7020208007089019953,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Passkey Phishing Campaign Uses Vishing Calls to Hijack Microsoft Entra Accounts"
+    },
+    {
+      "threat_id": "91f21fdec27de442",
+      "simhash": 8974993474707932939,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "RabbitMQ Flaws Could Leak OAuth Secrets and Expose Cross-Tenant Queue Metadata"
+    },
+    {
+      "threat_id": "12e1dea8b1e3acd8",
+      "simhash": 12159377347301484332,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "OAuth Client ID Spoofing Lets Attackers Validate Stolen Microsoft Entra Credentials"
+    },
+    {
+      "threat_id": "26d86b677f48c7b6",
+      "simhash": 3711490982537552724,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Microsoft Maps Three Salesforce Attack Paths Tied to a Year of ShinyHunters Activity"
+    },
+    {
+      "threat_id": "1c03ed6463812ea2",
+      "simhash": 4309269092083107412,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Attacker Uses Suspected AI-Generated PowerShell Script to Map Active Directory"
+    },
+    {
+      "threat_id": "2a8f73f3d2abe358",
+      "simhash": 5957027448066696668,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Injective Labs GitHub Compromise Pushes Wallet-Key-Stealing npm Packages"
+    },
+    {
+      "threat_id": "97b76568e1930e15",
+      "simhash": 2403595794447691569,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Hackers Use Fake Microsoft Entra Passkey Enrollment to Gain Microsoft 365 Access"
+    },
+    {
+      "threat_id": "66010a24b17d6dee",
+      "simhash": 11721040252551783373,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Dormant GitHub Accounts Help Attackers Blend In While Mapping Corporate Orgs"
+    },
+    {
+      "threat_id": "3efa56465bc20496",
+      "simhash": 12749137812715003809,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "npm 12 Disables Install Scripts by Default to Reduce Supply Chain Risk"
+    },
+    {
+      "threat_id": "d3c4b5d55ee89e98",
+      "simhash": 3587643658867255257,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Lessons Learned from CISA’s Recent GitHub Leak"
+    },
+    {
+      "threat_id": "a11dcc2cc7203966",
+      "simhash": 12240231560758259117,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Millions of Microsoft Entra Accounts Targeted in OAuth Client ID Spoofing Campaigns"
+    },
+    {
+      "threat_id": "03e55a70189cb246",
+      "simhash": 2577915264396392168,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "The Risk of Exposed Cloud Functions and How to Harden"
+    },
+    {
+      "threat_id": "4b94fc3a213beb83",
+      "simhash": 3597683235513327221,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Active Exploitation of Microsoft AD FS Vulnerability CVE-2026-56155 Detected"
+    },
+    {
+      "threat_id": "965fba42552bbaaf",
+      "simhash": 3578652711696030045,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "CVE-2026-15013 | cyberlord92 SAML Single Sign On Plugin up to 5.4.3 on WordPress SAML Signature Verification mo_saml_cas"
+    },
+    {
+      "threat_id": "02d1994d224197eb",
+      "simhash": 1192510259662773449,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "CVE-2026-55576 | MaaAssistantArknights Pull Request Title release-preparation.yml pull_request.title os command injectio"
+    },
+    {
+      "threat_id": "1159e803718bac80",
+      "simhash": 2994098596827164945,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "CVE-2026-53444 | Wekan up to 9.31 OIDC Server oidc_server.js GroupRoutineOnLogin improper authorization"
+    },
+    {
+      "threat_id": "efca8f7b45a1f46e",
+      "simhash": 3183461058683722553,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "CVE-2026-56678 | decolua 9router up to 0.5.5 Kiro API-key Validation Endpoint /api/oauth/kiro/api-key region input valid"
+    },
+    {
+      "threat_id": "16640e80b1f819d3",
+      "simhash": 2146502077347834512,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "ICYMI: June 2026 @AWS Security"
+    },
+    {
+      "threat_id": "8ad06705b4640308",
+      "simhash": 11692067320253129353,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Authenticate legitimate AI agent traffic with AWS WAF Bot Control"
+    },
+    {
+      "threat_id": "21be2c6a8a7dc6ac",
+      "simhash": 12433085634042815427,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Introducing OAuth Support for AWS MCP Server"
+    },
+    {
+      "threat_id": "8f714e791ae89b00",
+      "simhash": 1290731844863667233,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Safely run AI-generated code in Cloud Run sandboxes"
+    },
+    {
+      "threat_id": "1e670e9d4245ff9d",
+      "simhash": 3136705198567904682,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "M-Red-Team: AsyncAPI Supply Chain Compromise via GitHub Actions"
+    },
+    {
+      "threat_id": "2c6c21399315d8f1",
+      "simhash": 1281798300877870816,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "AsyncAPI Supply Chain Compromise via GitHub Actions (Campaign)"
+    },
+    {
+      "threat_id": "6ff99161e0fe3e4a",
+      "simhash": 6849300564715921008,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "No single pane of glass: Anatomy of an Azure permission takeover"
+    },
+    {
+      "threat_id": "efe02cd02add9f48",
+      "simhash": 8304648407888440760,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Defending SaaS-based applications against ShinyHunters OAuth abuse"
+    },
+    {
+      "threat_id": "bf20874834d4edd2",
+      "simhash": 17242392699500658333,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Microsoft Entra ID security updates: Passkeys are the default authentication method in Entra ID"
+    },
+    {
+      "threat_id": "ae5b712aa2e33254",
+      "simhash": 3571083776864112361,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Investigating Persistence Mechanisms in AWS"
+    },
+    {
+      "threat_id": "bd11192b7950de7b",
+      "simhash": 6884502203642105586,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Pandora’s Container Part 1: Unpacking Azure Container Security"
+    },
+    {
+      "threat_id": "e0661996d7407424",
+      "simhash": 1274949736649423133,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "June 2026 Threat Trend Report on APT Groups"
+    },
+    {
+      "threat_id": "8ba62aa8c83ce9ce",
+      "simhash": 4092410051342333555,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "CISA Incident Lessons, Amazon Q Flaw, and Giga Wiper"
+    },
+    {
+      "threat_id": "4f5d54a3cabfad15",
+      "simhash": 12821603182432924956,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Critical zero-days in Microsoft Active Directory, SonicWall SMA1000, GitHub malware campaign"
+    },
+    {
+      "threat_id": "c3c573af4a69f200",
+      "simhash": 8618655211355778734,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Progress ShareFile emergency shutdown; Injective GitHub breach; U-Boot firmware flaws"
+    },
+    {
+      "threat_id": "059a3a99e35d20e6",
+      "simhash": 16150920255192376321,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "GitHub API enumeration campaign exposed; GigaWiper Windows backdoor combines disk wipe, spyware"
+    },
+    {
+      "threat_id": "3cc4cbbfaf532877",
+      "simhash": 8270800574077041960,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Defending SaaS-based applications against ShinyHunters OAuth abuse"
+    },
+    {
+      "threat_id": "c388ebc8fbec7d78",
+      "simhash": 11696545328676650690,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "AsyncAPI npm packages backdoored via GitHub Actions"
+    },
+    {
+      "threat_id": "88e96f689af6073e",
+      "simhash": 11479976324594345696,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Build a Feature Flag Service with AWS CDK, Lambda, and DynamoDB (Like LaunchDarkly)"
+    },
+    {
+      "threat_id": "63bf5d738bc34526",
+      "simhash": 8304947440665458275,
+      "inserted_at": "2026-07-16T09:19:08.347598+00:00",
+      "title": "Building a Safer API Drift Healer: Deterministic Field Matching in V0.4"
+    }
+  ]
+}

@@ -1,13 +1,12 @@
-# pip install openai pydantic
-
 import hashlib
 import json
 import logging
 import re
 import time
+from pathlib import Path
 from typing import Any, Callable
 
-from openai import APIConnectionError, APITimeoutError, OpenAI
+from openai import APIConnectionError, APITimeoutError
 
 from generators.knowledge_base import GroundingResult, KnowledgeBase
 from generators.models import DetectionRule, ThreatRuleBatch
@@ -19,8 +18,15 @@ from ingestion.config import (
     RULE_VARIANTS_MAX,
     RULE_VARIANTS_MIN,
 )
+from llm.observability import create_threat_trace, flush as langfuse_flush, step3_generation_span
+from llm.schemas import RULE_BATCH_SCHEMA
+from llm.structured_client import StructuredLLMClient
 
 logger = logging.getLogger(__name__)
+
+# Path to the GEPA-evolved system prompt (written by main_feedback.py Step 6).
+# When the file exists, it supersedes the hardcoded SYSTEM_PROMPT_BASE below.
+_GEPA_PROMPT_FILE = Path("data/generator_system_prompt.txt")
 
 SYSTEM_PROMPT_BASE = """\
 You are an expert detection engineer building production SIEM/detection rules.
@@ -81,9 +87,45 @@ CRITICAL: The "recommend" and "remediate" keys are MANDATORY. Every rule object 
 """
 
 
+def _load_system_prompt_base() -> str:
+    """
+    Return the current base system prompt for Step 3 rule generation.
+
+    Priority order
+    ──────────────
+    1. GEPA-evolved file (data/generator_system_prompt.txt) — written by Step 6
+       main_feedback.py whenever the GEPA engine completes a successful run.
+    2. Hardcoded SYSTEM_PROMPT_BASE constant — always the safe fallback.
+
+    This means Step 3 automatically adopts optimised prompts produced by the
+    feedback loop without any manual config change.
+    """
+    if _GEPA_PROMPT_FILE.is_file():
+        try:
+            content = _GEPA_PROMPT_FILE.read_text(encoding="utf-8").strip()
+            if content:
+                logger.info(
+                    "rule_engine_using_evolved_prompt path=%s chars=%d",
+                    _GEPA_PROMPT_FILE,
+                    len(content),
+                )
+                return content
+        except OSError as exc:
+            logger.warning(
+                "rule_engine_evolved_prompt_load_failed path=%s error=%s — "
+                "falling back to hardcoded baseline",
+                _GEPA_PROMPT_FILE,
+                exc,
+            )
+    return SYSTEM_PROMPT_BASE
+
+
 def build_grounded_system_prompt(grounding: GroundingResult) -> str:
     allowed_actions = grounding.allowed_actions
     platform = grounding.primary_platform or "cloud"
+
+    # Use GEPA-evolved prompt when available; fall back to hardcoded baseline.
+    base = _load_system_prompt_base()
 
     if grounding.primary_platform == "github":
         env_line = (
@@ -138,7 +180,7 @@ def build_grounded_system_prompt(grounding: GroundingResult) -> str:
     if grounding.routed_profiles:
         profile_note = f"\nRouted catalog profiles: {', '.join(grounding.routed_profiles)}."
 
-    return SYSTEM_PROMPT_BASE + env_line + profile_note + vocab_block + forbid
+    return base + env_line + profile_note + vocab_block + forbid
 
 
 class RuleEngine:
@@ -149,6 +191,10 @@ class RuleEngine:
       Rule 1 — Process Creation / Command-Line Arguments
       Rule 2 — File / Registry Modifications or Behavioral Indicators
       Rule 3 — Network Connections / API / System Calls
+
+    Routes completions through StructuredLLMClient:
+      • OpenAI cloud  → strict JSON schema (RULE_BATCH_SCHEMA), no post-repair needed
+      • Local Ollama  → json_object mode + existing 5-level fallback parser + repair
     """
 
     def __init__(
@@ -160,8 +206,9 @@ class RuleEngine:
     ) -> None:
         self._kb = knowledge_base
         self._model = model
-        self._client = OpenAI(
+        self._llm = StructuredLLMClient(
             base_url=base_url,
+            model=model,
             api_key="ollama",
             timeout=timeout_seconds,
         )
@@ -174,22 +221,24 @@ class RuleEngine:
         self,
         threat: dict[str, Any],
         grounding: GroundingResult | None = None,
+        parent_observation: Any = None,
     ) -> tuple[list[DetectionRule], str | None, GroundingResult]:
         grounding = grounding or self.ground_threat(threat)
         system_prompt = build_grounded_system_prompt(grounding)
+        messages: list[dict[str, str]] = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": self._build_user_prompt(threat, grounding)},
+        ]
 
         try:
-            response = self._client.chat.completions.create(
-                model=self._model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": self._build_user_prompt(threat, grounding)},
-                ],
+            raw_dict = self._llm.generate_structured_output(
+                messages,
+                RULE_BATCH_SCHEMA,
+                "detection_rule_batch",
                 temperature=0.3,
-                response_format={"type": "json_object"},
+                parent_observation=parent_observation,  # Langfuse span A linkage
             )
-            raw = response.choices[0].message.content or "{}"
-            batch = self._parse_rules(raw)
+            batch = self._parse_rules(raw_dict)
             return batch.rules, None, grounding
         except (APIConnectionError, APITimeoutError, ConnectionError, TimeoutError) as exc:
             msg = f"phi4-mini-reasoning offline or timeout: {exc}"
@@ -197,7 +246,11 @@ class RuleEngine:
             return [], msg, grounding
         except Exception as exc:
             msg = f"Generation failed: {exc}"
-            logger.error("reasoning_model_generation_failed threat=%s error=%s", threat.get("title"), exc)
+            logger.error(
+                "reasoning_model_generation_failed threat=%s error=%s",
+                threat.get("title"),
+                exc,
+            )
             return [], msg, grounding
 
     def process_threat_stream(
@@ -225,16 +278,47 @@ class RuleEngine:
             if on_before:
                 on_before(index, total, threat, grounding)
 
+            # ── Langfuse: root trace + Span A ──────────────────────────────
+            lf_trace = create_threat_trace(
+                tid, title,
+                metadata={
+                    "source": threat.get("source"),
+                    "url":    threat.get("url"),
+                    "gemma_score": (threat.get("gemma_verdict") or {}).get("confidence_score"),
+                },
+            )
+            lf_trace_id: str | None = (
+                f"threat-{tid}" if lf_trace is not None else None
+            )
+
             started = time.perf_counter()
-            rules, error, grounding = self.generate_for_threat(threat, grounding=grounding)
+            with step3_generation_span(lf_trace, threat) as span_a:
+                rules, error, grounding = self.generate_for_threat(
+                    threat, grounding=grounding, parent_observation=span_a
+                )
+                # Update span output before the context manager closes it
+                if span_a is not None:
+                    try:
+                        span_a.update(output={
+                            "rules_generated": len(rules),
+                            "status":          "success" if rules and not error else "failed",
+                            "error":           error,
+                        })
+                    except Exception:
+                        pass
             elapsed = time.perf_counter() - started
 
             entry = build_staging_entry(threat, rules, error, grounding=grounding)
+            # Persist trace_id so Step 4 (validator) and Step 5 (triage)
+            # can attach Span B and feedback scores to the same root trace.
+            entry["langfuse_trace_id"] = lf_trace_id
             produced.append(entry)
 
             if on_after:
                 on_after(index, total, threat, entry, elapsed)
 
+        # Flush buffered Langfuse events before the process exits
+        langfuse_flush()
         return produced
 
     @staticmethod
@@ -363,9 +447,22 @@ class RuleEngine:
         return rule
 
     @staticmethod
-    def _parse_rules(raw: str) -> ThreatRuleBatch:
-        text = RuleEngine._strip_model_artifacts(raw)
-        data = RuleEngine._extract_rules_json(text)
+    def _parse_rules(raw: str | dict[str, Any]) -> ThreatRuleBatch:
+        """
+        Parse a rules payload from either a raw model string or a pre-parsed dict.
+
+        When called with a dict (cloud path or StructuredLLMClient Ollama path),
+        the artifact-stripping and JSON-extraction steps are skipped — the dict
+        is used directly.  All downstream repair and Pydantic validation still run.
+
+        When called with a string (legacy / direct Ollama text path), the full
+        5-level fallback chain is applied before Pydantic validation.
+        """
+        if isinstance(raw, dict):
+            data = raw
+        else:
+            text = RuleEngine._strip_model_artifacts(raw)
+            data = RuleEngine._extract_rules_json(text)
 
         if isinstance(data, list):
             rules_list = data

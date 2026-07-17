@@ -4,21 +4,38 @@ Modular, model-agnostic threat intelligence pipeline with production-grade state
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for system design and [USAGE.md](./USAGE.md) for the full local CLI walkthrough.
 
-## Quick start (local Python)
+## Quick start (local — uv)
+
+Dependencies are managed with **[uv](https://github.com/astral-sh/uv)** (Astral). A pinned `uv.lock` ships with the repo so every install is byte-for-byte reproducible.
+
+```bash
+# Install uv (if not already present)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create a virtual env and install all locked deps in one command
+uv sync
+
+# Run the pipeline
+uv run python main_ingestion.py       # Step 1 — ingest 198 RSS feeds
+uv run python main_filter.py          # Step 2 — keyword + patch-advisory + Gemma 4 filter
+uv run python main_generator.py       # Step 3 — generate 3 strategy-diverse rules per threat
+uv run python main_validator.py       # Step 4 — contract + KB + CTI cognitive audit
+
+uv run streamlit run app_triage.py --server.port 8502   # Step 5 — triage dashboard
+uv run python main_feedback.py                          # Step 6 — feedback loop
+
+uv run streamlit run app.py           # Threat stream dashboard   :8501
+```
+
+> **Updating dependencies** — edit `pyproject.toml`, then run `uv lock` to regenerate `uv.lock` and commit both files together. Never hand-edit `uv.lock`.
+
+### Fallback (plain pip)
+
+`requirements.txt` is retained as a reference for environments where uv is not available:
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-
-python main_ingestion.py       # Step 1 — ingest 198 RSS feeds
-python main_filter.py          # Step 2 — keyword + patch-advisory + Gemma 4 filter
-python main_generator.py       # Step 3 — generate 3 strategy-diverse rules per threat
-python main_validator.py       # Step 4 — contract + KB + CTI cognitive audit
-
-streamlit run app_triage.py --server.port 8502   # Step 5 — security engineer triage
-python main_feedback.py                          # Step 6 — feedback loop → negative constraints
-
-streamlit run app.py           # Threat stream dashboard   :8501
 ```
 
 ## Pipeline at a glance
@@ -70,7 +87,13 @@ Ensure `./data` exists (the repo includes `data/.gitkeep`).
 docker compose build
 ```
 
-This builds `threat-automation:latest` from the root `Dockerfile` (`python:3.11-slim`, full codebase + `requirements.txt`).
+This builds `threat-automation:latest` from the root `Dockerfile` using a **two-stage uv build**:
+
+1. The official `ghcr.io/astral-sh/uv:latest` image donates its `/uv` and `/uvx` binaries via `COPY --from`.
+2. A `--mount=type=cache,target=/root/.cache/uv` mount keeps the package download cache between builds — only changed packages are re-downloaded.
+3. `uv sync --frozen --no-dev` installs exactly the versions pinned in `uv.lock` directly into the system Python (`UV_SYSTEM_PYTHON=1`) with pre-compiled `.pyc` files (`UV_COMPILE_BYTECODE=1`).
+
+The dependency layer rebuilds **only when `pyproject.toml` or `uv.lock` changes**, so adding application code never triggers a full reinstall.
 
 ### Run the threat stream dashboard (persistent UI)
 

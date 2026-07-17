@@ -9,24 +9,54 @@ description = "Modular Threat Research Automation Pipeline"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    # LLM / AI clients
+    "openai>=1.30",
+    # Data validation
     "pydantic>=2.6",
     "pydantic-settings>=2.2",
+    # HTTP / async
+    "aiohttp>=3.9",
     "httpx>=0.27",
+    # RSS ingestion
     "feedparser>=6.0",
+    # HTML parsing
     "beautifulsoup4>=4.12",
     "lxml>=5.1",
     "markdownify>=0.13",
-    "litellm>=1.40",
+    # Observability
     "structlog>=24.1",
+    # Dedup hashing
     "simhash>=2.1",
+    # Dashboards
+    "streamlit>=1.33",
+    "streamlit-autorefresh>=1.0",
+    # Tiered semantic deduplication (Step 2 filter layer)
+    "lancedb>=0.5",
+    "sentence-transformers>=2.7",
+    # LLM observability (Step 3–5)
+    "langfuse>=2.0",
 ]
-
-[project.optional-dependencies]
-dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+# Project root must be on sys.path so tests can import main_validator etc.
+pythonpath = [".", "src"]
+# Treat every async test function as asyncio automatically
+asyncio_mode = "auto"
+
+# ---------------------------------------------------------------------------
+# uv configuration
+# ---------------------------------------------------------------------------
+[tool.uv]
+# Pins applied during `uv lock` resolution
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "pytest-mock>=3.15.1",
+]

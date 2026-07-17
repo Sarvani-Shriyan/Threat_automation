@@ -25,6 +25,8 @@ from typing import Any
 import streamlit as st
 import streamlit.components.v1 as components
 
+from llm.observability import log_approval_score, log_rejection_score
+
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
@@ -231,14 +233,16 @@ def load_triage_entries() -> list[dict[str, Any]]:
 
 def _prod_record(variant: dict[str, Any], entry: dict[str, Any]) -> dict[str, Any]:
     return {
-        "approved_at":  _now_iso(),
-        "threat_id":    entry.get("threat_id"),
-        "threat_title": entry.get("threat_title"),
-        "threat_url":   entry.get("threat_url"),
-        "source":       entry.get("source"),
-        "gemma_verdict": entry.get("gemma_verdict"),
-        "rule":         {k: v for k, v in variant.items() if k != "validation"},
-        "validation":   variant.get("validation"),
+        "approved_at":       _now_iso(),
+        "threat_id":         entry.get("threat_id"),
+        "threat_title":      entry.get("threat_title"),
+        "threat_url":        entry.get("threat_url"),
+        "source":            entry.get("source"),
+        "gemma_verdict":     entry.get("gemma_verdict"),
+        "rule":              {k: v for k, v in variant.items() if k != "validation"},
+        "validation":        variant.get("validation"),
+        # Carry trace_id so it can be referenced in downstream analysis
+        "langfuse_trace_id": entry.get("langfuse_trace_id"),
     }
 
 
@@ -285,6 +289,8 @@ def _feedback_record(
         "source":             entry.get("source"),
         "rule":               {k: v for k, v in variant.items() if k != "validation"},
         "validation":         variant.get("validation"),
+        # Carry trace_id for cross-pipeline lineage
+        "langfuse_trace_id":  entry.get("langfuse_trace_id"),
     }
 
 
@@ -311,7 +317,8 @@ def action_approve(
     """
     1. Write approved variant to prod.
     2. Implicitly reject all remaining (non-already-explicitly-rejected) siblings.
-    3. Remove threat from queue. Clear session state.
+    3. Log positive Langfuse feedback score (1.0) for this approval.
+    4. Remove threat from queue. Clear session state.
     """
     _append_to_file(PROD_RULES, [_prod_record(approved, entry)])
 
@@ -323,6 +330,12 @@ def action_approve(
     ]
     if implicit:
         _append_to_file(FEEDBACK_QUEUE, implicit)
+
+    # ── Langfuse: log positive engineer feedback score ────────────────────
+    log_approval_score(
+        entry.get("langfuse_trace_id"),
+        rule_name=approved.get("name", ""),
+    )
 
     _remove_threat_from_queue(entry["threat_id"])
     _clear_threat_state(entry["threat_id"], all_variants)
@@ -337,11 +350,20 @@ def action_explicit_reject(
 ) -> None:
     """
     Write one explicitly rejected variant to feedback queue.
+    Log negative Langfuse feedback score (0.0) with the engineer's reason.
     If all variants are now rejected, also remove the threat from queue.
     """
+    clean_reason = reason.strip()
     _append_to_file(
         FEEDBACK_QUEUE,
-        [_feedback_record(variant, entry, reason.strip(), "explicit", all_variants)],
+        [_feedback_record(variant, entry, clean_reason, "explicit", all_variants)],
+    )
+
+    # ── Langfuse: log negative engineer feedback score ────────────────────
+    log_rejection_score(
+        entry.get("langfuse_trace_id"),
+        rejection_reason=clean_reason,
+        rule_name=variant.get("name", ""),
     )
 
     updated = already_rejected | {variant["name"]}

@@ -14,6 +14,9 @@ __pycache__
 *.md
 !README.md
 
+# requirements.txt kept for local pip reference only — Docker uses uv + uv.lock
+requirements.txt
+
 # Local pipeline outputs — mounted at runtime, not baked into the image
 data/*
 !data/.gitkeep
