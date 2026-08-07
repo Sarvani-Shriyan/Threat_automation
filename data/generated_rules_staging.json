@@ -1,10 +1,10 @@
 {
   "generated_at": "2026-06-17T09:02:50.160968+00:00",
-  "last_updated_at": "2026-07-17T04:36:35.869517+00:00",
-  "threat_count": 73,
+  "last_updated_at": "2026-07-30T06:20:43.090838+00:00",
+  "threat_count": 85,
   "total_rule_variants": 102,
   "successful_threats": 34,
-  "failed_threats": 39,
+  "failed_threats": 51,
   "entries": [
     {
       "threat_id": "9e9d3ef4976ac8d7",
@@ -4759,17 +4759,596 @@
         ]
       },
       "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "3c06b99283ac6d22",
+      "threat_title": "One Header Away from 10+ GB of Customer Documents (PII) — $6K Bounty",
+      "threat_url": "https://infosecwriteups.com/one-header-away-from-10-gb-of-customer-documents-pii-6k-bounty-0c0ac8c335f2?source=rss----7b722bfd1b8d---4",
+      "source": "InfoSec Write-ups - Medium",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 10,
+        "primary_domain": "Cloud",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text details specific vulnerabilities (anonymous read/write, forgeable Referer header bypass) in an S3-compatible object storage bucket hosted on Volcengine (a Chinese cloud stack)."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Error code: 400 - {'error': {'message': '{\"error\":{\"code\":400,\"message\":\"request (4609 tokens) exceeds the available context size (4096 tokens), try increasing it\",\"type\":\"exceed_context_size_error\",\"n_prompt_tokens\":4609,\"n_ctx\":4096}}', 'type': 'invalid_request_error', 'param': None, 'code': None}}",
+      "generated_at": "2026-07-29T10:05:11Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws"
+        ],
+        "primary_platform": "aws",
+        "routed_profiles": [
+          "aws:iam",
+          "github:github_workflow",
+          "github:github_audit"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "BedrockAgentRuntime.Retrieve",
+          "Billing.AssociateSourceViews",
+          "Billing.CreateBillingView",
+          "Billing.DeleteBillingView",
+          "Billing.DisassociateSourceViews",
+          "Billing.GetBillingView",
+          "Billing.GetResourcePolicy",
+          "Billing.ListBillingViews",
+          "Billing.ListSourceViewsForBillingView",
+          "Billing.ListTagsForResource",
+          "Billing.TagResource",
+          "Billing.UntagResource",
+          "Billing.UpdateBillingView",
+          "Chatbot.AssociateToConfiguration",
+          "Chatbot.CreateChimeWebhookConfiguration"
+        ],
+        "source_files": [
+          "catalogs/aws_iam_actions.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "d929848e6ce0ee38",
+      "threat_title": "Certighost Exploit Lets Low-Privileged Active Directory Users Impersonate a Domain Controller",
+      "threat_url": "https://thehackernews.com/2026/07/certighost-exploit-lets-low-privileged.html",
+      "source": "The Hacker News",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 10,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text describes a working exploit allowing low-privileged users to obtain credentials and perform DCSync against a Domain Controller using Active Directory."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "phi4-mini-reasoning offline or timeout: Request timed out.",
+      "generated_at": "2026-07-29T10:19:47Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "active_directory"
+        ],
+        "primary_platform": "active_directory",
+        "routed_profiles": [
+          "active_directory:default"
+        ],
+        "injected_action_count": 12,
+        "allowed_actions": [
+          "DCSync",
+          "Kerberos TGT Request",
+          "Certificate Request",
+          "Kerberos Service Ticket",
+          "LDAP Search",
+          "Replication Event",
+          "AdminSDHolder Modified",
+          "Group Policy Change",
+          "LDAP Bind",
+          "NTLM Authentication",
+          "SAMR CreateUserInDomain",
+          "SAMR SetPassword"
+        ],
+        "source_files": [
+          "active_directory.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "f0b0732a271e3346",
+      "threat_title": "AWS Kiro Flaw Let a Poisoned Web Page Rewrite Its Config and Run Code",
+      "threat_url": "https://thehackernews.com/2026/07/aws-kiro-flaw-let-poisoned-web-page.html",
+      "source": "The Hacker News",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 10,
+        "primary_domain": "Cloud",
+        "primary_platform": "AWS",
+        "reasoning_summary": "The content describes a concrete remote code execution vulnerability in AWS's agentic coding IDE (Kiro) triggered by poisoned web page text."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "phi4-mini-reasoning offline or timeout: Request timed out.",
+      "generated_at": "2026-07-29T10:24:47Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws"
+        ],
+        "primary_platform": "aws",
+        "routed_profiles": [
+          "aws:iam"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "CloudSearchDomain.Search",
+          "DataZone.Search",
+          "ResourceExplorer2.Search",
+          "SageMaker.Search",
+          "AssumeRole",
+          "AttachUserPolicy",
+          "ConsoleLogin",
+          "CreateAccessKey",
+          "CreateRole",
+          "CreateUser",
+          "DeleteTrail",
+          "GetSecretValue",
+          "InvokeFunction",
+          "PassRole",
+          "PutBucketPolicy"
+        ],
+        "source_files": [
+          "aws_cloudtrail.json",
+          "catalogs/aws_iam_actions.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "4e5fdb1649a2c575",
+      "threat_title": "'Confused Deputy' Flaws Persist in Google Cloud, Microsoft Azure",
+      "threat_url": "https://www.darkreading.com/cloud-security/confused-deputy-flaws-google-cloud-microsoft-azure",
+      "source": "darkreading",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Cloud",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly mentions 'Confused Deputy' flaws affecting both Google Cloud and Microsoft Azure, relating to administrative permission bypass."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "phi4-mini-reasoning offline or timeout: Request timed out.",
+      "generated_at": "2026-07-29T10:34:55Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "aws:iam",
+          "gcp:iam",
+          "azure:azure_admin"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.Authorization/permissions/read",
+          "MICROSOFT.IMPACT/OPERATIONS/READ",
+          "MICROSOFT.IMPACT/REGISTER/ACTION",
+          "MICROSOFT.IMPACT/UNREGISTER/ACTION",
+          "Microsoft.Authorization/classicAdministrators/read",
+          "Microsoft.Authorization/denyAssignments/delete",
+          "Microsoft.Authorization/denyAssignments/read",
+          "Microsoft.Authorization/denyAssignments/write",
+          "Microsoft.Authorization/elevateAccess/action",
+          "Microsoft.Authorization/locks/delete",
+          "Microsoft.Authorization/locks/read",
+          "Microsoft.Authorization/locks/write",
+          "Microsoft.Authorization/operations/read",
+          "Microsoft.Authorization/policyAssignments/delete",
+          "Microsoft.Authorization/policyAssignments/read"
+        ],
+        "source_files": [
+          "azure_admin_events.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "ca27481bce982b8c",
+      "threat_title": "APT42 TAMECAT Malware Grows with AI-Assisted Phishing",
+      "threat_url": "https://securityonline.info/apt42-tamecat-malware-ai-phishing/",
+      "source": "Daily CyberSecurity",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly mentions 'AI-assisted phishing,' 'cloud C2,' and the goal to 'steal credentials' from targets."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-29T10:35:36Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws",
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "aws:iam",
+          "github:github_workflow",
+          "github:github_audit"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "dependabot_security_updates_new_repos.disable",
+          "dependabot_security_updates_new_repos.enable",
+          "RAM.EnableSharingWithAwsOrganization",
+          "RAM.PromotePermissionCreatedFromPolicy",
+          "RAM.PromoteResourceShareCreatedFromPolicy",
+          "SES.GetIdentityMailFromDomainAttributes",
+          "SES.SetIdentityMailFromDomain",
+          "STS.AssumeRoleWithSAML",
+          "STS.AssumeRoleWithWebIdentity",
+          "config.disable_anonymous_git_access",
+          "config.enable_anonymous_git_access",
+          "config.lock_anonymous_git_access",
+          "config.unlock_anonymous_git_access",
+          "dependabot_alerts_new_repos.disable",
+          "dependabot_alerts_new_repos.enable"
+        ],
+        "source_files": [
+          "catalogs/aws_iam_actions.json",
+          "github_audit_logs.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "eb812c3b6c8ea088",
+      "threat_title": "Critical Authorization Vulnerability in SiYuan (CVE-2026-66012)",
+      "threat_url": "https://threatcluster.io/cluster/cve-2026-66012-incibe-cert---vulnerabilities-rss-18h-the-att-6c8da0e9?utm_source=rss&utm_medium=feed&utm_campaign=rss_feed",
+      "source": "ThreatCluster - Threat Intelligence Feed",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text describes a critical missing authorization vulnerability that allows remote unauthenticated attackers to bypass authentication and execute arbitrary code with administrative privileges."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-29T10:36:38Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "gcp"
+        ],
+        "primary_platform": "gcp",
+        "routed_profiles": [
+          "gcp:iam"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "apihub.plugins.enable",
+          "cloudjobdiscovery.tools.access",
+          "lookerstudio.pro.manage",
+          "secretmanager.versions.access",
+          "secretmanager.versions.enable",
+          "aiplatform.extensions.execute",
+          "aiplatform.notebookRuntimes.assign",
+          "aiplatform.notebookRuntimes.upgrade",
+          "aiplatform.tensorboardTimeSeries.read",
+          "alloydb.clusters.upgrade",
+          "alloydb.users.create",
+          "alloydb.users.delete",
+          "alloydb.users.get",
+          "alloydb.users.list",
+          "alloydb.users.login"
+        ],
+        "source_files": [
+          "catalogs/gcp_iam_permissions.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "44c392b363654be6",
+      "threat_title": "Default Azure Automation Setting Enables Cross-Tenant Identity Takeover",
+      "threat_url": "https://www.darkreading.com/cloud-security/default-azure-automation-setting-cross-tenant-identity-takeover",
+      "source": "darkreading",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly details a cross-tenant identity takeover vulnerability within Azure Automation."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-29T10:36:57Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "aws",
+          "azure"
+        ],
+        "primary_platform": "okta",
+        "routed_profiles": [
+          "aws:iam",
+          "okta:okta_auth",
+          "azure:azure_admin",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Inspector2.Enable",
+          "MICROSOFT.IMPACT/OPERATIONS/READ",
+          "MICROSOFT.IMPACT/REGISTER/ACTION",
+          "MICROSOFT.IMPACT/UNREGISTER/ACTION",
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.Authorization/classicAdministrators/read",
+          "Microsoft.Authorization/denyAssignments/delete"
+        ],
+        "source_files": [
+          "azure_admin_events.json",
+          "azure_auth_events.json",
+          "catalogs/aws_iam_actions.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "15f132a82eab3c8a",
+      "threat_title": "Claude Cowork Flaw Could Let AI Agent Escape Its VM and Access Mac Files",
+      "threat_url": "https://thehackernews.com/2026/07/claude-cowork-flaw-could-let-ai-agent.html",
+      "source": "The Hacker News",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Cloud",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text describes a sandbox escape vulnerability allowing an agent to break out of a Linux virtual machine (VM) and access the underlying host filesystem."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-29T10:37:45Z",
+      "grounding_context": {
+        "matched_platforms": [],
+        "primary_platform": null,
+        "routed_profiles": [],
+        "injected_action_count": 0,
+        "allowed_actions": [],
+        "source_files": []
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "9f90e7c0eb55eca7",
+      "threat_title": "One ChatGPT link could smuggle a rogue AI agent into your company",
+      "threat_url": "https://www.theregister.com/security/2026/07/23/one-chatgpt-link-could-smuggle-a-rogue-ai-agent-into-your-company/5275116",
+      "source": "www.theregister.com - Articles",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text describes an OpenAI flaw allowing phishing bait to smuggle a rogue AI agent armed with employee access, indicating identity compromise within a third-party SaaS platform."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-29T10:38:01Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_admin",
+          "azure:azure_auth"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "Microsoft.AAD/Operations/read",
+          "Microsoft.AAD/domainServices/delete",
+          "Microsoft.AAD/domainServices/oucontainer/delete",
+          "Microsoft.AAD/domainServices/oucontainer/read",
+          "Microsoft.AAD/domainServices/oucontainer/write",
+          "Microsoft.AAD/domainServices/read",
+          "Microsoft.AAD/domainServices/write",
+          "Microsoft.AAD/register/action",
+          "Microsoft.AAD/unregister/action",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/delete",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/read",
+          "Microsoft.AzureActiveDirectory/b2cDirectories/write",
+          "Microsoft.AzureActiveDirectory/b2ctenants/read",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/delete",
+          "Microsoft.AzureActiveDirectory/ciamDirectories/read"
+        ],
+        "source_files": [
+          "azure_auth_events.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "44cd6bbc5370b542",
+      "threat_title": "Attackers Weaponize GitHub Actions Runners to Target cPanel and WHM Servers",
+      "threat_url": "https://thehackernews.com/2026/07/attackers-weaponize-github-actions.html",
+      "source": "The Hacker News",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly details attackers weaponizing compromised GitHub repositories and actions runners to create distributed attack infrastructure."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-29T10:38:12Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "github"
+        ],
+        "primary_platform": "github",
+        "routed_profiles": [
+          "github:github_workflow"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "check_run",
+          "image_version",
+          "pull_request_target",
+          "registry_package",
+          "workflow_run",
+          "branch_protection_rule",
+          "check_suite",
+          "create",
+          "delete",
+          "deployment",
+          "deployment_status",
+          "discussion",
+          "discussion_comment",
+          "fork",
+          "gollum"
+        ],
+        "source_files": [
+          "github_actions_workflow.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "c0c2d97cef31d063",
+      "threat_title": "Microsoft Azure DevOps MCP Flaw Lets Hidden PR Comments Hijack AI Review Agents",
+      "threat_url": "https://thehackernews.com/2026/07/microsoft-azure-devops-mcp-flaw-lets.html",
+      "source": "The Hacker News",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The threat describes a flaw in Azure DevOps where an invisible comment can hijack an AI coding agent via prompt injection, directly matching SaaS pipeline security flaws."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "Generation failed: Response missing 'rules' array",
+      "generated_at": "2026-07-30T06:15:43Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_admin"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "MICROSOFT.IMPACT/OPERATIONS/READ",
+          "MICROSOFT.IMPACT/REGISTER/ACTION",
+          "MICROSOFT.IMPACT/UNREGISTER/ACTION",
+          "Microsoft.Authorization/classicAdministrators/read",
+          "Microsoft.Authorization/denyAssignments/delete",
+          "Microsoft.Authorization/denyAssignments/read",
+          "Microsoft.Authorization/denyAssignments/write",
+          "Microsoft.Authorization/elevateAccess/action",
+          "Microsoft.Authorization/locks/delete",
+          "Microsoft.Authorization/locks/read",
+          "Microsoft.Authorization/locks/write",
+          "Microsoft.Authorization/operations/read",
+          "Microsoft.Authorization/permissions/read",
+          "Microsoft.Authorization/policyAssignments/delete",
+          "Microsoft.Authorization/policyAssignments/read"
+        ],
+        "source_files": [
+          "azure_admin_events.json"
+        ]
+      },
+      "langfuse_trace_id": null
+    },
+    {
+      "threat_id": "c32722b7df7b3883",
+      "threat_title": "CAV3RN Framework Upgrades to Outlook Calendar for C2 Communication",
+      "threat_url": "https://threatcluster.io/cluster/new-cav3rn-module-replaces-websocket-c2-with-outlook-calenda-492ac014?utm_source=rss&utm_medium=feed&utm_campaign=rss_feed",
+      "source": "ThreatCluster - Threat Intelligence Feed",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The threat explicitly details the use of AzureCommunication.dll and Microsoft Graph via Outlook calendar events for Command and Control (C2) communication."
+      },
+      "variants": [],
+      "variant_count": 0,
+      "generation_status": "failed",
+      "error": "phi4-mini-reasoning offline or timeout: Request timed out.",
+      "generated_at": "2026-07-30T06:20:43Z",
+      "grounding_context": {
+        "matched_platforms": [
+          "azure"
+        ],
+        "primary_platform": "azure",
+        "routed_profiles": [
+          "azure:azure_admin"
+        ],
+        "injected_action_count": 15,
+        "allowed_actions": [
+          "microsoft.web/serverfarms/capabilities/read",
+          "microsoft.web/sites/recover/action",
+          "microsoft.web/sites/slots/recover/action",
+          "Microsoft.RecoveryServices/locations/capabilities/action",
+          "microsoft.web/availablestacks/read",
+          "microsoft.web/billingmeters/read",
+          "microsoft.web/classicmobileservices/read",
+          "microsoft.web/connections/confirmconsentcode/action",
+          "microsoft.web/connections/listConnectionKeys/action",
+          "microsoft.web/connections/listconsentlinks/action",
+          "microsoft.web/deploymentlocations/read",
+          "microsoft.web/functionappstacks/read",
+          "microsoft.web/hostingenvironments/detectors/read",
+          "microsoft.web/hostingenvironments/diagnostics/read",
+          "microsoft.web/hostingenvironments/inboundnetworkdependenciesendpoints/read"
+        ],
+        "source_files": [
+          "azure_admin_events.json"
+        ]
+      },
+      "langfuse_trace_id": null
     }
   ],
   "run_stats": {
     "knowledge_base_dir": "/Users/sarvani/Threat_automation/knowledge_base",
     "knowledge_base_catalogs": 10,
     "input_threats": 50,
-    "processed_this_run": 23,
-    "skipped_resume": 27,
+    "processed_this_run": 2,
+    "skipped_resume": 48,
     "successful_generations": 0,
-    "failed_generations": 23,
+    "failed_generations": 2,
     "total_rule_variants_this_run": 0,
-    "elapsed_seconds": 5213.5
+    "elapsed_seconds": 432.5
   }
 }

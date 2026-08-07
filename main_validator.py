@@ -3,8 +3,11 @@
 Step 4: Deterministic rule validation pipeline.
 
 Stage 1  — Python contract enforcement (7-key schema, non-empty fields, severity enum)
-Stage 2  — Knowledge base action-name lookup (strict string match against all KB catalogs)
-Stage 3  — phi4-mini-reasoning cognitive audit (Sherman Kent CTI analytic discipline)
+Stage 2  — Knowledge base action-name lookup (case-insensitive match; loads both
+            knowledge_base/ catalogs and data/api_knowledge_base.json supplementary KB)
+Stage 3  — phi4-mini-reasoning cognitive audit (Sherman Kent CTI discipline;
+            cloud/NHI/AI-aware — no host OS penalty for API-focused rules;
+            evaluates Telemetry Storm Risk and Analytic Leap Risk explicitly)
 
 Single write-back: data/generated_rules_staging.json is read once; the fully annotated
 result is written to data/validated_rules.json only after every entry/variant finishes.
@@ -31,6 +34,8 @@ from llm.observability import flush as langfuse_flush, step4_validation_span
 DEFAULT_STAGING_INPUT = Path("data/generated_rules_staging.json")
 DEFAULT_VALIDATED_OUTPUT = Path("data/validated_rules.json")
 KB_DIR = Path("knowledge_base")
+# Supplementary API knowledge base created during Step 3 grounding.
+API_KB_PATH = Path("data/api_knowledge_base.json")
 
 # The 7 mandatory contract keys every rule variant must contain, non-empty.
 REQUIRED_RULE_KEYS: tuple[str, ...] = (
@@ -43,7 +48,7 @@ REQUIRED_RULE_KEYS: tuple[str, ...] = (
     "remediate",
 )
 
-VALID_SEVERITIES: frozenset[str] = frozenset({"Low", "Medium", "High", "Critical"})
+VALID_SEVERITIES: frozenset[str] = frozenset({"None", "Low", "Medium", "High", "Critical"})
 
 # Raw files that are upstream sources, not curated action catalogs — skip them.
 _KB_RAW_SUFFIXES = (".raw.json",)
@@ -70,67 +75,88 @@ _STAGE3_CLIENT: "StructuredLLMClient | None" = None  # type: ignore[name-defined
 # ---------------------------------------------------------------------------
 
 STAGE3_SYSTEM_PROMPT: str = """\
-You are an expert Cyber Threat Intelligence (CTI) Analyst trained rigorously in Sherman Kent's analytic discipline. Your goal is to transform the provided raw threat data, logs, or notes into a professional, transparent, and highly disciplined threat intelligence report. 
+You are an expert Cyber Threat Intelligence (CTI) Analyst and Detection Engineering Auditor trained rigorously in Sherman Kent's analytic discipline. Your goal is to audit a proposed detection rule against its source threat data and produce a disciplined, transparent intelligence assessment.
 
 You must strictly separate hard evidence from analytical assumptions.
 
 ---
 
-### STEP 1: ANALYTICAL DEFINITIONS
-When writing the report, you must strictly adhere to these definitions for Probability and Confidence. Do not mix them up.
+### STEP 0: THREAT CONTEXT CLASSIFICATION
+Before scoring, classify the threat context from the input data:
+- **Cloud/API Threat**: The threat exploits cloud service APIs, IAM, SaaS platforms, or cloud-native resources (AWS, Azure, GCP, Okta, GitHub).
+- **NHI Threat**: The threat targets Non-Human Identities — service accounts, service principals, workload identities, machine identities, OAuth apps, or automated pipelines.
+- **AI Agent Threat**: The threat exploits AI agents, LLM systems, MCP vulnerabilities, prompt injection, or autonomous AI pipelines.
+- **Host OS Threat**: The threat involves host operating system artefacts — process trees, file system modifications, Windows Registry changes, or local endpoint telemetry.
 
-#### Estimative Probability Scale (How likely it is)
+> **CRITICAL AUDIT RULE**: If the threat context is Cloud/API, NHI, or AI Agent, do NOT penalize the detection rule for lacking host OS file/registry/process telemetry conditions. Cloud-native and NHI-focused rules are expected to target API log events and cloud control plane actions, NOT endpoint artefacts. Penalizing a cloud rule for missing Windows Registry checks is an analytic error.
+
+---
+
+### STEP 1: RISK EVALUATION MATRIX
+Evaluate the rule against exactly these two risk dimensions:
+
+#### Telemetry Storm Risk (Signal-to-Noise)
+Does the detection rule risk generating excessive false-positive alerts?
+- **High Storm Risk**: The actionNames are too broad (e.g., generic read/list operations triggered by normal operations). The rule would fire on hundreds of benign events per day.
+- **Medium Storm Risk**: The actionNames are moderately specific but could fire in common administrative scenarios without additional context filters.
+- **Low Storm Risk**: The actionNames directly correspond to the exact attack technique described in the threat data. Benign triggers are rare or require anomalous combinations.
+
+#### Analytic Leap Risk (Assumption Gap)
+Does the detection rule make logical leaps not supported by the threat text or API log evidence?
+- **High Leap Risk**: The rule assumes attacker behaviour, tooling, or sequences that are not described or inferable from the source threat advisory.
+- **Medium Leap Risk**: The rule extrapolates plausible but unconfirmed behaviour from the threat description.
+- **Low Leap Risk**: Every actionName in the rule maps directly to an explicit API call, log event, or technique described in the threat advisory.
+
+---
+
+### STEP 2: ANALYTICAL DEFINITIONS
+When writing the report, strictly adhere to these definitions:
+
+#### Estimative Probability Scale (How likely this detection fires on the real attack)
 - Almost Certain: 90%–99% chance
 - Highly Likely / Probable: 60%–85% chance
 - Likely / Possible: 35%–55% chance
 - Unlikely: 10%–30% chance
 - Remote / Highly Unlikely: Less than 10% chance
 
-#### Confidence Levels (Strength of our evidence)
-- High Confidence: Based on high-quality, verified, first-hand data/logs with no contradictory information.
-- Medium Confidence: Based on plausible data or third-party vendor reporting, but lacks direct, independent verification.
-- Low Confidence: Based on fragmented, unverified, or highly perishable data.
+#### Confidence Levels (Strength of the evidence backing the rule)
+- High Confidence: Rule actionNames map directly to verified, first-hand API calls or log events described in the threat advisory.
+- Medium Confidence: Rule is based on plausible third-party reporting but lacks direct API log confirmation.
+- Low Confidence: Rule is based on fragmented, unverified, or highly perishable data.
 
 ---
 
-### STEP 2: PROCEDURAL WORKFLOW
-Analyze the source data sequentially using the following process:
-1. Categorize the Evidence: Label every technical indicator or claim as either Source-observed (we saw it), Reported (someone else said it), or Inferred (we deduced it).
-2. Brainstorm Alternative Hypotheses: List at least two plausible alternative explanations for the activity (e.g., false flags, shared infrastructure, tool reuse, or coincidence).
-3. Identify Collection Gaps: Explicitly note what critical data is missing or what we cannot see from the current dataset.
-
----
-
-### STEP 3: THE MANDATORY CONTENT CHECKLIST
-Before outputting the final report, verify that you have checked every box:
-- [ ] Clearly separated physical observations (logs, IPs, hashes) from analytical opinions.
-- [ ] Used exact probability words from the scale in Step 1, and never used vague synonyms.
-- [ ] Assigned a separate Confidence Level and explained why that level was chosen based on data quality.
-- [ ] Evaluated and written down at least one alternative theory to challenge the primary conclusion.
-- [ ] Included a specific section highlighting "Collection Gaps" (what data we are missing).
-- [ ] Avoided over-confident attribution to threat actors without concrete, verified ties.
+### STEP 3: PROCEDURAL WORKFLOW
+1. Classify the threat context (Cloud/API, NHI, AI Agent, or Host OS).
+2. Evaluate Telemetry Storm Risk and Analytic Leap Risk using the matrix above.
+3. Categorize each technical indicator as: Source-observed, Reported, or Inferred.
+4. Brainstorm at least one alternative hypothesis or detection gap.
+5. Identify collection gaps — what telemetry is missing.
 
 ---
 
 ### REPORT FORMAT
-Please output the report using this exact structure inside your response container:
+Output the report using this exact structure:
 
 ## 1. Executive Summary
-(Brief overview of the activity using precise probability language)
+(Brief overview using precise probability language. State the threat context classification.)
 
 ## 2. Technical Observations & Evidence Categorization
-(Bullet points of IPs, hashes, domains, or behaviors categorized by Source-observed, Reported, or Inferred)
+(Bullet points of actionNames, API events, or behaviors categorized as Source-observed / Reported / Inferred)
 
 ## 3. Core Analysis & Assessment
-- Primary Hypothesis: (What we think is happening)
-- Probability Assessment: (Choose from Step 1 scale)
-- Confidence Assessment & Justification: (Choose from Step 1 scale and justify based on evidence quality)
+- Threat Context: (Cloud/API | NHI | AI Agent | Host OS)
+- Telemetry Storm Risk: (High / Medium / Low — with one-sentence justification)
+- Analytic Leap Risk: (High / Medium / Low — with one-sentence justification)
+- Primary Hypothesis: (What this rule is designed to detect)
+- Probability Assessment: (Choose from Step 2 scale)
+- Confidence Assessment & Justification: (Choose from Step 2 scale and justify)
 
 ## 4. Alternative Hypotheses
-(Alternative theories that could explain the same technical data)
+(Alternative explanations or gaps — e.g., attacker could achieve same goal via a different API action not covered by this rule)
 
 ## 5. Collection Gaps
-(What data or logs are missing that would help clarify this threat?)\
+(What data or telemetry is missing that would increase detection fidelity?)\
 """
 
 # Safe fallback emitted when Ollama is unreachable or returns an unusable response.
@@ -350,10 +376,21 @@ async def run_stage3_cognitive_audit(
 # ---------------------------------------------------------------------------
 
 
-def load_kb_action_set(kb_dir: Path = KB_DIR) -> frozenset[str]:
+def load_kb_action_set(
+    kb_dir: Path = KB_DIR,
+    api_kb_path: Path = API_KB_PATH,
+) -> frozenset[str]:
     """
-    Walk every JSON file under kb_dir and collect all authoritative actionNames
-    into a single flat frozenset for O(1) lookup.
+    Walk every JSON file under kb_dir and also read data/api_knowledge_base.json,
+    collecting all authoritative actionNames into a single flat frozenset for O(1)
+    lookup.
+
+    Case normalisation
+    ------------------
+    All actions are stored **lower-cased** so that Stage 2 matching is
+    case-insensitive.  The LLM may capitalise API actions inconsistently
+    ("assumeRole" vs "AssumeRole"), and a failed lookup for a legitimately
+    grounded action should never block an otherwise valid rule.
 
     Raw upstream dumps (*.raw.json) are excluded — they are source artifacts,
     not the curated catalog format.
@@ -362,28 +399,43 @@ def load_kb_action_set(kb_dir: Path = KB_DIR) -> frozenset[str]:
     loaded_files: list[str] = []
     skipped_files: list[str] = []
 
+    # ── Directory KB (knowledge_base/*.json) ──────────────────────────────
     for json_path in sorted(kb_dir.rglob("*.json")):
         name = json_path.name
-
-        # Skip raw upstream dumps
         if any(name.endswith(suffix) for suffix in _KB_RAW_SUFFIXES):
             skipped_files.append(name)
             continue
-
         try:
             payload = json.loads(json_path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError) as exc:
             logger.warning("kb_load_failed file=%s error=%s", name, exc)
             continue
-
         if not isinstance(payload, dict):
             continue
-
         raw_actions = payload.get("actionNames")
         if isinstance(raw_actions, list):
             count_before = len(actions)
-            actions.update(str(a) for a in raw_actions if a)
+            actions.update(str(a).lower() for a in raw_actions if a)
             loaded_files.append(f"{name}(+{len(actions) - count_before})")
+
+    # ── Supplementary API KB (data/api_knowledge_base.json) ───────────────
+    # Format: {"aws": [...], "azure": [...], "nhi": [...], "ai_agent": [...], …}
+    if api_kb_path.is_file():
+        try:
+            api_payload = json.loads(api_kb_path.read_text(encoding="utf-8"))
+            if isinstance(api_payload, dict):
+                api_count = 0
+                for platform, acts in api_payload.items():
+                    if isinstance(acts, list):
+                        for a in acts:
+                            if a:
+                                actions.add(str(a).lower())
+                                api_count += 1
+                loaded_files.append(f"api_knowledge_base.json(+{api_count})")
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning("api_kb_load_failed path=%s error=%s", api_kb_path, exc)
+    else:
+        logger.debug("api_kb_not_found path=%s — skipping supplementary KB", api_kb_path)
 
     logger.info(
         "kb_loaded total_actions=%d files=%d skipped=%d",
@@ -416,13 +468,19 @@ def run_stage1_contract(rule: dict[str, Any]) -> list[str]:
         elif isinstance(value, list) and len(value) == 0:
             violations.append(f"empty list for required key: '{key}'")
 
-    # Explicit severity enum check
+    # Explicit severity checks: word-characters-only first, then enum membership.
     severity = rule.get("defaultSeverity", "")
-    if severity and severity not in VALID_SEVERITIES:
-        violations.append(
-            f"invalid defaultSeverity '{severity}' — must be one of "
-            f"{sorted(VALID_SEVERITIES)}"
-        )
+    if severity:
+        if not re.fullmatch(r"[A-Za-z]+", severity):
+            violations.append(
+                f"invalid defaultSeverity '{severity}' — must be a pure word string "
+                f"(no digits, decimals, or punctuation); allowed: {sorted(VALID_SEVERITIES)}"
+            )
+        elif severity not in VALID_SEVERITIES:
+            violations.append(
+                f"invalid defaultSeverity '{severity}' — must be one of "
+                f"{sorted(VALID_SEVERITIES)}"
+            )
 
     return violations
 
@@ -438,7 +496,16 @@ def run_stage2_kb_lookup(
 ) -> list[str]:
     """
     Cross-reference every actionName in the rule against the full KB action set.
-    Returns a list of violation strings for actions not found (empty = pass).
+
+    Matching is **case-insensitive**: both the KB (built by load_kb_action_set)
+    and each rule action are normalised to lowercase before comparison.  This
+    means a rule using "AssumeRole", "assumerole", or "ASSUMEROLE" all pass if
+    the KB contains any casing of that action.
+
+    Multi-action behavioral chains (e.g. Variant 2) are validated action-by-action
+    — every member of actionNames must exist in the KB.
+
+    Returns a list of violation strings for actions not found (empty list = pass).
     """
     rule_actions: list[str] = rule.get("actionNames") or []
     violations: list[str] = []
@@ -447,7 +514,7 @@ def run_stage2_kb_lookup(
         if not isinstance(action, str) or not action.strip():
             violations.append(f"actionName is blank or non-string: {action!r}")
             continue
-        if action not in kb_actions:
+        if action.lower() not in kb_actions:
             violations.append(
                 f"actionName '{action}' not found in knowledge base catalogs"
             )
@@ -612,7 +679,7 @@ async def run_validation(
         return 1
 
     logger.info("Loading knowledge base from %s …", KB_DIR)
-    kb_actions = load_kb_action_set(KB_DIR)
+    kb_actions = load_kb_action_set(KB_DIR, API_KB_PATH)
 
     # --- Load staging file (once) ---
     if not staging_path.is_file():
@@ -697,6 +764,8 @@ async def run_validation(
     print("STEP 4 — VALIDATION REPORT")
     print("=" * 60)
     print(f"Staging file              : {staging_path}")
+    print(f"KB directory              : {KB_DIR}")
+    print(f"Supplementary API KB      : {API_KB_PATH}{'' if API_KB_PATH.is_file() else ' (not found — skipped)'}")
     print(f"KB actions loaded         : {len(kb_actions):,}")
     print()
     print(f"Staging entries processed : {len(validated_entries)}")

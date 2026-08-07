@@ -24,12 +24,19 @@ from llm.structured_client import StructuredLLMClient
 
 logger = logging.getLogger(__name__)
 
+# Default path for the supplementary flat API knowledge base.
+DEFAULT_API_KB_PATH = Path("data/api_knowledge_base.json")
+
+# Maximum number of supplementary actions merged into the LOOKUP_ARRAY per threat.
+# Keeps prompt size bounded while still broadening the grounded vocabulary.
+_SUPPLEMENTARY_ACTION_LIMIT = 20
+
 # Path to the GEPA-evolved system prompt (written by main_feedback.py Step 6).
 # When the file exists, it supersedes the hardcoded SYSTEM_PROMPT_BASE below.
 _GEPA_PROMPT_FILE = Path("data/generator_system_prompt.txt")
 
 SYSTEM_PROMPT_BASE = """\
-You are an expert detection engineer building production SIEM/detection rules.
+You are an expert detection engineer building production SIEM/detection rules for cloud, SaaS, and identity platforms.
 
 Given a verified security threat article, generate EXACTLY 3 detection rule variants.
 The array must contain EXACTLY 3 objects — no more, no fewer.
@@ -37,30 +44,43 @@ The array must contain EXACTLY 3 objects — no more, no fewer.
 Output ONLY a valid JSON object with this exact structure (no markdown, no commentary):
 {"rules": [ <rule_1>, <rule_2>, <rule_3> ]}
 
-━━━ MANDATORY STRATEGY DIVERSITY ━━━
-Each of the 3 rules MUST target a FUNDAMENTALLY different telemetry layer.
+━━━ THREAT-CENTRIC MULTI-VARIANT STRATEGY ━━━
+Each variant MUST capture a DISTINCT detection angle derived directly from the threat advisory.
 Do NOT produce slight syntax variations of the same detection idea.
+Do NOT force host-OS telemetry categories (process/file/network/registry) if the threat is
+cloud-API, SaaS, or identity-plane focused — select the most appropriate telemetry for the threat.
 
-  Rule 1 — PROCESS CREATION / COMMAND-LINE ARGUMENTS
-    Focus: spawned processes, executable paths, command-line flags, script invocations,
-           shell child-process chains, or interpreter abuse tied to the threat.
+  Variant 1 — PRIMARY HIGH-FIDELITY TRIGGER
+    Focus: The single most direct, explicit API action or event from the LOOKUP_ARRAY
+           identified in the threat advisory as the core exploitation step.
+           Use ONE specific, high-signal actionName that an adversary MUST invoke to execute
+           this particular attack. Minimise false positives — this is the smoking-gun signal.
 
-  Rule 2 — FILE / REGISTRY MODIFICATIONS OR BEHAVIORAL INDICATORS
-    Focus: file writes, file reads on sensitive paths, registry key changes,
-           configuration drift, credential file access, persistence artifacts,
-           or storage-layer behavioral anomalies tied to the threat.
+  Variant 2 — BEHAVIORAL & CHAINED ACTION INDICATOR
+    Focus: Two or more complementary KB actionNames that together reveal the attack chain
+           (e.g., privilege change followed by token grant, credential access then lateral move,
+           resource creation then data exfiltration).
+           Detect adversarial behaviour patterns through correlated, sequenced events
+           rather than a single atomic action.
 
-  Rule 3 — NETWORK CONNECTIONS / API / SYSTEM CALLS
-    Focus: outbound/inbound connection patterns, DNS lookups, API calls,
-           data-plane syscalls, cloud-plane operations, or protocol-level
-           indicators tied to the threat.
+  Variant 3 — DEFENSE-IN-DEPTH / SECONDARY VECTOR
+    Focus: Peripheral administrative changes, persistent configuration mutations, or
+           fallback log events from the LOOKUP_ARRAY that indicate the attacker's broader
+           footprint — not the primary exploit path, but the residual evidence left behind
+           (e.g., audit-log tampering, policy drift, persistence artefacts, access-key creation).
+
+━━━ CRITICAL KB GROUNDING RULE ━━━
+You MUST select actionNames EXCLUSIVELY from the LOOKUP_ARRAY provided below.
+NEVER invent, abbreviate, guess, or paraphrase action strings.
+NEVER use action names not explicitly present in the LOOKUP_ARRAY — this causes downstream
+Stage 2 validation failure and the rule will be rejected.
 
 ━━━ SCHEMA — every rule MUST include ALL 7 keys, NO EXCEPTIONS ━━━
 
 {
   "name":            "String — format: '[Platform]: [Actionable Indicator Title]'",
-  "description":     "String — operational trigger, condition boundaries, layer focus",
-  "actionNames":     ["String — exact infrastructure/API action name to monitor"],
+  "description":     "String — operational trigger, condition boundaries, detection logic",
+  "actionNames":     ["String — exact API/event action name from LOOKUP_ARRAY ONLY"],
   "defaultSeverity": "String — exactly one of: Low, Medium, High, Critical",
   "threatType":      "String — MITRE ATT&CK Tactic name",
   "recommend":       "String — structural hardening and preventive configuration steps",
@@ -69,8 +89,8 @@ Do NOT produce slight syntax variations of the same detection idea.
 
 EXAMPLE of one correctly-formed rule object:
 {
-  "name": "[Azure]: Unusual Role Assignment to Service Principal",
-  "description": "Detects unexpected IAM role assignments to service principals outside approved change windows.",
+  "name": "[Azure]: Unauthorized Role Assignment to Service Principal",
+  "description": "Detects unexpected IAM role assignments to service principals outside approved change windows — primary indicator of privilege escalation as described in the threat advisory.",
   "actionNames": ["Microsoft.Authorization/roleAssignments/write"],
   "defaultSeverity": "High",
   "threatType": "Privilege Escalation",
@@ -81,8 +101,8 @@ EXAMPLE of one correctly-formed rule object:
 CRITICAL: The "recommend" and "remediate" keys are MANDATORY. Every rule object in your output MUST contain both. Rules missing either key are INVALID.
 
 ━━━ HARD RULES ━━━
-- Names must include the primary platform (AWS, Azure, Okta, GitHub, etc.).
-- Do NOT invent actionNames — use ONLY strings from the LOOKUP_ARRAY provided.
+- Names must include the primary platform (AWS, Azure, Okta, GCP, GitHub, etc.).
+- actionNames MUST come ONLY from the LOOKUP_ARRAY — zero exceptions.
 - Do NOT emit markdown fences, prose, or any text outside the JSON object.\
 """
 
@@ -120,8 +140,131 @@ def _load_system_prompt_base() -> str:
     return SYSTEM_PROMPT_BASE
 
 
-def build_grounded_system_prompt(grounding: GroundingResult) -> str:
-    allowed_actions = grounding.allowed_actions
+def _load_api_knowledge_base(
+    path: Path = DEFAULT_API_KB_PATH,
+) -> dict[str, list[str]]:
+    """
+    Load the flat per-platform supplementary API knowledge base from
+    ``data/api_knowledge_base.json``.
+
+    Expected format::
+
+        {
+          "aws":   ["AssumeRole", "CreateUser", ...],
+          "azure": ["Microsoft.Authorization/roleAssignments/write", ...],
+          ...
+        }
+
+    Returns an empty dict when the file is absent or malformed, so callers
+    degrade gracefully to the existing knowledge_base/ directory grounding.
+    """
+    if not path.is_file():
+        logger.debug("api_kb_not_found path=%s — using KB-directory grounding only", path)
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            logger.warning("api_kb_invalid_format path=%s — root must be a JSON object", path)
+            return {}
+        result: dict[str, list[str]] = {}
+        for platform, actions in data.items():
+            if isinstance(actions, list):
+                result[str(platform).lower()] = [
+                    str(a).strip() for a in actions if isinstance(a, str) and a.strip()
+                ]
+        logger.info(
+            "api_kb_loaded path=%s platforms=%d total_actions=%d",
+            path,
+            len(result),
+            sum(len(v) for v in result.values()),
+        )
+        return result
+    except (json.JSONDecodeError, OSError) as exc:
+        logger.warning("api_kb_load_failed path=%s error=%s", path, exc)
+        return {}
+
+
+def _merge_supplementary_actions(
+    grounding: GroundingResult,
+    api_kb: dict[str, list[str]],
+    threat_text: str,
+    limit: int = _SUPPLEMENTARY_ACTION_LIMIT,
+) -> list[str]:
+    """
+    Augment ``grounding.allowed_actions`` with platform-specific actions from
+    ``api_kb``, scored by relevance to the threat text.
+
+    Strategy
+    --------
+    1. Identify the primary platform from ``grounding.primary_platform``.
+    2. Retrieve that platform's action list from ``api_kb`` (also checks
+       closely related platform aliases).
+    3. Exclude actions already present in ``grounding.allowed_actions``.
+    4. Score remaining actions: actions whose token segments appear in the
+       threat text rank first; others follow alphabetically.
+    5. Append up to ``limit`` highest-scoring supplementary actions and
+       return the combined, deduplicated list.
+    """
+    if not api_kb:
+        return grounding.allowed_actions
+
+    primary = (grounding.primary_platform or "").lower()
+    # Try the primary platform and common aliases
+    candidates: list[str] = []
+    for key in (primary, primary.replace("_", ""), primary.split("_")[0]):
+        if key in api_kb:
+            candidates = api_kb[key]
+            break
+    # Also fold in any matched secondary platforms (adds cross-platform breadth)
+    for matched_plat in grounding.matched_platforms:
+        mlower = matched_plat.lower()
+        if mlower in api_kb and mlower != primary:
+            candidates = candidates + [
+                a for a in api_kb[mlower] if a not in candidates
+            ]
+
+    existing: set[str] = set(grounding.allowed_actions)
+    novel = [a for a in candidates if a not in existing]
+
+    # Score by token overlap with the threat text (case-insensitive)
+    lower_text = threat_text.lower()
+    def _action_score(action: str) -> float:
+        parts = re.split(r"[\W_./:]+", action.lower())
+        return sum(1.0 for p in parts if len(p) > 3 and p in lower_text)
+
+    novel.sort(key=lambda a: (-_action_score(a), a))
+    supplementary = novel[:limit]
+
+    if supplementary:
+        logger.info(
+            "api_kb_supplementary platform=%s injected=%d",
+            primary, len(supplementary),
+        )
+
+    return grounding.allowed_actions + supplementary
+
+
+def build_grounded_system_prompt(
+    grounding: GroundingResult,
+    supplementary_actions: list[str] | None = None,
+) -> str:
+    """
+    Compose the grounded system prompt for a specific threat.
+
+    Parameters
+    ----------
+    grounding:
+        Result of KnowledgeBase.lookup() — contains the KB-scored allowed actions
+        and platform routing metadata.
+    supplementary_actions:
+        Optional additional action names sourced from data/api_knowledge_base.json,
+        already merged and deduplicated by _merge_supplementary_actions().
+        When provided, these are injected into the LOOKUP_ARRAY alongside the
+        KB-scored actions so the model has a broader, platform-verified vocabulary.
+    """
+    # Use the merged action list if supplementary actions were provided; otherwise
+    # fall back to the KB-scored list.
+    all_actions = supplementary_actions if supplementary_actions is not None else grounding.allowed_actions
     platform = grounding.primary_platform or "cloud"
 
     # Use GEPA-evolved prompt when available; fall back to hardcoded baseline.
@@ -134,8 +277,8 @@ def build_grounded_system_prompt(grounding: GroundingResult) -> str:
         )
         forbid = (
             "\nYou are strictly forbidden from inventing fake event paths or action strings. "
-            "You MUST populate the 'actionNames' array ONLY using strings found inside this "
-            "verified collection (LOOKUP_ARRAY)."
+            "You MUST select actionNames EXCLUSIVELY from strings present in the LOOKUP_ARRAY "
+            "below — failure to do so causes Stage 2 validation rejection."
         )
     elif grounding.primary_platform == "okta" or "okta" in grounding.matched_platforms:
         env_line = (
@@ -143,9 +286,9 @@ def build_grounded_system_prompt(grounding: GroundingResult) -> str:
             "system environment (System Log event types)."
         )
         forbid = (
-            "\nYou are strictly forbidden from inventing fake event paths or guessing "
-            "period-notation structures. You MUST populate 'actionNames' ONLY using strings "
-            "explicitly found inside this reference collection (LOOKUP_ARRAY)."
+            "\nYou are strictly forbidden from inventing or guessing Okta event type strings. "
+            "You MUST select actionNames EXCLUSIVELY from strings present in the LOOKUP_ARRAY "
+            "below — failure to do so causes Stage 2 validation rejection."
         )
     elif grounding.primary_platform == "azure" or "azure" in grounding.matched_platforms:
         env_line = (
@@ -153,24 +296,34 @@ def build_grounded_system_prompt(grounding: GroundingResult) -> str:
             "environment (ARM operations and/or Entra ID audit activities)."
         )
         forbid = (
-            "\nYou are strictly forbidden from inventing fake permission namespaces or guessing "
-            "slash/period paths. You MUST populate the 'actionNames' array ONLY using strings "
-            "explicitly found inside this reference collection (LOOKUP_ARRAY)."
+            "\nYou are strictly forbidden from inventing Azure permission namespaces or "
+            "guessing slash/period paths. You MUST select actionNames EXCLUSIVELY from strings "
+            "present in the LOOKUP_ARRAY below — failure to do so causes Stage 2 validation rejection."
+        )
+    elif grounding.primary_platform == "aws" or "aws" in grounding.matched_platforms:
+        env_line = (
+            "\n\nENVIRONMENT: You are generating rules for an AWS CloudTrail / IAM environment."
+        )
+        forbid = (
+            "\nYou are strictly forbidden from inventing AWS API action names. "
+            "You MUST select actionNames EXCLUSIVELY from strings present in the LOOKUP_ARRAY "
+            "below — failure to do so causes Stage 2 validation rejection."
         )
     else:
         env_line = f"\n\nENVIRONMENT: You are generating rules for a {platform} environment."
         forbid = (
             "\nYou are strictly forbidden from creating or guessing event names. "
-            "You MUST select and populate the 'actionNames' array ONLY from this verified list of choices."
+            "You MUST select actionNames EXCLUSIVELY from strings present in the LOOKUP_ARRAY "
+            "below — failure to do so causes Stage 2 validation rejection."
         )
 
-    if not allowed_actions:
+    if not all_actions:
         vocab_block = (
             "\n\nSTRICT ALLOWED VOCABULARY (LOOKUP_ARRAY):\n"
             "[No verified action names retrieved — do not invent API/event names.]"
         )
     else:
-        vocab_json = json.dumps(allowed_actions, indent=2)
+        vocab_json = json.dumps(all_actions, indent=2)
         vocab_block = (
             f"\n\nSTRICT ALLOWED VOCABULARY (LOOKUP_ARRAY — verified authoritative catalog):\n"
             f"{vocab_json}"
@@ -185,16 +338,28 @@ def build_grounded_system_prompt(grounding: GroundingResult) -> str:
 
 class RuleEngine:
     """
-    phi4-mini-reasoning rule generation with knowledge-base grounded actionNames.
+    phi4-mini-reasoning rule generation with KB-grounded actionNames.
 
-    Generates exactly 3 structurally diverse detection rule variants per threat:
-      Rule 1 — Process Creation / Command-Line Arguments
-      Rule 2 — File / Registry Modifications or Behavioral Indicators
-      Rule 3 — Network Connections / API / System Calls
+    Generates exactly 3 threat-centric detection rule variants per threat:
+      Variant 1 — Primary High-Fidelity Trigger
+                  Single most direct API action identified in the threat advisory.
+      Variant 2 — Behavioral & Chained Action Indicator
+                  Two or more correlated KB actions that reveal the attack chain.
+      Variant 3 — Defense-in-Depth / Secondary Vector
+                  Peripheral administrative changes or residual attacker footprint.
 
+    actionNames grounding
+    ─────────────────────
+    All generated actionNames are constrained to a LOOKUP_ARRAY built from:
+      1. knowledge_base/ directory catalogs (KB-scored, threat-relevant actions).
+      2. data/api_knowledge_base.json (supplementary flat per-platform map, loaded
+         once at startup and merged per-threat up to _SUPPLEMENTARY_ACTION_LIMIT).
+
+    LLM routing
+    ───────────
     Routes completions through StructuredLLMClient:
-      • OpenAI cloud  → strict JSON schema (RULE_BATCH_SCHEMA), no post-repair needed
-      • Local Ollama  → json_object mode + existing 5-level fallback parser + repair
+      • OpenAI cloud  → strict JSON schema (RULE_BATCH_SCHEMA), no post-repair needed.
+      • Local Ollama  → json_object mode + 5-level fallback parser + repair.
     """
 
     def __init__(
@@ -203,6 +368,7 @@ class RuleEngine:
         base_url: str = OLLAMA_BASE_URL,
         model: str = OLLAMA_PHI4_MODEL,
         timeout_seconds: float = OLLAMA_PHI4_TIMEOUT_SECONDS,
+        api_kb_path: Path | None = None,
     ) -> None:
         self._kb = knowledge_base
         self._model = model
@@ -212,6 +378,10 @@ class RuleEngine:
             api_key="ollama",
             timeout=timeout_seconds,
         )
+        # Supplementary flat API knowledge base (data/api_knowledge_base.json).
+        # Loaded once here; merged per-threat in generate_for_threat.
+        _kb_path = api_kb_path if api_kb_path is not None else DEFAULT_API_KB_PATH
+        self._api_kb: dict[str, list[str]] = _load_api_knowledge_base(_kb_path)
 
     def ground_threat(self, threat: dict[str, Any]) -> GroundingResult:
         text = f"{threat.get('title', '')}\n{threat.get('content', '')}"
@@ -224,7 +394,17 @@ class RuleEngine:
         parent_observation: Any = None,
     ) -> tuple[list[DetectionRule], str | None, GroundingResult]:
         grounding = grounding or self.ground_threat(threat)
-        system_prompt = build_grounded_system_prompt(grounding)
+
+        # Merge supplementary API KB actions into the grounded vocabulary.
+        # The combined list is what the LLM sees in the LOOKUP_ARRAY.
+        threat_text = f"{threat.get('title', '')}\n{threat.get('content', '')}"
+        merged_actions = _merge_supplementary_actions(
+            grounding, self._api_kb, threat_text
+        )
+
+        system_prompt = build_grounded_system_prompt(
+            grounding, supplementary_actions=merged_actions
+        )
         messages: list[dict[str, str]] = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": self._build_user_prompt(threat, grounding)},
@@ -343,10 +523,13 @@ class RuleEngine:
             f"Grounded Platforms: {', '.join(grounding.matched_platforms) or 'none'}\n"
             f"Routed Profiles: {', '.join(grounding.routed_profiles) or 'none'}\n"
             f"Verified actionNames sample: {allowed_preview or 'none'}\n\n"
-            f"REMINDER — output exactly 3 rules using the 3 mandatory strategy layers:\n"
-            f"  [1] Process Creation / Command-Line Arguments\n"
-            f"  [2] File / Registry Modifications or Behavioral Indicators\n"
-            f"  [3] Network Connections / API / System Calls\n\n"
+            f"REMINDER — output exactly 3 threat-centric variants:\n"
+            f"  [1] PRIMARY HIGH-FIDELITY TRIGGER\n"
+            f"      — single most direct API action from the LOOKUP_ARRAY for this specific threat\n"
+            f"  [2] BEHAVIORAL & CHAINED ACTION INDICATOR\n"
+            f"      — 2+ correlated KB actions that together reveal the attack chain\n"
+            f"  [3] DEFENSE-IN-DEPTH / SECONDARY VECTOR\n"
+            f"      — peripheral changes or residual attacker footprint from the LOOKUP_ARRAY\n\n"
             f"Threat Content:\n{(threat.get('content') or '')[:5000]}"
         )
 

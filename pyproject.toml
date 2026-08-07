@@ -11,6 +11,8 @@ requires-python = ">=3.11"
 dependencies = [
     # LLM / AI clients
     "openai>=1.30",
+    # CVSS vector parsing (v4.0 / v3.x / v2)
+    "cvss>=3.6",
     # Data validation
     "pydantic>=2.6",
     "pydantic-settings>=2.2",

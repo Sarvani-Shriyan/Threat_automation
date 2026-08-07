@@ -259,7 +259,16 @@ RSS_FEED_LINKS = [
 ]
 
 # Step 2 — platform keyword matrix (case-insensitive match in title or content).
+#
+# Word-boundary notes
+# -------------------
+# Short acronyms (len ≤ 4 with no spaces) such as NHI, MCP, LLM, AWS, GCP,
+# IdP, SAML, OIDC are compiled with \b … \b guards by _compile_keyword_patterns
+# so they only match exact tokens — not substrings of longer words.
+# Multi-word phrases (any entry containing a space) use exact phrase matching,
+# which is already precise enough without explicit boundary anchors.
 PLATFORM_KEYWORDS: list[str] = [
+    # ── Cloud platforms ────────────────────────────────────────────────────
     "AWS",
     "GCP",
     "Azure",
@@ -267,11 +276,34 @@ PLATFORM_KEYWORDS: list[str] = [
     "Okta",
     "OAuth",
     "Salesforce",
+    "Microsoft Entra",
+
+    # ── Identity & access management ──────────────────────────────────────
     "IdP",
     "Active Directory",
     "SAML",
     "OIDC",
-    "Microsoft Entra",
+
+    # ── Non-Human Identity (NHI) ───────────────────────────────────────────
+    "Non-Human Identity",
+    "NHI",                    # \b applied automatically (len ≤ 4)
+    "Service Principal",
+    "Workload Identity",
+    "Service Account",
+    "Machine Identity",
+    "OAuth App",
+
+    # ── AI & AI Agent security ─────────────────────────────────────────────
+    "AI Agent",
+    "Agentic AI",
+    "LLM",                    # \b applied automatically (len ≤ 4)
+    "Prompt Injection",
+    "MCP",                    # \b applied automatically (len ≤ 4)
+    "Model Context Protocol",
+    "RAG Poisoning",
+    "LangChain",
+    "CrewAI",
+    "Vector Database",
 ]
 
 # Backward-compatible alias
@@ -288,6 +320,11 @@ OLLAMA_BASE_URL = "http://localhost:11434/v1"
 
 # Step 2 — Gemma 4 verifier
 OLLAMA_MODEL = "gemma4:e4b"
+# Gemma only needs to classify a short article into a 5-field JSON verdict.
+# 45 s is generous; if the model hasn't responded by then it is either
+# overloaded or unavailable and a retry would just compound the queue delay.
+GEMMA_TIMEOUT_SECONDS = 45
+# Kept for back-compat; Step 3/4 callers still import this name.
 OLLAMA_TIMEOUT_SECONDS = 120
 OLLAMA_MAX_WORKERS = 4
 

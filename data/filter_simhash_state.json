@@ -228,6 +228,198 @@
       "simhash": 8304947440665458275,
       "inserted_at": "2026-07-16T09:19:08.347598+00:00",
       "title": "Building a Safer API Drift Healer: Deterministic Field Matching in V0.4"
+    },
+    {
+      "threat_id": "1dfd3b9324837f39",
+      "simhash": 2407323719684157317,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "VMRay Exposes Operation STANDOFF, a Russian-Speaking Intrusion Campaign Hidden Behind GitHub"
+    },
+    {
+      "threat_id": "3c03d0b8ea1c8f2f",
+      "simhash": 3828314813636758679,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Kimsuky Hacked South Korean Groupware Vendors With New Gomir Variants"
+    },
+    {
+      "threat_id": "ca27481bce982b8c",
+      "simhash": 13664422714040156129,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "APT42 TAMECAT Malware Grows with AI-Assisted Phishing"
+    },
+    {
+      "threat_id": "bed99c850def54d6",
+      "simhash": 5352908718369467444,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "New GitHub, PyPI Policies Boost Supply Chain Security"
+    },
+    {
+      "threat_id": "b7dcadffe437195c",
+      "simhash": 4884657313407005289,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "GitHub Adds 3-Day Dependabot Cooldown to Limit Poisoned Package Adoption"
+    },
+    {
+      "threat_id": "d929848e6ce0ee38",
+      "simhash": 4207164309594654317,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Certighost Exploit Lets Low-Privileged Active Directory Users Impersonate a Domain Controller"
+    },
+    {
+      "threat_id": "7189204a0898f777",
+      "simhash": 3046263997753190511,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Seeing AI Agents Is Not Enough. Security Teams Must Enforce What They Can Do"
+    },
+    {
+      "threat_id": "f83dfd1f0574c910",
+      "simhash": 3605017539344299361,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Hacker Runs Hermes AI Agent Unattended for Post-Exploitation at Thai Finance Ministry"
+    },
+    {
+      "threat_id": "15f132a82eab3c8a",
+      "simhash": 4312685717095802823,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Claude Cowork Flaw Could Let AI Agent Escape Its VM and Access Mac Files"
+    },
+    {
+      "threat_id": "44cd6bbc5370b542",
+      "simhash": 3595501353217520728,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Attackers Weaponize GitHub Actions Runners to Target cPanel and WHM Servers"
+    },
+    {
+      "threat_id": "ed26366726a7e706",
+      "simhash": 10867095261506641005,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "GitHub Cuts Public Bug Bounty Payouts, Moves Top Rewards to VIP Tier"
+    },
+    {
+      "threat_id": "c0c2d97cef31d063",
+      "simhash": 279179887170248306,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Microsoft Azure DevOps MCP Flaw Lets Hidden PR Comments Hijack AI Review Agents"
+    },
+    {
+      "threat_id": "f0b0732a271e3346",
+      "simhash": 3514946538023906929,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "AWS Kiro Flaw Let a Poisoned Web Page Rewrite Its Config and Run Code"
+    },
+    {
+      "threat_id": "4e5fdb1649a2c575",
+      "simhash": 1372199609538183736,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "'Confused Deputy' Flaws Persist in Google Cloud, Microsoft Azure"
+    },
+    {
+      "threat_id": "447c982fbbfe469e",
+      "simhash": 2578875722094401125,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Escape Artists: 'Incorrigible' AI Models Resist Rehabilitation"
+    },
+    {
+      "threat_id": "44c392b363654be6",
+      "simhash": 4471961555300672121,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Default Azure Automation Setting Enables Cross-Tenant Identity Takeover"
+    },
+    {
+      "threat_id": "9f90e7c0eb55eca7",
+      "simhash": 1544749189716778537,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "One ChatGPT link could smuggle a rogue AI agent into your company"
+    },
+    {
+      "threat_id": "eb812c3b6c8ea088",
+      "simhash": 57219161962837881,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Critical Authorization Vulnerability in SiYuan (CVE-2026-66012)"
+    },
+    {
+      "threat_id": "c32722b7df7b3883",
+      "simhash": 3587604368821466367,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "CAV3RN Framework Upgrades to Outlook Calendar for C2 Communication"
+    },
+    {
+      "threat_id": "8f09a15241baec7f",
+      "simhash": 4957704270616858325,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "INC Ransomware affiliate targets ESXi &amp; NAS Devices in AD environment"
+    },
+    {
+      "threat_id": "c0f53a4dffb916d5",
+      "simhash": 2650529815075295169,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "AWS Shield Advanced is embracing the AWS WAF Anti-DDoS managed rule group: What changes and how to prepare"
+    },
+    {
+      "threat_id": "c682138369cbe411",
+      "simhash": 3661348724976877377,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Announcing the Cloud Security Alliance on AWS Compliance Guide"
+    },
+    {
+      "threat_id": "5875c9fbebd8c4cb",
+      "simhash": 4125707798881584464,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Accelerating AWS Network Firewall troubleshooting with AWS DevOps Agent"
+    },
+    {
+      "threat_id": "40f10407a3f78ad5",
+      "simhash": 3668350698885942865,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Do more with AWS WAF labels using dynamic label interpolation"
+    },
+    {
+      "threat_id": "280850e00fd1c4e4",
+      "simhash": 2397331479008990581,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "What’s new with Google Cloud"
+    },
+    {
+      "threat_id": "9de90c023824cfca",
+      "simhash": 17908152088209465208,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "How Elasticsearch ES|QL COMPLETION turns noisy curl and wget rules into high-fidelity cloud security alerts"
+    },
+    {
+      "threat_id": "af9b63ffc926ed5d",
+      "simhash": 8207436857367679739,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "An autonomous AI agent compromised Hugging Face. The response is the real story. by Lucie Cardiet"
+    },
+    {
+      "threat_id": "b769cf4772144ae8",
+      "simhash": 2009477699883832945,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "OpenAI’s Lab Rat Escapes"
+    },
+    {
+      "threat_id": "52930ad7cac24fb2",
+      "simhash": 657980100501130867,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "Our 3 takeaways from the 2026 Gartner® Hype Cycle™ for Digital Identity"
+    },
+    {
+      "threat_id": "9a079de28e9af043",
+      "simhash": 9172064990881118203,
+      "inserted_at": "2026-07-28T09:48:45.241605+00:00",
+      "title": "No Newman PASS, No Output: How I Made My API Drift Healer Safer"
+    },
+    {
+      "threat_id": "51e70d3635e5592c",
+      "simhash": 2614842689574789289,
+      "inserted_at": "2026-07-29T04:57:41.316978+00:00",
+      "title": "MZ Automation libIEC61850"
+    },
+    {
+      "threat_id": "3c06b99283ac6d22",
+      "simhash": 4092520006492301170,
+      "inserted_at": "2026-07-29T04:57:41.316978+00:00",
+      "title": "One Header Away from 10+ GB of Customer Documents (PII) — $6K Bounty"
     }
   ]
 }

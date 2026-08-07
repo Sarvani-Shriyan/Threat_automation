@@ -147,6 +147,10 @@ class StructuredLLMClient:
                 base_url=base_url,
                 api_key=api_key,
                 timeout=timeout,
+                # Never auto-retry against local Ollama: a timeout means the
+                # model is busy / unavailable and re-sending immediately just
+                # stacks up more work.  Cloud path keeps default retries.
+                max_retries=2 if self._is_cloud else 0,
             )
             self._langfuse_enabled = True
         else:
@@ -154,6 +158,7 @@ class StructuredLLMClient:
                 base_url=base_url,
                 api_key=api_key,
                 timeout=timeout,
+                max_retries=2 if self._is_cloud else 0,
             )
             self._langfuse_enabled = False
 

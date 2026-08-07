@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
-# pip install openai pydantic
+# pip install openai pydantic cvss
 """
 Step 3: Grounded streaming rule generation with knowledge-base retrieval.
 """
 
 import argparse
 import logging
+import sys
 import time
 from pathlib import Path
 from typing import Any
+
+# Ensure src/ is importable when running as a script from the project root.
+_SRC_DIR = Path(__file__).resolve().parent / "src"
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
+
+from threat_pipeline.utils.cvss_severity import apply_official_severity  # noqa: E402
 
 from generators.io import (
     DEFAULT_FILTERED_INPUT,
@@ -17,7 +25,7 @@ from generators.io import (
     load_filtered_threats,
 )
 from generators.knowledge_base import GroundingResult, KnowledgeBase
-from generators.rule_engine import RuleEngine
+from generators.rule_engine import DEFAULT_API_KB_PATH, RuleEngine
 from ingestion.config import KNOWLEDGE_BASE_DIR, KNOWLEDGE_BASE_MAX_ACTIONS
 
 logging.basicConfig(
@@ -27,7 +35,7 @@ logging.basicConfig(
 logger = logging.getLogger("main_generator")
 
 
-def _print_kb_banner(kb: KnowledgeBase) -> None:
+def _print_kb_banner(kb: KnowledgeBase, api_kb_path: Path) -> None:
     print("\n" + "=" * 60)
     print("KNOWLEDGE BASE — GROUNDED RETRIEVAL")
     print("=" * 60)
@@ -38,13 +46,18 @@ def _print_kb_banner(kb: KnowledgeBase) -> None:
     for entry in kb.entries:
         tag = f" [{entry.source}]" if entry.source else ""
         print(f"  - {entry.platform}: {len(entry.action_names)} actions ({entry.source_file}){tag}")
+    api_kb_status = (
+        f"LOADED ({api_kb_path})" if api_kb_path.is_file()
+        else f"NOT FOUND — using KB-directory grounding only ({api_kb_path})"
+    )
+    print(f"Supplementary API KB      : {api_kb_status}")
     print("=" * 60 + "\n")
     logger.info("kb_init %s", kb.summary())
 
 
 def _print_queue_banner(total: int, output_path: Path, already_staged: int) -> None:
     print("=" * 60)
-    print("PHI4-MINI-REASONING RULE GENERATION — 3-STRATEGY DIVERSITY")
+    print("PHI4-MINI-REASONING — THREAT-CENTRIC MULTI-VARIANT RULES")
     print("=" * 60)
     print(f"Threats queued this run     : {total}")
     print(f"Already in staging file     : {already_staged}")
@@ -90,6 +103,18 @@ def _make_on_after(store: StagingStore):
         elapsed: float,
     ) -> None:
         title = threat.get("title", "Untitled")
+
+        # Apply official CVSS severity override for every generated variant.
+        # If the threat advisory carries a CVSS vector, its qualitative text
+        # label ("Low" / "Medium" / "High" / "Critical") replaces the AI's
+        # estimated severity.  When no vector is present the AI's value is
+        # retained after capitalisation/validation.
+        variants = entry.get("variants") or []
+        if variants:
+            entry["variants"] = [
+                apply_official_severity(v, threat) for v in variants
+            ]
+
         store.append_entry(entry)
         grounded = entry.get("grounding_context", {})
         injected = grounded.get("injected_action_count", 0)
@@ -140,18 +165,21 @@ def run_generation(
     input_path: Path = DEFAULT_FILTERED_INPUT,
     output_path: Path = DEFAULT_STAGING_OUTPUT,
     kb_dir: Path | None = None,
+    api_kb_path: Path | None = None,
     *,
     limit: int | None = None,
     resume: bool = True,
     force: bool = False,
     platforms: list[str] | None = None,
 ) -> int:
+    _api_kb_path = api_kb_path if api_kb_path is not None else DEFAULT_API_KB_PATH
+
     kb = KnowledgeBase(
         base_dir=kb_dir or Path(KNOWLEDGE_BASE_DIR),
         max_actions=KNOWLEDGE_BASE_MAX_ACTIONS,
         platforms=platforms,
     )
-    _print_kb_banner(kb)
+    _print_kb_banner(kb, _api_kb_path)
 
     threats = load_filtered_threats(input_path)
     if limit is not None:
@@ -168,7 +196,7 @@ def run_generation(
 
     _print_queue_banner(queued, store.path, already_staged)
 
-    engine = RuleEngine(knowledge_base=kb)
+    engine = RuleEngine(knowledge_base=kb, api_kb_path=_api_kb_path)
     on_after = _make_on_after(store)
     run_started = time.perf_counter()
 
@@ -226,6 +254,12 @@ def main() -> int:
         default=Path(KNOWLEDGE_BASE_DIR),
         help="Directory of authoritative JSON event/action schemas",
     )
+    parser.add_argument(
+        "--api-kb",
+        type=Path,
+        default=DEFAULT_API_KB_PATH,
+        help="Supplementary flat per-platform API knowledge base JSON (default: data/api_knowledge_base.json)",
+    )
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--no-resume", action="store_true")
     parser.add_argument("--force", action="store_true")
@@ -245,6 +279,7 @@ def main() -> int:
             args.input,
             args.output,
             kb_dir=args.kb_dir,
+            api_kb_path=args.api_kb,
             limit=args.limit,
             resume=not args.no_resume,
             force=args.force,

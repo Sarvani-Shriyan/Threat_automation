@@ -9,6 +9,7 @@ from openai import APIConnectionError, APITimeoutError
 from pydantic import BaseModel, Field, field_validator
 
 from ingestion.config import (
+    GEMMA_TIMEOUT_SECONDS,
     OLLAMA_BASE_URL,
     OLLAMA_MAX_WORKERS,
     OLLAMA_MODEL,
@@ -29,18 +30,21 @@ CRITICAL SAFETY GUARDRAILS:
 - If the threat text does not explicitly fall into our core domains, you must output a confidence_score of 1 and set is_relevant to false.
 
 CORE LANDSCAPE DOMAINS (IF INDUCTIVELY PRESENT, HIGHER CONFIDENCE IS TRIGGERED):
-1. Identity Security: MFA fatigue, session hijacking, token theft, account recovery abuse, unauthorized privilege elevation, identity providers (Okta, Entra ID, IAM).
+1. Identity Security: MFA fatigue, session hijacking, token theft, account recovery abuse, unauthorized privilege elevation, identity providers (Okta, Entra ID, IAM). Also includes Non-Human Identity (NHI) threats: service account abuse, service principal privilege escalation, workload identity exploitation, machine identity theft, OAuth app abuse, and automated pipeline credential compromise. Map NHI threats to primary_domain="Identity".
 2. Cloud Infrastructure Security: Malicious modifications or resource destructions within AWS, GCP, Azure, or ARM templates.
 3. SaaS Security: Continuous integration or enterprise configuration flaws (GitHub Actions, pipeline hijacking, runner takeovers).
+4. AI Agent & LLM Security: Exploitation of AI agents or autonomous systems — rogue AI agent post-exploitation, AI agent VM escape or sandbox breakout, prompt injection attacks with a concrete payload or demonstrated exploit, MCP (Model Context Protocol) vulnerability abuse, LLM-assisted attack campaigns, or AI system compromise incidents where the AI agent is the attack vector or victim. Map AI Agent and LLM security threats to primary_domain="Identity" (AI agents are identity principals) unless the attack targets cloud infrastructure directly.
 
 EXCLUSION BOUNDARIES (SET 'is_relevant': false IMMEDIATELY):
 - Broad endpoint malware, local Windows/Mac desktop OS exploits, browser exploits, generic compliance overviews, or simple company security press releases.
+- General AI product news, AI performance benchmarks, AI productivity articles, or AI strategy opinion pieces with no concrete exploit, vulnerability, or attack technique.
+- Articles about NHI or AI agents that are purely educational or vendor marketing with no demonstrated attack vector.
 
 EXPLICIT DETERMINISTIC SCORING MATRIX:
-- 9-10: Contains a concrete proof-of-concept exploit vector directly matching Cloud, Identity, or SaaS boundaries.
-- 7-8: High probability behavioral match explicitly referencing our core domains but missing granular exploit payload metrics.
-- 6: Baseline relevance cutoff. Mentions resource mutations or core identifiers but focuses on architecture or policy.
-- 1-5: Collateral coverage, generic IT news, or entirely excluded operating system platforms.
+- 9-10: Contains a concrete proof-of-concept exploit vector directly matching Cloud, Identity, SaaS, or AI Agent / NHI boundaries. Includes confirmed AI agent post-exploitation incidents or real-world NHI credential abuse campaigns.
+- 7-8: High probability behavioral match explicitly referencing our core domains but missing granular exploit payload metrics. Includes AI agent attack reports and NHI privilege escalation advisories without full PoC.
+- 6: Baseline relevance cutoff. Mentions resource mutations, core identifiers, AI agent security controls, or NHI governance gaps that directly relate to attack surface.
+- 1-5: Collateral coverage, generic IT news, AI opinion pieces, or entirely excluded operating system platforms.
 
 Your absolute output contract format is strictly this structural JSON payload:
 {
@@ -131,7 +135,7 @@ class GemmaVerifier:
         self,
         base_url: str = OLLAMA_BASE_URL,
         model: str = OLLAMA_MODEL,
-        timeout_seconds: float = OLLAMA_TIMEOUT_SECONDS,
+        timeout_seconds: float = GEMMA_TIMEOUT_SECONDS,
         max_workers: int = OLLAMA_MAX_WORKERS,
         min_confidence_score: int = MIN_CONFIDENCE_SCORE,
     ) -> None:

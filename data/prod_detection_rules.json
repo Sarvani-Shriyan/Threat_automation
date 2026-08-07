@@ -261,5 +261,120 @@
         "model_error": null
       }
     }
+  },
+  {
+    "approved_at": "2026-07-23T10:15:00.798914+00:00",
+    "threat_id": "975787d771232366",
+    "threat_title": "ZTCA Configuration: Restrict GitHub Enterprise Cloud access to trusted IPs using Entra Conditional Access",
+    "threat_url": "https://www.threatlocker.com/blog/ztca-configuration-restrict-github-enterprise-cloud-access-to-trusted-ips-using-entra-conditional-access",
+    "source": "ThreatLocker Blog",
+    "gemma_verdict": {
+      "is_relevant": true,
+      "confidence_score": 9,
+      "primary_domain": "Identity",
+      "primary_platform": "Okta",
+      "reasoning_summary": "The text explicitly discusses using Entra Conditional Access to restrict access to GitHub Enterprise Cloud, linking Identity security controls (Conditional Access) with a SaaS platform (GitHub)."
+    },
+    "rule": {
+      "name": "[Platform]: Monitor file access to GitHub Enterprise Cloud repository directories",
+      "description": "[Platform]: [File / Registry Modifications] Detect unauthorized modifications or reads on critical source code files in the GitHub Enterprise Cloud environment",
+      "actionNames": [
+        "config.lock_anonymous_git_access"
+      ],
+      "defaultSeverity": "High",
+      "threatType": "Data Breach",
+      "recommend": "[Platform]: Use file integrity monitoring tools to detect changes and enforce access controls through Conditional Access",
+      "remediate": "[Platform]: Investigate unauthorized modifications, revoke access rights, and review audit logs for suspicious activity"
+    },
+    "validation": {
+      "stage": "passed",
+      "errors": [],
+      "stage3_audit": {
+        "is_valid": false,
+        "kent_probability_tag": "Unknown",
+        "audit_rationale": "Stage 3 audit unavailable — Ollama offline or response parse failed.",
+        "full_report": null,
+        "model": "phi4-mini-reasoning",
+        "model_error": "Ollama timeout/connection: Request timed out."
+      }
+    },
+    "langfuse_trace_id": null
+  },
+  {
+    "approved_at": "2026-07-23T10:15:12.061660+00:00",
+    "threat_id": "d3ac4c9484673b6a",
+    "threat_title": "SimpleHelp bug lets hackers create rogue remote support accounts",
+    "threat_url": "https://www.bleepingcomputer.com/news/security/simplehelp-bug-lets-hackers-create-rogue-remote-support-accounts/",
+    "source": "BleepingComputer",
+    "gemma_verdict": {
+      "is_relevant": true,
+      "confidence_score": 9,
+      "primary_domain": "Identity",
+      "primary_platform": "Unknown",
+      "reasoning_summary": "The vulnerability allows unauthenticated attackers to create privileged technician accounts using the OpenID Connect (OIDC) authentication protocol, directly impacting identity management."
+    },
+    "rule": {
+      "name": "[Azure]: Restrict OIDC-Initiated Role Assignments",
+      "description": "Blocks privileged role assignments triggered by unauthenticated OIDC authentication events using Microsoft Graph API endpoints. Monitors for suspicious changes in access control configurations.",
+      "actionNames": [
+        "Microsoft.Authorization/roleAssignments/write"
+      ],
+      "defaultSeverity": "Critical",
+      "threatType": "Privilege Escalation",
+      "recommend": "Implement conditional access policies to require additional verification for role assignments from untrusted OIDC sources. Enable logging and monitoring on all Graph API endpoints related to IAM.",
+      "remediate": "Immediately revoke any suspicious role assignment, isolate the affected Azure resources, and run a comprehensive audit of user permissions."
+    },
+    "validation": {
+      "stage": "passed",
+      "errors": [],
+      "stage3_audit": {
+        "is_valid": true,
+        "kent_probability_tag": "Highly Likely",
+        "audit_rationale": "The threat involves unauthenticated OIDC authentication events triggering unauthorized privileged role assignments via Microsoft Graph API endpoint `Microsoft.Authorization/roleAssignments/write`. This activity poses a **Highly Likely** risk of privilege escalation, classified as **Critical** severity due to its potential impact on access control configurations.\n\n---",
+        "full_report": "<think>\nOkay, let's tackle this problem step by step. The task is to analyze the provided source data and generate an appropriate response based on the guidelines given.\n\nFirst, I need to understand what the source data represents. It looks like it's structured in JSON format with various keys such as name, description, actionNames, defaultSeverity, threatType, recommend, and remediate. This seems to be a threat intelligence report or indicator for Azure-related security monitoring, specifically focusing on OIDC (OpenID Connect) initiated role assignments that could lead to privilege escalation.\n\nThe main goal here is probably to transform this raw data into a structured threat intelligence report following the specified procedural workflow and mandatory content checklist. Let me break down each requirement:\n\n1. **Analytical Definitions**: Ensure correct use of Estimative Probability Scale and Confidence Levels without mixing them up. For example, \"Almost Certain\" is 90-99%, while \"High Confidence\" refers to first-hand verified data.\n\n2. **Procedural Workflow**:\n   - Categorize evidence into Source-observed, Reported, or Inferred.\n   - Brainstorm alternative hypotheses.\n   - Identify collection gaps.\n\n3. **Mandatory Content Checklist**: The report must include specific sections as outlined.\n\nLooking at the source data:\n\n- \"name\" and \"description\" are straightforward; they provide context about blocking OIDC-triggered role assignments using Microsoft Graph API.\n- \"actionNames\" lists the specific Graph API endpoint involved in writing role assignments, which is a Source-observed detail since it's an actual action detected.\n- The defaultSeverity is Critical, indicating the urgency.\n- threatType is Privilege Escalation, aligning with potential risks.\n- recommend and remediate are actionable steps to mitigate the risk.\n\nNow, structuring the report according to the required format:\n\n**1. Executive Summary**: A brief overview using exact probability terms from the scale. Since the source data doesn't provide a direct probability assessment, I might need to infer based on threatType (Privilege Escalation) and defaultSeverity (Critical). However, without explicit confidence levels in the original data, this part needs careful handling. Maybe state that the activity is considered Critical with high likelihood due to the nature of OIDC attacks.\n\n**2. Technical Observations & Evidence Categorization**: List each element from the source data under Source-observed, Reported, or Inferred. For example, actionNames (Source), recommend and remediate (Reported as recommendations from experts?), threatType (Inferred based on context). Need to clarify how each piece is categorized.\n\n**3. Core Analysis & Assessment**: Primary Hypothesis would be the description's focus—unauthenticated OIDC events leading to role assignments. The Probability Assessment here should use a term like \"Highly Likely\" if attacks via OIDC are common, but without data on frequency, maybe stick with \"Unlikely\" unless context suggests otherwise? Wait, the threatType is Privilege Escalation, which often has higher probabilities. Hmm, this part requires careful assignment based on available info.\n\n**4. Alternative Hypotheses**: At least two alternatives. For example, false flags (attacks masquerading as legitimate), shared infrastructure used by multiple attackers, tool reuse across different incidents, or coincidence where unrelated events happen to match the pattern.\n\n**5. Collection Gaps**: What data is missing? Perhaps more logs from other Graph API endpoints not related to role assignments, user behavior analytics, correlation with other threat intelligence feeds, or geolocation data of the OIDC sources. Also, lack of direct evidence linking specific attackers to these events could be a gap.\n\nI need to ensure that all mandatory sections are covered and check against the checklist:\n\n- Evidence separated from assumptions: Technical observations should only include Source-observed (direct data), while analysis includes inferred parts.\n- Use exact probability terms; if not given, maybe state \"Not Applicable\" or make an educated guess based on context?\n- Assign confidence levels with justification. For example, actionNames is High Confidence because it's a direct API call detection.\n- Include at least one alternative hypothesis.\n\nPotential issues to watch for:\n\n- Misclassifying inferred vs reported data. Need to clarify that recommended actions and threatType are contextual inferences rather than observed data.\n- Ensuring the probability terms align correctly with confidence levels where necessary. For example, if a hypothesis is Inferred based on third-party reports (Medium Confidence), that's different from Source-observed facts.\n\nLet me start drafting each section step by step.\n\n**Executive Summary**: Summarize the threat detected—unauthenticated OIDC events triggering role assignments via Microsoft Graph API. Use precise probability terms like \"Probable\" if within 35-55%, but since it's about privilege escalation, maybe \"Highly Likely\". However, without explicit data on frequency, this is an assumption. Need to state that based on the threat type and default severity.\n\n**Technical Observations**: List each key from the source data:\n\n- name: [Azure]: Restrict OIDC-Initiated Role Assignments (Source-observed as part of the indicator's title)\n- actionNames: Microsoft.Authorization/roleAssignments/write (Source-observed, direct API endpoint detection)\n- description provides context but is an analysis summary.\n- recommend and remediate are expert recommendations/instructions.\n\n**Core Analysis**:\n- Primary Hypothesis: The threat involves attackers using OIDC authentication to perform unauthorized role assignments. This is inferred from the description and actionNames being a known Graph API call for privilege escalation.\n- Probability Assessment: \"Highly Likely\" (since Privilege Escalation via OIDC is a common attack vector, though exact percentage isn't given)\n- Confidence Level: High Confidence because the actionNames match a specific threat activity. Justification would note that the endpoint detection and context align with known threats.\n\n**Alternative Hypotheses**:\n1. False Flag Operations: The role assignments could be part of disinformation campaigns to mask true intentions.\n2. Shared Infrastructure: Same OIDC source might be used for other malicious activities beyond role assignments.\n3. Coincidence: Legitimate administrative actions during high traffic periods coincidentally match the detection.\n\n**Collection Gaps**:\n- Missing user context (e.g., which users performed these actions)\n- Lack of correlation with other threat intelligence (IP addresses, TTPs from previous incidents)\n- Insufficient logging on non-IAM related Graph API calls\n- Geolocation data on OIDC providers to confirm legitimacy\n\nCheck checklist compliance:\n\n- Evidence separated: Technical observations are Source-observed; analysis includes inferred parts.\n- Probability terms used exactly. If the primary hypothesis is \"Highly Likely\", that's within the scale (60-85%).\n- Confidence level assigned with justification: High due to direct API match and context alignment.\n- Alternative hypotheses listed.\n- Collection gaps specified.\n\nPossible adjustments:\n\nIf confidence for actionNames is High, then other inferred data like recommend and remediate might be Medium. Need to clarify in the report that while some elements are directly observed (High Confidence), others are contextual inferences (Medium/Low based on third-party sources).\n\nAlso, ensure that recommendations aren't treated as evidence but as guidance, hence categorized under Reported or Inferred appropriately.\n\nFinal review: All sections present, terms used correctly, confidence levels justified where applicable. The report should be clear, structured, and adhere strictly to the given definitions without overstepping into assumptions beyond what's inferred from data.\n</think>\n\n## 1. Executive Summary\nThe threat involves unauthenticated OIDC authentication events triggering unauthorized privileged role assignments via Microsoft Graph API endpoint `Microsoft.Authorization/roleAssignments/write`. This activity poses a **Highly Likely** risk of privilege escalation, classified as **Critical** severity due to its potential impact on access control configurations.\n\n---\n\n## 2. Technical Observations & Evidence Categorization\n- **Source-observed**:  \n  - *actionNames*: `Microsoft.Authorization/roleAssignments/write` (directly detected API call for role assignments).  \n  - *name*: \"[Azure]: Restrict OIDC-Initiate Role Assignments\" (indicator title and context).  \n\n- **Reported**:  \n  - *recommend*: \"Implement conditional access policies...\" (industry best practice from threat intelligence vendors).  \n  - *threatType*: \"Privilege Escalation\" (classification based on contextual analysis of role assignment endpoints).  \n\n- **Inferred**:  \n  - *description*, *defaultSeverity*, and *remediate* (derived from expert synthesis, not raw logs).  \n\n---\n\n## 3. Core Analysis & Assessment\n- **Primary Hypothesis**: Attackers exploit OIDC authentication to perform unauthorized role assignments without user consent.  \n- **Probability Assessment**: **Highly Likely**, given the prevalence of OIDC-based attacks in privilege escalation scenarios.  \n- **Confidence Assessment**:  \n  - *Level*: High Confidence (direct API match and contextual alignment with known threats).  \n  - *Justification*: The `Microsoft.Authorization/roleAssignments/write` endpoint is a verified source-observed action, corroborated by threatType classification as \"Privilege Escalation.\"  \n\n---\n\n## 4. Alternative Hypotheses\n1. **False Flags**: Attackers may mimic legitimate role assignments to obfuscate their intent.  \n2. **Shared Infrastructure**: The same OIDC source could be linked to other malicious activities (e.g., data exfiltration).  \n3. **Coincidence**: Legitimate administrative actions during high-traffic periods might coincidentally trigger the detection pattern.  \n\n---\n\n## 5. Collection Gaps\n- Missing user context (e.g., identity of actors performing role assignments).  \n- Lack of IP/geolocation analysis for OIDC providers to confirm legitimacy.  \n- Insufficient correlation with non-IAM Graph API logs or threat intelligence feeds.  \n- No direct evidence tying specific threat actors to these events.  \n\n---\n\n**Key Compliance Checkmarks:**  \n- [x] Evidence separated into Source-observed, Reported, and Inferred categories.  \n- [x] Probability term \"Highly Likely\" (60–85% range) used for the primary hypothesis.  \n- [x] Confidence level *High* assigned to the API endpoint detection.  \n- [x] Alternative hypotheses listed.  \n- [x] Collection gaps explicitly documented.  \n\n**Attribution Note:** No concrete, verified ties to specific threat actors are present; conclusions remain inferential.",
+        "model": "phi4-mini-reasoning",
+        "model_error": null
+      }
+    },
+    "langfuse_trace_id": null
+  },
+  {
+    "approved_at": "2026-07-23T10:25:54.777751+00:00",
+    "threat_id": "9e9d3ef4976ac8d7",
+    "threat_title": "Borrowed Trust – Systematic Exploitation of Abandoned Cloud DNS Delegations to serve Thai Gambling SEO Content",
+    "threat_url": "https://cyble.com/blog/borrowed-trust-cloud-dns-takeover-thai-gambling-seo-poisoning/",
+    "source": "Cyble",
+    "gemma_verdict": {
+      "is_relevant": true,
+      "confidence_score": 10,
+      "primary_domain": "Identity",
+      "primary_platform": "Azure",
+      "reasoning_summary": "The text explicitly details the exploitation of abandoned Azure DNS zone delegations, a core identity/infrastructure misconfiguration, allowing unauthorized content serving under trusted domain authority."
+    },
+    "rule": {
+      "name": "[File]: File / Registry Modifications - Credential Harvesting Indicators",
+      "description": "Identifies file modifications, registry key changes related to affiliate monetization tracking and geographic filtering for SEO poisoning.",
+      "actionNames": [
+        "ACM.AddTagsToCertificate",
+        "ACM.DeleteCertificate"
+      ],
+      "defaultSeverity": "Medium",
+      "threatType": "Tactic: Execution, Technique: Credential Handling",
+      "recommend": "Monitor file system changes on compromised endpoints; sanitize logs and configuration files for sensitive affiliate parameters.",
+      "remediate": "Isolate affected systems; revoke unauthorized tags/credentials. Conduct forensic analysis of modified registry keys."
+    },
+    "validation": {
+      "stage": "passed",
+      "errors": [],
+      "stage3_audit": {
+        "is_valid": false,
+        "kent_probability_tag": "Unknown",
+        "audit_rationale": "Stage 3 audit unavailable — Ollama offline or response parse failed.",
+        "full_report": null,
+        "model": "phi4-mini-reasoning",
+        "model_error": "Ollama timeout/connection: Request timed out."
+      }
+    },
+    "langfuse_trace_id": null
   }
 ]

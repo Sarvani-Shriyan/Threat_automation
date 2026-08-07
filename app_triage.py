@@ -5,6 +5,11 @@ Security Engineer Triage Dashboard  —  app_triage.py
 3-column decision panel for reviewing exactly 3 validated detection rule variants
 per threat. One rule wins; the other two are logged to the feedback queue.
 
+Variant columns map to the threat-centric multi-variant strategy:
+  Col 1 — 🎯 Primary High-Fidelity Trigger
+  Col 2 — 🔗 Behavioral & Chained Action
+  Col 3 — 🛡️ Defense-in-Depth / Secondary Vector
+
 Data sources (read/written from shared ./data volume):
   IN   data/validated_rules.json        Step 4 output — entries with validated variants
   OUT  data/prod_detection_rules.json   Single approved rule per threat
@@ -39,11 +44,11 @@ _IMPLICIT_REJECT_REASON = (
     "Implicitly rejected: Another variant strategy was selected for production by the engineer."
 )
 
-# Strategy layer labels — aligned with the Rule Engine's 3-strategy prompt order.
+# Threat-centric variant labels — aligned with the Rule Engine's 3-variant prompt order.
 _STRATEGY_LABELS: list[tuple[str, str]] = [
-    ("🖥️", "Process / CLI Args"),
-    ("📁", "File & Registry"),
-    ("🌐", "Network / API Calls"),
+    ("🎯", "Primary High-Fidelity Trigger"),
+    ("🔗", "Behavioral & Chained Action"),
+    ("🛡️", "Defense-in-Depth / Secondary Vector"),
 ]
 
 # ---------------------------------------------------------------------------
@@ -114,12 +119,14 @@ _SEVERITY_BG: dict[str, str] = {
     "High":     "#e67e22",
     "Medium":   "#f39c12",
     "Low":      "#27ae60",
+    "None":     "#708090",
 }
 _SEVERITY_FG: dict[str, str] = {
     "Critical": "#fff",
     "High":     "#fff",
     "Medium":   "#000",
     "Low":      "#fff",
+    "None":     "#fff",
 }
 _KENT_BG: dict[str, str] = {
     "Almost Certain":  "#922b21",
@@ -152,6 +159,23 @@ def _kent_badge(tag: str) -> str:
 
 def _platform_badge(p: str) -> str:
     return _badge(p, "#1f618d")
+
+
+_DOMAIN_BG: dict[str, str] = {
+    "Identity":  "#6c3483",
+    "Cloud":     "#1a5276",
+    "SaaS":      "#117a65",
+    "NHI":       "#7d6608",
+    "AI_Agent":  "#1b4f72",
+    "Unrelated": "#555",
+}
+
+
+def _domain_badge(d: str) -> str:
+    """Return a styled badge for primary_domain values including NHI and AI_Agent."""
+    label_map = {"AI_Agent": "AI Agent", "NHI": "NHI"}
+    label = label_map.get(d, d)
+    return _badge(label, _DOMAIN_BG.get(d, "#555"))
 
 
 # ---------------------------------------------------------------------------
@@ -247,9 +271,9 @@ def _prod_record(variant: dict[str, Any], entry: dict[str, Any]) -> dict[str, An
 
 
 _STRATEGY_NAMES: list[str] = [
-    "Process / CLI Args",
-    "File & Registry",
-    "Network / API Calls",
+    "Primary High-Fidelity Trigger",
+    "Behavioral & Chained Action",
+    "Defense-in-Depth / Secondary Vector",
 ]
 
 
@@ -524,6 +548,22 @@ def _threat_block(entry: dict[str, Any]) -> None:
     if {v["name"] for v in all_variants} == already_rejected:
         return
 
+    # Pull CVSS vector source from the first variant that carries it (set by
+    # apply_official_severity when an official CVSS vector was found).
+    cvss_vector_src: str = next(
+        (v.get("cvss_vector_source", "") for v in all_variants if v.get("cvss_vector_source")),
+        "",
+    )
+
+    # Derive NHI / AI_Agent domain tags from grounding_context if present.
+    grounding: dict[str, Any] = entry.get("grounding_context") or {}
+    _extra_domains: list[str] = []
+    matched_platforms: list[str] = [p.lower() for p in (grounding.get("matched_platforms") or [])]
+    if any(p in matched_platforms for p in ("nhi", "active_directory", "workload_identity")):
+        _extra_domains.append("NHI")
+    if any(p in matched_platforms for p in ("ai_agent", "llm", "mcp")):
+        _extra_domains.append("AI_Agent")
+
     with st.container(border=True):
         # ── Threat header ────────────────────────────────────────
         linked = f"[{title}]({url})" if url else title
@@ -533,8 +573,12 @@ def _threat_block(entry: dict[str, Any]) -> None:
         with h1:
             st.markdown(f"**Source:** {source}")
         with h2:
+            domain_badges_html = _domain_badge(domain)
+            for ed in _extra_domains:
+                domain_badges_html += f"&nbsp;{_domain_badge(ed)}"
             st.markdown(
-                f"**Platform:** {_platform_badge(platform)}&nbsp;&nbsp;**Domain:** {domain}",
+                f"**Platform:** {_platform_badge(platform)}&nbsp;&nbsp;"
+                f"**Domain:** {domain_badges_html}",
                 unsafe_allow_html=True,
             )
         with h3:
@@ -546,6 +590,12 @@ def _threat_block(entry: dict[str, Any]) -> None:
             if rejected:
                 label += f" · ⛔ {rejected} rejected"
             st.caption(label)
+
+        if cvss_vector_src:
+            st.markdown(
+                f"**CVSS Vector:** `{cvss_vector_src}`",
+                unsafe_allow_html=False,
+            )
 
         if reasoning:
             st.info(f"🧠 {reasoning}")
@@ -604,8 +654,8 @@ def main() -> None:
         st.markdown(
             "**How it works:**\n\n"
             "Each threat shows **3 variants** side-by-side — "
-            "Process/CLI, File/Registry, Network/API.\n\n"
-            "Click **Approve** on the winning strategy. "
+            "🎯 Primary High-Fidelity, 🔗 Behavioral & Chained, 🛡️ Defense-in-Depth.\n\n"
+            "Click **Approve** on the winning variant. "
             "The other 2 are automatically sent to the feedback queue.\n\n"
             "Click **Reject** on any variant to log it with a custom reason "
             "before approving a different one."

@@ -1,28 +1,73 @@
 {
-  "filtered_at": "2026-07-16T09:19:08.398235+00:00",
+  "filtered_at": "2026-07-29T04:57:42.292655+00:00",
   "stats": {
-    "total_in_file": 612,
-    "total_inputs": 612,
-    "keyword_dropped": 545,
-    "passed_keywords": 67,
-    "cve_patch_dropped": 9,
-    "survived_cve_patch_filter": 58,
-    "tier1_simhash_dropped": 0,
+    "total_in_file": 629,
+    "total_inputs": 629,
+    "keyword_dropped": 546,
+    "passed_keywords": 83,
+    "cve_patch_dropped": 1,
+    "survived_cve_patch_filter": 82,
+    "tier1_simhash_dropped": 30,
     "tier2_vector_dropped": 0,
-    "passed_dedup_gate": 58,
-    "gemma_rejected": 20,
-    "confirmed_gemma": 38,
+    "passed_dedup_gate": 52,
+    "gemma_rejected": 50,
+    "confirmed_gemma": 2,
     "min_confidence_score": 6,
     "existing_loaded": 50,
-    "new_confirmed_this_run": 38,
-    "merged_before_cap": 88,
-    "trimmed_count": 38,
+    "new_confirmed_this_run": 2,
+    "merged_before_cap": 52,
+    "trimmed_count": 2,
     "max_queue_size": 50,
-    "confirmed_gemma_this_run": 38,
+    "confirmed_gemma_this_run": 2,
     "final_queue_size": 50
   },
   "article_count": 50,
   "articles": [
+    {
+      "source": "InfoSec Write-ups - Medium",
+      "title": "One Header Away from 10+ GB of Customer Documents (PII) — $6K Bounty",
+      "url": "https://infosecwriteups.com/one-header-away-from-10-gb-of-customer-documents-pii-6k-bounty-0c0ac8c335f2?source=rss----7b722bfd1b8d---4",
+      "content": "Sample Document Leaked An anonymous attacker could fully enumerate, read, and overwrite the production customer-service attachment bucket of a major insurer’s China operation. The bucket backs the file-upload flow of their WeChat customer-service chatbot, held massive customer chat attachments; photos of identity cards, hospital certificates, policy screens, confidential documents, etc. Anyone on the internet could read all of it. A quick aside, if you’ve never touched a Chinese cloud stack. This bucket lives on Volcengine (火山引擎), ByteDance’s public cloud, same parent company as TikTok and Douyin. Their object storage is called TOS , and it’s S3-compatible in the way that matters: same API verbs, same virtual-hosted URLs, same XML error bodies, its own HMAC-SHA256 signing scheme. Every instinct you have from S3 transfers over. What doesn’t transfer is the console. 防盗链 sits right there in the bucket settings, a few rows under CORS, presented as a normal thing to turn on. On AWS you’d have to go out of your way to write a bucket policy that conditions on aws:Referer. Here it’s a checkbox. That difference is most of the reason this bug exists. The issue is caused by two independent authentication control failures on the same storage workflow: Anonymous read bypass : the bucket allows unauthenticated listing of object keys, and object reads are protected only by a forgeable Referer header pointing at the app’s own domain. Any attacker can spoof this header and retrieve the full object content. Anonymous write / overwrite : the upload signer at /api/tos/presigned-post is unauthenticated and signs attacker-supplied bucket/key values using the company’s Volcengine TOS credential. This allows anonymous uploads and overwrite-in-place of existing object keys. The first bug — Forgeable Referer Header Bypass Same object, same second, same URL. Only one header changes. GET /chat/message/[REDACTED]/20251211/images/[REDACTED].png Host: [REDACTED]-prod.[REDACTED].volces.com (no Referer) → 403 AccessDenied, 213 bytes Referer: https://evil.example.com.cn/ → 403 AccessDenied, 213 bytes Referer: https://[REDACTED].[Target].com.cn/ → 200 image/png, 7828 bytes That’s the whole bypass. 403 Forbidden Auth Bypassed The bucket had 防盗链 switched on; anti-leech, hotlink protection. You give it a list of allowed referring domains and it blocks requests that come from anywhere else. Every Chinese cloud ships it. It exists to stop someone embedding your images on their forum and running up your bandwidth bill. It’s a billing control. Somebody left it holding the door as an access control. And Referer is a request header. The client writes it. There is no signature on it, no secret in it, nothing to verify. I typed the allowed domain and the bucket believed me. How I got to the bucket in the first place?? Well, it was pretty straightforward, although getting there took a fair amount of time. I spent hours collecting, deobfuscating, and going through JavaScript bundles from the host target, following one small clue after another. One URL led to a new function, that function pointed to another endpoint, and little by little, the trail eventually brought me to the bucket URL itself. The second bug — Unauthenticated Signer Take a look at this part of the code from the bundle. cc = \"[REDACTED]-prod\" fetch(\"https://[app-host]/volces/api/tos/presigned-post\", {method:\"POST\", headers:{\"Content-Type\":\"application/json\"}, body:JSON.stringify({bucket:cc, key:h})}) m = `${cc}.[REDACTED].volces.com` f = `https://${m}/${encodeURI(h)}` The headers object has exactly one key. No Authorization, no token, nothing to strip, because nothing was ever there. It calls the app’s own backend rather than a cloud SDK, so somebody hand-wrote a signer. And both bucket and key come from the browser. So I asked it for a signature. POST /volces/api/tos/presigned-post Content-Type: application/json {\"bucket\":\"[REDACTED]-prod\",\"key\":\"bugbounty-poc.txt\"} → 200 OK X-Powered-By: Express Access-Control-Allow-Origin: * {\"data\":{ \"key\": \"bugbounty-poc.txt\", \"policy\": \"eyJleHBpcmF0aW9uIjoi…\", \"x-tos-algorithm\": \"TOS4-HMAC-SHA256\", \"x-tos-credential\": \"[AK]/20260623/[REGION]/tos/request\", \"x-tos-date\": \"20260623T013954Z\", \"x-tos-signature\": \"[REDACTED]\"}} A complete signed upload credential, handed to an anonymous caller, over Access-Control-Allow-Origin: *. Any website on the internet could mint one from a visitor’s browser. Base64-decode that policy field and the real problem shows: {\"expiration\":\"2026–06–23T02:39:54Z\",\"conditions\":[ {\"bucket\":\"[REDACTED]-prod\"}, {\"key\":\"bugbounty-poc.txt\"}, {\"x-tos-algorithm\":\"TOS4-HMAC-SHA256\"}, {\"x-tos-date\":\"20260623T013954Z\"}, {\"x-tos-credential\":\"[AK]/20260623/[REGION]/tos/request\"}]} No size cap. No content-type restriction. No ACL. And no key prefix, just the exact key I asked for. A prefix tied to your session is what stops you writing into someone else’s folder. An exact key you chose yourself is a round trip that ends where it started. Proving overwrite, not just upload The write is a multipart POST straight to the bucket, every field lifted from that JSON: POST /bugbounty-poc.txt Host: [REDACTED]-prod.[REDACTED].volces.com Content-Type: multipart/form-data key, policy, x-tos-algorithm, x-tos-credential, x-tos-date, x-tos-signature, file → 204 No Content ETag: \"bbea7bc181dd55ae2a31e308802e5f5b\" But 204 only proves I created something. Storage returns the same 204 whether the key was empty or occupied, so it can’t distinguish me from someone replacing a customer’s file. The ETag can, it’s a content hash. Same request, different content: → 204 No Content ETag: \"736b48e1fd44a7edf641bf367851c032\" Same key, different hash. The second write destroyed the first. Overwrite-in-place, proven without deleting anything. Whose bug is this? It is a fair question, especially because the storage platform and the anti-leech feature both belong to ByteDance. But the failures still sit with the insurer’s implementation. 防盗链 behaved exactly as documented: it checked the Referer, rejected domains outside the allowlist, and applied that rule to object reads. The feature itself did not malfunction. The issue is that it was designed for a different threat model. Hotlink protection assumes a third-party website is embedding your image and that the visitor’s browser will generate the Referer from the page serving it. In that situation, the site owner controls the page, but not the request header sent by the visitor’s browser. Once the same control is placed in front of someone using curl, that assumption disappears. There is no browser left to provide an honest header; the requester simply writes it themselves. The feature did what it was built to do. It was just being asked to provide a security guarantee it was never designed to make. The remaining issues are more direct. Bucket listing is governed separately from object reads, and an unauthenticated max-keys request returning 200 means the listing permission had been opened through configuration. The signer was also not a Volcengine service, but an Express route running on the insurer’s own host with access to the insurer’s credentials. Volcengine correctly verified the signed policy each time. What was missing was the authorization check before that policy was created, along with basic restrictions such as a session-bound key prefix, upload size limits, and content-type constraints. The same implementation on AWS would have produced the same result, while a properly configured Volcengine deployment would not. The cloud provider supplied the controls; the application decided how to use them. That said, placing a bandwidth-protection feature beside settings such as CORS and ACLs without clearly separating its purpose can make the wrong assumption easier to make. It may help explain the mistake, but it does not change where the missing authorization ultimately lived. Remediation For the first issue: Disable anonymous ListBucket, and audit it separately from GetObject. They are separate permissions. One unauthenticated ?max-keys=1 across your estate finds every bucket that got this wrong. Serve objects through short-lived signed URLs rather than direct anonymous access. 防盗链 can stay on. It just can’t be the only thing standing there. For the second one: Authenticate the signer, and derive identity from the session, never from the request body. Never take bucket from the client. It belongs in server config. Constrain the policy: a starts-with key prefix built from the session, a content-length-range, a content-type restriction, a short expiry. Every condition you leave out is a permission you granted. Closing In the end, the vulnerability came down to a very small assumption: that a client-controlled header could be trusted to protect sensitive data. One line in a request was enough to cross a boundary that should have required real authorization. What stayed with me most was how ordinary the path looked from the outside. A chatbot, a JavaScript bundle, a hidden route, a storage bucket. Nothing about it appeared dramatic at first. But small clues tend to matter when you keep following them carefully, and this one eventually led to thousands of real customer documents. That is probably the part I value most about findings like this. Not the size of the bucket, the bounty, or even the simplicity of the bypass, but the reminder that meaningful vulnerabilities often sit behind controls that look reasonable until someone asks what they actually guarantee. The issue has since been solved, and all sensitive details have been redacted in accordance with the program’s disclosure policy . Reported through HackerOne, $6,000 bounty. Remediated. One Header Away from 10+ GB of Customer Documents (PII) — $6K Bounty was originally published in InfoSec Write-ups on Medium, where people are continuing the conversation by highlighting and responding to this story.",
+      "published_at": "2026-07-27T04:08:35+00:00",
+      "timestamp": "2026-07-27T04:08:35+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 10,
+        "primary_domain": "Cloud",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text details specific vulnerabilities (anonymous read/write, forgeable Referer header bypass) in an S3-compatible object storage bucket hosted on Volcengine (a Chinese cloud stack)."
+      }
+    },
+    {
+      "source": "The Hacker News",
+      "title": "Certighost Exploit Lets Low-Privileged Active Directory Users Impersonate a Domain Controller",
+      "url": "https://thehackernews.com/2026/07/certighost-exploit-lets-low-privileged.html",
+      "content": "Researchers H0j3n and Aniq Fakhrul published a working exploit on July 24 that lets a low-privileged Active Directory user obtain a certificate for a Domain Controller and authenticate as that machine. They codenamed the flaw Certighost. Because Domain Controller accounts carry directory replication rights, the resulting Kerberos credential can retrieve the krbtgt secret through DCSync.",
+      "published_at": "2026-07-24T08:45:21+00:00",
+      "timestamp": "2026-07-24T08:45:21+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 10,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text describes a working exploit allowing low-privileged users to obtain credentials and perform DCSync against a Domain Controller using Active Directory."
+      }
+    },
+    {
+      "source": "The Hacker News",
+      "title": "AWS Kiro Flaw Let a Poisoned Web Page Rewrite Its Config and Run Code",
+      "url": "https://thehackernews.com/2026/07/aws-kiro-flaw-let-poisoned-web-page.html",
+      "content": "Hidden text on a web page was enough to make Kiro, AWS's agentic coding IDE, rewrite its own configuration file and run an attacker's code on a developer's machine, with no approval step able to stop it. Intezer, in research with Kodem Security, found that a request as ordinary as asking Kiro to summarize a page could end in remote code execution. AWS has patched the issue and says it is",
+      "published_at": "2026-07-21T10:36:12+00:00",
+      "timestamp": "2026-07-21T10:36:12+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 10,
+        "primary_domain": "Cloud",
+        "primary_platform": "AWS",
+        "reasoning_summary": "The content describes a concrete remote code execution vulnerability in AWS's agentic coding IDE (Kiro) triggered by poisoned web page text."
+      }
+    },
     {
       "source": "Rapid7 Cybersecurity Blog",
       "title": "Investigating Persistence Mechanisms in AWS",
@@ -51,6 +96,141 @@
         "primary_domain": "Identity",
         "primary_platform": "Azure",
         "reasoning_summary": "The text explicitly details the exploitation of abandoned Azure DNS zone delegations, a core identity/infrastructure misconfiguration, allowing unauthorized content serving under trusted domain authority."
+      }
+    },
+    {
+      "source": "darkreading",
+      "title": "'Confused Deputy' Flaws Persist in Google Cloud, Microsoft Azure",
+      "url": "https://www.darkreading.com/cloud-security/confused-deputy-flaws-google-cloud-microsoft-azure",
+      "content": "This category of vulnerabilities allows an attacker to easily acquire administrative level permissions and bypass cloud providers' access controls.",
+      "published_at": "2026-07-27T15:27:26+00:00",
+      "timestamp": "2026-07-27T15:27:26+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Cloud",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly mentions 'Confused Deputy' flaws affecting both Google Cloud and Microsoft Azure, relating to administrative permission bypass."
+      }
+    },
+    {
+      "source": "Daily CyberSecurity",
+      "title": "APT42 TAMECAT Malware Grows with AI-Assisted Phishing",
+      "url": "https://securityonline.info/apt42-tamecat-malware-ai-phishing/",
+      "content": "APT42 TAMECAT malware now blends AI-assisted phishing with cloud C2 to steal credentials from defense and nuclear-sector targets. Related Posts: VMRay Exposes Operation STANDOFF, a Russian-Speaking Intrusion Campaign Hidden Behind GitHub Kimsuky Hacked South Korean Groupware Vendors With New Gomir Variants TELESHIM Malware Targets Middle East Governments Through Telegram The post APT42 TAMECAT Malware Grows with AI-Assisted Phishing appeared first on Daily CyberSecurity .",
+      "published_at": "2026-07-27T00:56:52+00:00",
+      "timestamp": "2026-07-27T00:56:52+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text explicitly mentions 'AI-assisted phishing,' 'cloud C2,' and the goal to 'steal credentials' from targets."
+      }
+    },
+    {
+      "source": "ThreatCluster - Threat Intelligence Feed",
+      "title": "Critical Authorization Vulnerability in SiYuan (CVE-2026-66012)",
+      "url": "https://threatcluster.io/cluster/cve-2026-66012-incibe-cert---vulnerabilities-rss-18h-the-att-6c8da0e9?utm_source=rss&utm_medium=feed&utm_campaign=rss_feed",
+      "content": "A critical missing authorization vulnerability (CVE-2026-66012) has been identified in SiYuan versions prior to 3.7.2, allowing remote unauthenticated attackers to bypass authentication on the POST /mcp kernel endpoint. This vulnerability exposes 31 MCP tools, including file management capabilities, and enables attackers to read sensitive configuration files and execute arbitrary code with administrative privileges. The flaw is particularly dangerous when the Publish server is enabled in anonymous mode, as it allows attackers to plant malicious plugins that execute on desktop launch. A CVSS base score of 10 has been assigned, indicating critical severity. Currently, there is no evidence of active exploitation or public proof-of-concept available. Users are advised to upgrade to version 3.7.2 or later and review their workspaces for unauthorized files. The vulnerability was first published on July 25, 2026. Key Points: • CVE-2026-66012 is a critical vulnerability with a CVSS score of 10. • Attackers can exploit the flaw to gain administrative access and execute arbitrary code. • Users must upgrade to SiYuan v3.7.2 or later to mitigate the risk.",
+      "published_at": "2026-07-26T05:22:19+00:00",
+      "timestamp": "2026-07-26T05:22:19+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text describes a critical missing authorization vulnerability that allows remote unauthenticated attackers to bypass authentication and execute arbitrary code with administrative privileges."
+      }
+    },
+    {
+      "source": "darkreading",
+      "title": "Default Azure Automation Setting Enables Cross-Tenant Identity Takeover",
+      "url": "https://www.darkreading.com/cloud-security/default-azure-automation-setting-cross-tenant-identity-takeover",
+      "content": "Microsoft addresses a public-by-default configuration and chain of code flaws in Azure Automation that could have let attackers seize another tenant's identity and access others' data, credentials, and cloud workloads.",
+      "published_at": "2026-07-24T07:18:16+00:00",
+      "timestamp": "2026-07-24T07:18:16+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The text explicitly details a cross-tenant identity takeover vulnerability within Azure Automation."
+      }
+    },
+    {
+      "source": "The Hacker News",
+      "title": "Claude Cowork Flaw Could Let AI Agent Escape Its VM and Access Mac Files",
+      "url": "https://thehackernews.com/2026/07/claude-cowork-flaw-could-let-ai-agent.html",
+      "content": "Cybersecurity researchers have uncovered a sandbox escape vulnerability in Anthropic's Claude Cowork that makes it possible to break out of the confines of a Linux virtual machine (VM) within which the agent runs to read or write files anywhere on the Mac. Accomplish AI, which shared details of the vulnerability with The Hacker News ahead of publication, said about 500,000 macOS users running",
+      "published_at": "2026-07-23T07:57:59+00:00",
+      "timestamp": "2026-07-23T07:57:59+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Cloud",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text describes a sandbox escape vulnerability allowing an agent to break out of a Linux virtual machine (VM) and access the underlying host filesystem."
+      }
+    },
+    {
+      "source": "www.theregister.com - Articles",
+      "title": "One ChatGPT link could smuggle a rogue AI agent into your company",
+      "url": "https://www.theregister.com/security/2026/07/23/one-chatgpt-link-could-smuggle-a-rogue-ai-agent-into-your-company/5275116",
+      "content": "Researchers say OpenAI flaw let phishing bait create an autonomous corporate mole armed with employee access",
+      "published_at": "2026-07-23T07:32:00+00:00",
+      "timestamp": "2026-07-23T07:32:00+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Unknown",
+        "reasoning_summary": "The text describes an OpenAI flaw allowing phishing bait to smuggle a rogue AI agent armed with employee access, indicating identity compromise within a third-party SaaS platform."
+      }
+    },
+    {
+      "source": "The Hacker News",
+      "title": "Attackers Weaponize GitHub Actions Runners to Target cPanel and WHM Servers",
+      "url": "https://thehackernews.com/2026/07/attackers-weaponize-github-actions.html",
+      "content": "Cybersecurity researchers have shed light on a large-scale campaign that has turned compromised GitHub repositories into distributed attack infrastructure designed to target cPanel and WebHost Manager (WHM) instances. The activity involves malicious Packagist development versions spanning 10 packages associated with a legitimate PHP and DevOps developer, dinushchathurya, between July 12 and 13,",
+      "published_at": "2026-07-23T05:58:54+00:00",
+      "timestamp": "2026-07-23T05:58:54+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "GitHub",
+        "reasoning_summary": "The text explicitly details attackers weaponizing compromised GitHub repositories and actions runners to create distributed attack infrastructure."
+      }
+    },
+    {
+      "source": "The Hacker News",
+      "title": "Microsoft Azure DevOps MCP Flaw Lets Hidden PR Comments Hijack AI Review Agents",
+      "url": "https://thehackernews.com/2026/07/microsoft-azure-devops-mcp-flaw-lets.html",
+      "content": "A single invisible comment in an Azure DevOps pull request can turn a reviewer's own AI coding agent against them, driving it into projects the attacker has no rights to reach and quietly leaking what it finds. The flaw is in Microsoft's official Azure DevOps MCP server, and it works because one of its tools returns pull request descriptions without a prompt-injection guardrail the company had",
+      "published_at": "2026-07-21T23:27:52+00:00",
+      "timestamp": "2026-07-21T23:27:52+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "SaaS",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The threat describes a flaw in Azure DevOps where an invisible comment can hijack an AI coding agent via prompt injection, directly matching SaaS pipeline security flaws."
+      }
+    },
+    {
+      "source": "ThreatCluster - Threat Intelligence Feed",
+      "title": "CAV3RN Framework Upgrades to Outlook Calendar for C2 Communication",
+      "url": "https://threatcluster.io/cluster/new-cav3rn-module-replaces-websocket-c2-with-outlook-calenda-492ac014?utm_source=rss&utm_medium=feed&utm_campaign=rss_feed",
+      "content": "The Project CAV3RN cyberespionage framework has evolved with the introduction of a new communication module, AzureCommunication.dll, which replaces the previous HTTP/WebSocket component. This module utilizes Outlook calendar events accessed via Microsoft Graph for command and control (C2) communication, enhancing its stealth capabilities. Additionally, it employs DNS AAAA records for configuration recovery. The framework has been active against targets in Israel since December 2025, with significant changes noted in April 2026. This shift to a controller-based architecture allows for more modular post-exploitation capabilities. The new communication method aims to avoid detection while maintaining operational effectiveness. The full implications of this upgrade are still being analyzed, and further public research is expected to emerge. Key Points: • CAV3RN's new module uses Outlook calendar events for stealthy C2 communication. • The framework targets entities in Israel and has been active since late 2025. • The upgrade enhances modular capabilities and avoids detection by traditional methods.",
+      "published_at": "2026-07-21T07:57:54+00:00",
+      "timestamp": "2026-07-21T07:57:54+00:00",
+      "gemma_verdict": {
+        "is_relevant": true,
+        "confidence_score": 9,
+        "primary_domain": "Identity",
+        "primary_platform": "Azure",
+        "reasoning_summary": "The threat explicitly details the use of AzureCommunication.dll and Microsoft Graph via Outlook calendar events for Command and Control (C2) communication."
       }
     },
     {
@@ -591,186 +771,6 @@
         "primary_domain": "Identity",
         "primary_platform": "Unknown",
         "reasoning_summary": "The text details the use of KerberosTicketTrace and CertificateTrace options within Metasploit, directly referencing core identity protocols and ticket handling."
-      }
-    },
-    {
-      "source": "BleepingComputer",
-      "title": "Early Warning Signs of Supply-Chain Attacks Live in the Dark Web",
-      "url": "https://www.bleepingcomputer.com/news/security/early-warning-signs-of-supply-chain-attacks-live-in-the-dark-web/",
-      "content": "GitHub access sales, leaked repositories, and stolen API keys can all become supply-chain attack footholds. Flare explores how underground forums expose early signals tied to software supply-chain risk. [...]",
-      "published_at": "2026-06-12T08:31:11+00:00",
-      "timestamp": "2026-06-12T08:31:11+00:00",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "SaaS",
-        "primary_platform": "GitHub",
-        "reasoning_summary": "The text explicitly mentions GitHub access sales, leaked repositories, and stolen API keys, which are direct indicators of SaaS supply-chain attack vectors."
-      }
-    },
-    {
-      "source": "Rapid7 Cybersecurity Blog",
-      "title": "Active Exploitation of Oracle PeopleSoft Zero-Day (CVE-2026-35273)",
-      "url": "https://www.rapid7.com/blog/post/etr-active-exploitation-of-oracle-peoplesoft-zero-day-cve-2026-35273",
-      "content": "Overview On June 10, 2026, Oracle published a security alert for CVE-2026-35273 , a critical vulnerability in the Updates Environment Management component of PeopleSoft Enterprise PeopleTools. Oracle released an out-of-band patch the same day as the advisory, underscoring the urgency of remediation. The vulnerability has a CVSSv3.1 score of 9.8 and is remotely exploitable without authentication. Per the vendor advisory, successful exploitation may result in remote code execution (RCE). TrendAI has classified the underlying flaw as a server-side request forgery ( CWE-918 ). PeopleTools versions 8.61 and 8.62 are affected. CVE-2026-35273 was reported to Oracle through TrendAI's Zero Day Initiative. According to a report published by Mandiant on June 11, 2026, this vulnerability has been exploited in the wild as a zero-day prior to the vendor security alert , with active exploitation observed between May 27 and June 9, 2026, predating Oracle's advisory by two weeks. The vulnerability was added to the CISA KEV on June 12, 2026. Mandiant has attributed the campaign to UNC6240 (ShinyHunters), a financially motivated cybercriminal collective known for data theft and extortion. ShinyHunters has been linked to breaches across cloud services, SaaS platforms, and telecommunications providers, frequently exploiting weak authentication controls, stolen credentials, and cloud misconfigurations rather than deploying sophisticated malware. Based on information published by Mandiant, the campaign heavily targeted the higher education sector; 68 percent of the more than 100 notified organizations were universities and colleges. The observed exploitation targeted PeopleSoft's Environment Management Hub (PSEMHUB) endpoints, and data stolen during the campaign was published on the ShinyHunters Data Leak Site (DLS) on June 9, 2026. The /PSIGW/HttpListeningConnector URI path appears in both the indicators of compromise for this campaign and in a PeopleSoft exploit chain for CVE-2013-3821 , detailed by Lexfo in 2017 . A related XML External Entity (XXE) vulnerability, CVE-2017-3548 , targeted a different Integration Gateway connector ( PeopleSoftServiceListeningConnector ) under the same /PSIGW/ path. Technical overview TrendAI's detection signatures for CVE-2026-35273 classify the underlying vulnerability as an SSRF. These include IPS Rule 1012580 (\"Oracle Peoplesoft PeopleTools SSRF Vulnerability\") and DDI Rule 5855 (\"Peoplesoft PeopleTools Environment Management Hub (PSEMHUB) SSRF Exploit\"). Mandiant describes CVE-2026-35273 as a critical remote code execution vulnerability, indicating that the SSRF serves as the mechanism through which code execution is achieved. Based on Mandiant's analysis, two endpoints are involved in exploitation: /PSEMHUB/hub and /PSIGW/HttpListeningConnector . The exploit chain may also cause the target system to make outbound SMB connections (TCP port 445) to external destinations, potentially allowing attackers to capture Windows machine-account NetNTLM hashes. Post-exploitation activity observed by Mandiant included the deployment of MeshCentral (an open-source, and self-hosted web-based remote monitoring and management platform) remote management agents configured to masquerade as Microsoft Azure services (e.g., meshagent64-azure-ops.exe ), with C2 communications directed to wss://azurenetfiles[.]net:443/agent.ashx . The attackers performed internal reconnaissance of PeopleSoft configurations, deployed lateral movement scripts, and exfiltrated data using zstd compression. Mitigation guidance Organizations running PeopleTools versions 8.61 or 8.62 should apply the vendor-supplied patch on an emergency basis, without waiting for a regular patch cycle to occur. Oracle has characterized this as a high-priority risk reduction measure. In addition to patching, organizations should implement the following compensating controls: Disable the Environment Management Hub (EMHub) Service in multi-server configurations, or completely remove the PSEMHUB application in single-server configurations. Block external access to /PSEMHUB/* and /PSIGW/HttpListeningConnector at the network perimeter or firewall level. Per Mandiant, restricting these endpoints is considered non-breaking for standard end-user PeopleSoft Internet Architecture (PIA) browser sessions. Monitor outbound SMB traffic (TCP port 445) from PeopleSoft servers to untrusted external destinations. Given that exploitation occurred as early as May 27, 2026, Rapid7 strongly recommends investigating for signs of compromise even after patching, using the indicators of compromise outlined below. For the latest mitigation guidance, please refer to the Oracle security alert and Mandiant's report . Rapid7 customers Exposure Command, InsightVM, and Nexpose Exposure Command, InsightVM, and Nexpose customers can assess exposure to CVE-2026-35273 with authenticated vulnerability checks available in the 12th June 2026 content release. Intelligence Hub Customers leveraging Rapid7's Intelligence Hub can track the latest developments surrounding CVE-2026-35273, including indicators of compromise (IOCs) from the Mandiant report published on June 11, 2026. Indicators of compromise The following indicators of compromise are sourced from Mandiant's report . Mandiant has also published a GTI collection with additional IOCs for registered users. Network indicators Staging and C2 infrastructure: 142.11.200[.]186 142.11.200[.]187 142.11.200[.]188 142.11.200[.]189 142.11.200[.]190 azurenetfiles[.]net (C2 domain masquerading as Microsoft Azure) 176.120.22[.]24 (ShinyHunters DLS mirror) File indicators Filename Description SHA-256 meshagent64-azure-ops.exe Pre-configured Windows MeshCentral agent f02a924c9ff92a8780ce812511341182c6b509d45bc59f3f7b522e37225d24fc meshagent64-v2.exe Pre-configured Windows MeshCentral agent d83fdb9e53c5ff03c4cb0451ea1bebd79b53f29eadc1e2fa394c7af13a86ce2f meshagent32-azure-ops.exe Pre-configured Windows MeshCentral agent (32-bit) c7e9332731b06644fc73e0046a2a89eaa59b09f54250e9bd622467187351711f meshagent Unconfigured Linux MeshCentral agent 68257a6f9ff196179ec03624e849927f26599eb180a7c82e14ef5bc4e93bc309 .bash_history Attacker command history 2ab684d93c1553fad87041b4dea97188a97e78589deee2a7bacff905564f3a35 Host-based indicators Unexpected .jsp files under <PS_CFG_HOME>/webserv/<domain>/applications/peoplesoft/PSEMHUB.war/ Unauthorized files or directories under .../PSEMHUB.war/envmetadata/transactions/ Unexpected directories named logs , persistantstorage , or scratchpad under PSEMHUB paths Recently created or modified .xml files under <docroot>/envmetadata/data/environment/ (potential XMLDecoder persistence) Defacement and extortion marker file: README-IF-YOU-SEE-THIS-YOUVE-BEEN-HACKED.TXT Log-based indicators HTTP POST requests to the following endpoints from external source IPs: /PSEMHUB/hub /PSIGW/HttpListeningConnector Requests to /PSIGW/HttpListeningConnector containing loopback addresses ( 127.0.0.1 , localhost , ::1 ) or internal IP ranges within request headers or parameters may indicate SSRF exploitation. Updates June 12, 2026 : Initial publication. June 12, 2026 : CVE added to CISA KEV.",
-      "published_at": "2026-06-12T08:13:04+00:00",
-      "timestamp": "2026-06-12T08:13:04+00:00",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "Identity",
-        "primary_platform": "Unknown",
-        "reasoning_summary": "The text describes a critical RCE vulnerability (CVE-2026-35273) in PeopleSoft, which was used in conjunction with post-exploitation activity involving the deployment of agents masquerading as Microsoft Azure services and the capture of Windows machine-account NetNTLM hashes, indicating identity compromise."
-      }
-    },
-    {
-      "source": "ThreatLocker Blog",
-      "title": "How to restrict AWS access to specific IPs using Conditional Access",
-      "url": "https://www.threatlocker.com/blog/how-to-restrict-aws-access-to-specific-ips-using-conditional-access",
-      "content": "How to use Microsoft Entra ID Named Locations and Conditional Access to block AWS IAM Identity Center sign-ins from any IP address outside your approved range.",
-      "published_at": "2026-06-12T07:15:18+00:00",
-      "timestamp": "2026-06-12T07:15:18+00:00",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "Identity",
-        "primary_platform": "Okta",
-        "reasoning_summary": "The text explicitly mentions using Microsoft Entra ID Conditional Access to restrict AWS IAM Identity Center sign-ins, linking Identity and Cloud domains."
-      }
-    },
-    {
-      "source": "ThreatCluster - Threat Intelligence Feed",
-      "title": "Critical CVE-2026-48611 Vulnerability Allows OAuth Account Hijacking",
-      "url": "https://threatcluster.io/cluster/critical-cve-2026-48611-vulnerability-allows-oauth-account-h-80c1d62a",
-      "content": "CVE-2026-48611 has been identified as a critical vulnerability due to improper authentication checks in OAuth implementations, allowing account hijacking even when OAuth is disabled. This flaw affects default installations of phpBB versions below 3.3.16, enabling unauthenticated attackers to gain unauthorized access to user accounts. The vulnerability has been assigned a CVSS score of 9.8, indicating its critical nature. Currently, there is no evidence of public proof-of-concept or active exploitation. Security experts recommend applying the patch available via GitHub Advisory immediately or disabling OAuth functionality if not needed. Organizations should also audit account access logs for any signs of unauthorized activity. The vulnerability was published on June 12, 2026. Key Points: • CVE-2026-48611 is a critical vulnerability with a CVSS score of 9.8. • It allows account hijacking through improper OAuth authentication checks. • Immediate patching is recommended to mitigate risks associated with this flaw.",
-      "published_at": "2026-06-12T03:21:50+00:00",
-      "timestamp": "2026-06-12T03:21:50+00:00",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "Identity",
-        "primary_platform": "Unknown",
-        "reasoning_summary": "The text explicitly details a critical vulnerability (CVE-2026-48611) allowing account hijacking through improper OAuth authentication checks, which is a core Identity Security concern."
-      }
-    },
-    {
-      "source": "The Cyber Express",
-      "title": "163 Organizations Hit by Thai Gambling SEO Poisoning Campaign",
-      "url": "https://thecyberexpress.com/thai-gambling-seo-poisoning/",
-      "content": "A large-scale Thai gambling SEO poisoning operation has compromised 163 organizations across more than 30 countries by exploiting abandoned cloud DNS delegations, according to research from Cyble Research & Intelligence Labs (CRIL). The ongoing SEO poisoning campaign has affected government agencies, healthcare organizations, financial institutions, universities, and critical infrastructure operators, allowing attackers to host Thai-language gambling content on trusted enterprise domains. How the SEO Poisoning Campaign Works Researchers found that the campaign primarily abuses abandoned Azure DNS zone delegations . When organizations retire cloud projects, DNS records that delegate subdomains to Azure are often left behind. Threat actors identify these orphaned delegations, recreate the abandoned DNS zones under new Azure subscriptions, and gain authority over the affected subdomains. Using this method, the attackers deploy a Next.js-based Thai-language gambling kit protected by valid Let's Encrypt wildcard certificates. As a result, users, browsers, and search engines see what appears to be legitimate content hosted under trusted corporate domains. At the time of publication, 161 of the 163 affected organizations remained actively compromised. Discovery Leads to Global Exposure The investigation began when CRIL identified unusual DNS activity on a Verizon subdomain environment. Researchers discovered more than 1,000 individually named subdomains serving Thai-language gambling content. Each page contains affiliate links designed to drive user registrations and generate commissions. Further analysis revealed the same infrastructure and content fingerprints across 162 additional organizations. More than 90 compromised enterprise subdomains shared the same Next.js build ID (QQOrXCFjoI6C9oF-4YVhl), favicon path (/img/ib99-hq.ico), and affiliate redirect destinations. Four DNS Abuse Methods Identified The Thai gambling SEO poisoning operation relied on four compromise mechanisms: Azure DNS zone takeover: More than 150 organizations were affected through abandoned Azure DNS delegations. DigitalOcean DNS zone takeover: Two organizations were compromised using a similar technique. Direct wildcard DNS misconfigurations: Two organizations had wildcard records pointing to attacker-controlled infrastructure. Mass A-record creation: Verizon's environment contained over 1,000 individual DNS records directing traffic to gambling content. Certificate Transparency records showed some abandoned zones had remained dormant for years. One pharmaceutical company's subdomain had not seen a legitimate certificate since October 2019 before attackers obtained a new certificate on April 11, 2026. Another electronics firm's platform showed a gap between February 2023 and April 10, 2026. Monetization and Backend Infrastructure The SEO poisoning campaign generated revenue through affiliate tracking codes such as \"ibiza99vip1,\" \"bigwinv1,\" \"seven77vip1,\" and \"link99.\" Researchers observed server-side filtering that verified visitors originated from Thailand before redirecting them to gambling platforms. The campaign ultimately linked to four gambling destinations: ibiza99.autos, big888.store, seven77.click, and link99.nova555.rest. The gambling pages promoted deposits as low as 1 Thai Baht (approximately $0.03 USD) and included structured SEO content, FAQ schema, and mobile optimization features. Behind the delivery infrastructure, researchers uncovered a dedicated backend fleet of 103 servers located in Hong Kong under AS398478 (PEG TECH INC). Evidence linking the servers included identical TLS fingerprints, shared certificates, matching HTTP hashes, uniform MySQL configurations, and common administration tools. Detection and Mitigation CRIL noted that traditional security tools are unlikely to detect this Thai gambling SEO poisoning activity because the attackers use valid certificates, reputable domains, and clean infrastructure. The researchers recommend continuous monitoring of Certificate Transparency logs, auditing all DNS delegations, and immediately removing abandoned NS records pointing to cloud providers. According to the report, the campaign demonstrates how a single DNS hygiene failure can be systematically exploited at scale. Rather than breaching networks or applications, the attackers capitalized on forgotten cloud configurations , turning trusted domains into vehicles for a sophisticated SEO poisoning campaign targeting Thai search traffic.",
-      "published_at": "2026-06-12T01:58:39+00:00",
-      "timestamp": "2026-06-12T01:58:39+00:00",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "Identity",
-        "primary_platform": "Azure",
-        "reasoning_summary": "The text details the exploitation of abandoned Azure DNS zone delegations and DNS zone takeovers to compromise trusted enterprise subdomains."
-      }
-    },
-    {
-      "source": "The Hacker News",
-      "title": "GitHub to Disable npm Install Scripts by Default to Stop Supply Chain Attacks",
-      "url": "https://thehackernews.com/2026/06/github-to-disable-npm-install-scripts.html",
-      "content": "GitHub has announced what it said are \"breaking changes\" coming to npm version 12, one of which turns off install scripts by default to combat software supply chain threats. The changes aim to combat attack techniques that abuse the \"npm install\" command to trigger the execution of malicious code using npm lifecycle hooks. \"Npm install\" is used to download and install all the necessary",
-      "published_at": "2026-06-11T00:53:03+00:00",
-      "timestamp": "2026-06-11T00:53:03+00:00",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "SaaS",
-        "primary_platform": "GitHub",
-        "reasoning_summary": "The text explicitly discusses GitHub making changes to npm install scripts to combat software supply chain threats, which falls directly under SaaS security boundaries."
-      }
-    },
-    {
-      "source": "www.theregister.com - Articles",
-      "title": "GitHub pulls pin on npm's auto-run scripts",
-      "url": "https://www.theregister.com/devops/2026/06/10/github-pulls-pin-on-npms-auto-run-scripts/5253453",
-      "content": "Shai-Hulud worm exploited exactly this. Better late than never, says everyone except the malware authors",
-      "published_at": "2026-06-10T07:41:14+00:00",
-      "timestamp": "2026-06-10T07:41:14+00:00",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "SaaS",
-        "primary_platform": "GitHub",
-        "reasoning_summary": "The content explicitly discusses GitHub pulling a pin on npm's auto-run scripts, which is a direct security measure within the SaaS development ecosystem."
-      }
-    },
-    {
-      "source": "Cybersecurity Blog",
-      "title": "The Megalodon Supply Chain Attack Campaign Explained",
-      "url": "https://www.cm-alliance.com/cybersecurity-blog/the-megalodon-supply-chain-attack-campaign-explained",
-      "content": "In May 2026, cybersecurity researchers uncovered one of the largest software supply chain attacks ever observed on GitHub. Known as the Megalodon campaign, the attack saw threat actors inject malicious GitHub Actions workflows into more than 5,500 repositories through over 5,700 malicious commits in just a few hours.",
-      "published_at": "2026-06-10T04:45:29+00:00",
-      "timestamp": "2026-06-10T04:45:29+00:00",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "SaaS",
-        "primary_platform": "GitHub",
-        "reasoning_summary": "The text explicitly details the injection of malicious GitHub Actions workflows into repositories, directly matching the SaaS security domain."
-      }
-    },
-    {
-      "source": "darkreading",
-      "title": "Miasma Supply Chain Worm Burrows Into 73 Microsoft Repositories",
-      "url": "https://www.darkreading.com/application-security/miasma-supply-chain-worm-73-microsoft-repositories",
-      "content": "The attacks stemmed from a GitHub account that was also compromised in a previous Miasma attack on Microsoft last month.",
-      "published_at": "2026-06-09T14:03:45+00:00",
-      "timestamp": "2026-06-09T14:03:45+00:00",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "SaaS",
-        "primary_platform": "GitHub",
-        "reasoning_summary": "The text explicitly mentions a compromised GitHub account used in a supply chain attack targeting repositories."
-      }
-    },
-    {
-      "source": "www.theregister.com - Articles",
-      "title": "Miasma worms its way onto GitHub as attack kit goes open source",
-      "url": "https://www.theregister.com/cyber-crime/2026/06/09/miasma-supply-chain-attack-toolkit-goes-public-on-github/5253074",
-      "content": "As if there weren't enough package poisonings to worry about",
-      "published_at": "2026-06-09T12:35:50+00:00",
-      "timestamp": "2026-06-09T12:35:50+00:00",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "SaaS",
-        "primary_platform": "GitHub",
-        "reasoning_summary": "The text explicitly mentions 'GitHub' and 'package poisonings,' indicating a supply chain attack vector within a source code management platform."
-      }
-    },
-    {
-      "source": "The Hacker News",
-      "title": "Microsoft Restores Some GitHub Repos, Keeps Others Offline as Miasma Probe Continues",
-      "url": "https://thehackernews.com/2026/06/microsoft-restores-some-github-repos.html",
-      "content": "Microsoft on Monday confirmed that it temporarily removed some GitHub repositories in response to a recent security incident that led to 73 of its open-source projects being compromised to inject an information stealer into the code. \"Our priority is to protect customers and the broader ecosystem,\" a Microsoft spokesperson told The Hacker News via email. \"We temporarily removed some",
-      "published_at": "2026-06-09T11:04:52+00:00",
-      "timestamp": "2026-06-09T11:04:52+00:00",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "SaaS",
-        "primary_platform": "GitHub",
-        "reasoning_summary": "The text explicitly mentions the compromise of GitHub repositories and the injection of an information stealer into open-source code."
-      }
-    },
-    {
-      "source": "ThreatLocker Blog",
-      "title": "Miasma worm targets Microsoft, compromises 73 GitHub repositories",
-      "url": "https://www.threatlocker.com/blog/miasma-worm-targets-microsoft-compromises-73-github-repositories",
-      "content": "Miasma worm hits 73 Microsoft GitHub repositories and directly targets StepSecurity’s Harden-Runner to evade security controls.",
-      "published_at": "2026-06-09T10:07:44+00:00",
-      "timestamp": "2026-06-09T10:07:44+00:00",
-      "gemma_verdict": {
-        "is_relevant": true,
-        "confidence_score": 9,
-        "primary_domain": "SaaS",
-        "primary_platform": "GitHub",
-        "reasoning_summary": "The text explicitly mentions the worm targeting GitHub repositories and compromising a specific runner environment (Harden-Runner)."
       }
     }
   ]
