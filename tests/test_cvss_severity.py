@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import copy
 from typing import Any
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -29,6 +30,7 @@ from threat_pipeline.utils.cvss_severity import (
     _normalise_fallback_severity,
     _parse_severity_from_vector,
     apply_official_severity,
+    enrich_threat_with_nvd_cvss,
 )
 
 
@@ -485,3 +487,209 @@ class TestApplyOfficialSeverityPreservesKeys:
             assert result[key] == base_rule[key], (
                 f"Key '{key}' was modified unexpectedly"
             )
+
+
+# ---------------------------------------------------------------------------
+# apply_official_severity — cvss_score + severity_source (Task 3 & 4)
+# ---------------------------------------------------------------------------
+
+
+class TestApplyOfficialSeverityCvssScore:
+    """Verify that apply_official_severity now sets cvss_score and severity_source."""
+
+    def test_cvss3_critical_sets_score(self, base_rule: dict[str, Any]) -> None:
+        advisory = {"cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"}
+        result = apply_official_severity(base_rule, advisory)
+        assert result.get("cvss_score") is not None
+        assert isinstance(result["cvss_score"], float)
+        assert 9.0 <= result["cvss_score"] <= 10.0
+
+    def test_cvss3_high_sets_score_in_range(self, base_rule: dict[str, Any]) -> None:
+        advisory = {"cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"}
+        result = apply_official_severity(base_rule, advisory)
+        assert result.get("cvss_score") is not None
+        assert 7.0 <= result["cvss_score"] <= 8.9
+
+    def test_cvss4_sets_score(self, base_rule: dict[str, Any]) -> None:
+        advisory = {
+            "cvss_vector": (
+                "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+            )
+        }
+        result = apply_official_severity(base_rule, advisory)
+        assert result.get("cvss_score") is not None
+        assert isinstance(result["cvss_score"], float)
+
+    def test_no_vector_score_absent(self, base_rule: dict[str, Any]) -> None:
+        result = apply_official_severity(base_rule, {})
+        assert result.get("cvss_score") is None
+
+    def test_severity_source_cvss_when_vector_used(self, base_rule: dict[str, Any]) -> None:
+        advisory = {"cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H"}
+        result = apply_official_severity(base_rule, advisory)
+        assert result.get("severity_source") == "cvss"
+
+    def test_severity_source_not_cvss_without_vector(self, base_rule: dict[str, Any]) -> None:
+        result = apply_official_severity(base_rule, {"title": "No CVSS here"})
+        assert result.get("severity_source") != "cvss"
+
+    def test_malformed_vector_leaves_score_absent(self, base_rule: dict[str, Any]) -> None:
+        advisory = {"cvss_vector": "NOTAVALIDVECTOR"}
+        result = apply_official_severity(base_rule, advisory)
+        assert result.get("cvss_score") is None
+        assert result.get("severity_source") != "cvss"
+
+    def test_cvss_score_is_float_not_decimal(self, base_rule: dict[str, Any]) -> None:
+        advisory = {"cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"}
+        result = apply_official_severity(base_rule, advisory)
+        assert type(result["cvss_score"]) is float  # not Decimal
+
+
+# ---------------------------------------------------------------------------
+# enrich_threat_with_nvd_cvss — NVD API lookup (Task 2) — mocked HTTP
+# ---------------------------------------------------------------------------
+
+_NVD_V31_RESPONSE = {
+    "vulnerabilities": [
+        {
+            "cve": {
+                "id": "CVE-2024-12345",
+                "metrics": {
+                    "cvssMetricV31": [
+                        {
+                            "cvssData": {
+                                "vectorString": (
+                                    "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+                                )
+                            }
+                        }
+                    ]
+                },
+            }
+        }
+    ]
+}
+
+_NVD_V40_RESPONSE = {
+    "vulnerabilities": [
+        {
+            "cve": {
+                "id": "CVE-2025-99999",
+                "metrics": {
+                    "cvssMetricV40": [
+                        {
+                            "cvssData": {
+                                "vectorString": (
+                                    "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N"
+                                    "/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+                                )
+                            }
+                        }
+                    ]
+                },
+            }
+        }
+    ]
+}
+
+_NVD_EMPTY_RESPONSE: dict = {"vulnerabilities": []}
+
+
+def _mock_nvd_response(payload: dict) -> MagicMock:
+    resp = MagicMock()
+    resp.json.return_value = payload
+    resp.raise_for_status.return_value = None
+    return resp
+
+
+class TestEnrichThreatWithNvdCvss:
+    """All HTTP calls are mocked — no live network requests."""
+
+    def _clear_cache(self) -> None:
+        from threat_pipeline.utils.cvss_severity import _fetch_nvd_cvss_vector
+        _fetch_nvd_cvss_vector.cache_clear()
+
+    def test_enriches_threat_with_v31_vector(self) -> None:
+        self._clear_cache()
+        threat = {"title": "Test vuln", "cve_ids": ["CVE-2024-12345"]}
+        with patch(
+            "threat_pipeline.utils.cvss_severity.httpx.get",
+            return_value=_mock_nvd_response(_NVD_V31_RESPONSE),
+        ):
+            enrich_threat_with_nvd_cvss(threat)
+        assert threat["cvss_vector"] == "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+
+    def test_enriches_threat_with_v40_vector(self) -> None:
+        self._clear_cache()
+        threat = {"title": "AI vuln", "cve_ids": ["CVE-2025-99999"]}
+        with patch(
+            "threat_pipeline.utils.cvss_severity.httpx.get",
+            return_value=_mock_nvd_response(_NVD_V40_RESPONSE),
+        ):
+            enrich_threat_with_nvd_cvss(threat)
+        assert threat.get("cvss_vector", "").startswith("CVSS:4.0/")
+
+    def test_no_cve_ids_leaves_threat_unchanged(self) -> None:
+        threat: dict = {"title": "No CVEs anywhere"}
+        enrich_threat_with_nvd_cvss(threat)
+        assert "cvss_vector" not in threat
+
+    def test_empty_cve_ids_list_leaves_threat_unchanged(self) -> None:
+        threat: dict = {"title": "No CVEs", "cve_ids": []}
+        enrich_threat_with_nvd_cvss(threat)
+        assert "cvss_vector" not in threat
+
+    def test_existing_vector_not_overwritten(self) -> None:
+        original = "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:L/I:L/A:N"
+        threat = {"title": "Test", "cve_ids": ["CVE-2024-12345"], "cvss_vector": original}
+        enrich_threat_with_nvd_cvss(threat)
+        assert threat["cvss_vector"] == original
+
+    def test_network_error_does_not_raise(self) -> None:
+        self._clear_cache()
+        threat = {"title": "Unreachable", "cve_ids": ["CVE-2024-88888"]}
+        with patch(
+            "threat_pipeline.utils.cvss_severity.httpx.get",
+            side_effect=Exception("connection timeout"),
+        ):
+            enrich_threat_with_nvd_cvss(threat)  # must not raise
+        assert threat.get("cvss_vector") is None
+
+    def test_empty_vulnerabilities_leaves_no_vector(self) -> None:
+        self._clear_cache()
+        threat = {"title": "Not in NVD", "cve_ids": ["CVE-2024-00001"]}
+        with patch(
+            "threat_pipeline.utils.cvss_severity.httpx.get",
+            return_value=_mock_nvd_response(_NVD_EMPTY_RESPONSE),
+        ):
+            enrich_threat_with_nvd_cvss(threat)
+        assert threat.get("cvss_vector") is None
+
+    def test_http_error_status_does_not_raise(self) -> None:
+        self._clear_cache()
+        threat = {"title": "Rate limited", "cve_ids": ["CVE-2024-77777"]}
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status.side_effect = Exception("HTTP 429")
+        with patch(
+            "threat_pipeline.utils.cvss_severity.httpx.get",
+            return_value=mock_resp,
+        ):
+            enrich_threat_with_nvd_cvss(threat)  # must not raise
+        assert threat.get("cvss_vector") is None
+
+    def test_nvd_vector_flows_through_apply_official_severity(
+        self, base_rule: dict[str, Any]
+    ) -> None:
+        """End-to-end: NVD vector enrichment → apply_official_severity → cvss_score set."""
+        self._clear_cache()
+        threat = {"title": "E2E test", "cve_ids": ["CVE-2024-12345"]}
+        with patch(
+            "threat_pipeline.utils.cvss_severity.httpx.get",
+            return_value=_mock_nvd_response(_NVD_V31_RESPONSE),
+        ):
+            enrich_threat_with_nvd_cvss(threat)
+        result = apply_official_severity(base_rule, threat)
+        assert result["defaultSeverity"] == "Critical"
+        assert result.get("severity_source") == "cvss"
+        assert result.get("cvss_score") is not None
+        assert isinstance(result["cvss_score"], float)

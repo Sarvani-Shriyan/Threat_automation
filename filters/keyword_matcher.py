@@ -62,6 +62,14 @@ def load_platform_keywords() -> list[str]:
     return [k.strip() for k in PLATFORM_KEYWORDS if k.strip()]
 
 
+def extract_cve_ids(article: dict[str, Any]) -> list[str]:
+    """Return all unique CVE IDs found in article title + content, uppercased."""
+    title = article.get("title") or ""
+    content = article.get("content") or article.get("raw_content") or ""
+    text = f"{title}\n{content}"
+    return list(dict.fromkeys(m.upper() for m in CVE_PATTERN.findall(text)))
+
+
 def _compile_keyword_patterns(keywords: list[str]) -> list[re.Pattern[str]]:
     """Longer phrases first; word boundaries for short tokens."""
     ordered = sorted(keywords, key=len, reverse=True)

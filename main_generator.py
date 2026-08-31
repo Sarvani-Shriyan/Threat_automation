@@ -16,7 +16,7 @@ _SRC_DIR = Path(__file__).resolve().parent / "src"
 if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
-from threat_pipeline.utils.cvss_severity import apply_official_severity  # noqa: E402
+from threat_pipeline.utils.cvss_severity import apply_official_severity, enrich_threat_with_nvd_cvss  # noqa: E402
 
 from generators.io import (
     DEFAULT_FILTERED_INPUT,
@@ -111,6 +111,8 @@ def _make_on_after(store: StagingStore):
         # retained after capitalisation/validation.
         variants = entry.get("variants") or []
         if variants:
+            # NVD lookup: enrich threat with cvss_vector once per threat (cached).
+            enrich_threat_with_nvd_cvss(threat)
             entry["variants"] = [
                 apply_official_severity(v, threat) for v in variants
             ]

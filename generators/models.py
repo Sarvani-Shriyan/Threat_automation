@@ -1,6 +1,6 @@
 # pip install pydantic
 
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -17,6 +17,9 @@ class DetectionRule(BaseModel):
     threatType: str = Field(description="MITRE ATT&CK Tactic name")
     recommend: str
     remediate: str
+    # Set by apply_official_severity when a real CVSS vector is resolved.
+    cvss_score: Optional[float] = None
+    severity_source: Literal["cvss", "ai"] = "ai"
 
     @field_validator("defaultSeverity", mode="before")
     @classmethod

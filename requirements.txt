@@ -14,3 +14,4 @@ simhash>=2.1
 pytest>=8.0
 streamlit>=1.33
 streamlit-autorefresh>=1.0
+cvss>=3.6

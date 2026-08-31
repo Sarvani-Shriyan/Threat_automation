@@ -426,6 +426,14 @@ def _variant_column(
     kent_tag  = audit.get("kent_probability_tag", "Unknown")
     rationale = audit.get("audit_rationale", "")
 
+    # Severity source label: "CVSS 8.7 · High" vs "AI Est. · High"
+    cvss_score_val  = variant.get("cvss_score")
+    severity_src    = variant.get("severity_source", "ai")
+    if severity_src == "cvss" and cvss_score_val is not None:
+        sev_source_label = f"CVSS {float(cvss_score_val):.1f} · {severity}"
+    else:
+        sev_source_label = f"AI Est. · {severity}"
+
     reject_form_key = f"show_rej__{tid}__{v_name}"
     is_rejected     = v_name in already_rejected
 
@@ -452,7 +460,8 @@ def _variant_column(
             # Rule name + badges
             st.markdown(f"**{v_name}**")
             st.markdown(
-                f"{_severity_badge(severity)}&nbsp;{_kent_badge(kent_tag)}",
+                f"{_severity_badge(severity)}&nbsp;{_kent_badge(kent_tag)}&nbsp;"
+                f"<span style='font-size:0.75rem;color:#7f8c8d;'>{sev_source_label}</span>",
                 unsafe_allow_html=True,
             )
             st.markdown("")

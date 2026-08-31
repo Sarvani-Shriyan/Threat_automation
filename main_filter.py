@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from filters.gemma_verifier import MIN_CONFIDENCE_SCORE, GemmaVerifier
-from filters.keyword_matcher import CvePatchFilter, KeywordMatcher, load_threat_queue
+from filters.keyword_matcher import CvePatchFilter, KeywordMatcher, extract_cve_ids, load_threat_queue
 from filters.semantic_dedup import SemanticDeduplicator
 
 logging.basicConfig(
@@ -257,6 +257,9 @@ async def run_filter_async(
     # ── Gate 2: CVE / patch-bulletin drop ────────────────────────────────────
     cve_filter = CvePatchFilter()
     cve_survived, cve_dropped = cve_filter.filter_articles(keyword_passed)
+    # Tag each surviving article with its CVE IDs for downstream NVD lookup.
+    for article in cve_survived:
+        article.setdefault("cve_ids", extract_cve_ids(article))
     survived_cve = len(cve_survived)
 
     # ── Gate 3: Tiered semantic deduplication ─────────────────────────────────
